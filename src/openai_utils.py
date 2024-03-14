@@ -14,15 +14,18 @@ api_key = os.environ.get(
 )
 
 
+import json
+
 def load_conf():
-    config = configparser.ConfigParser()
-    config.read("tab_conf.conf")
+    with open("tab_conf.json", "r") as file:
+        config = json.load(file)
+    
     system_role = config["system_message"]["content"]
-    temperature = config.getfloat("settings", "temperature")
+    temperature = float(config["settings"]["temperature"])
     return system_role, temperature
 
 
-def requester(question, model_type="gpt-4-turbo-preview"):
+def requester(question, model_type="gpt-3.5-turbo"):
     system_content,  temperature = load_conf()
 
     headers = {
