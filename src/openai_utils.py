@@ -6,7 +6,7 @@ import requests
 from log import logger
 from model import select_model
 
-api_url = "https://aihubmix.com/v1/chat/completions"
+api_url = "https://aihubmix.com"
 api_key = os.environ.get(
     "OPENAI_TOKEN",
     "You may need to check your environment variables' confogure.",
@@ -23,6 +23,44 @@ def load_conf():
 
 
 conversation_history = []
+
+import requests
+from pathlib import Path
+
+
+def tts(msg):
+    # api https://platform.openai.com/docs/api-reference/audio/createSpeech
+    # package https://platform.openai.com/docs/guides/text-to-speech
+    # 假设 api_key 和 api_url 在其他地方正确定义
+    headers = {
+        "Authorization": f"Bearer {api_key}",
+        "Content-Type": "application/json",
+    }
+
+    # 调整数据负载，使 messages 为对象数组
+    data = {"model": "tts-1", "input": msg, "voice": "alloy"}
+
+    # 发送 POST 请求
+    response = requests.post(
+        api_url + "/v1/audio/speech", json=data, headers=headers
+    )
+
+    # 检查响应状态码
+    if response.status_code == 200:
+        # 获取当前脚本目录并构造保存文件的路径
+        speech_file_path = Path(__file__).parent / "speech.mp3"
+
+        # 保存音频文件
+        with open(speech_file_path, "wb") as f:
+            f.write(response.content)
+        print("音频文件保存成功。")
+    else:
+        print(
+            "生成语音失败。状态码：",
+            response.status_code,
+            "\n",
+            response.content.decode("utf-8"),
+        )
 
 
 def requester(question, model_type="gpt-4-turbo-preview"):
@@ -58,7 +96,9 @@ def requester(question, model_type="gpt-4-turbo-preview"):
     logger.trace(f"Payload: {payload}")
     logger.trace(f"User question: {question}")
 
-    response = requests.post(api_url, headers=headers, json=payload)
+    response = requests.post(
+        api_url + "/v1/chat/completions", headers=headers, json=payload
+    )
 
     if response.status_code == 200:
         # response_dict = response.json()
@@ -133,4 +173,5 @@ def chat():
 
 
 init()
-chat()
+# chat()
+tts("Today is a wonderful day to build something people love!")
