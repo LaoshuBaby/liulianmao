@@ -2,11 +2,7 @@ import requests
 import json
 import os
 from log import logger
-
-MODEL = "gpt-3.5-turbo"  # price = 0.75
-# MODEL = "gpt-4-turbo-preview" # price = 5.00
-# MODEL = "gpt-4" # price = 15.00
-# MODEL = "gpt-4-32k" # price = 30.00
+from model import select_model
 
 
 api_url = "https://aihubmix.com/v1/chat/completions"
@@ -23,7 +19,7 @@ def ask_chatgpt(question):
         "Content-Type": "application/json",
     }
     payload = {
-        "model": MODEL,
+        "model": select_model("gpt-4"),
         "messages": [
             {"role": "system", "content": "You are a helpful assistant."},
             {"role": "user", "content": question},
