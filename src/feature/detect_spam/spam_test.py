@@ -1,4 +1,4 @@
-from openai_utils import show
+from openai_utils import ask
 from openai_utils import logger
 import json
 
@@ -23,7 +23,7 @@ def spam_detect():
         msg = template.format(sentence=sentence)
         logger.info(sentence)
         logger.info(status)
-        result = show(msg)
+        result = ask(msg)
         if (result == status) or (result == "SPAM" and status == "SB"):
             count_success += 1
         else:

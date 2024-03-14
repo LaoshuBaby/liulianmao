@@ -1,9 +1,11 @@
-import requests
+import configparser
 import json
 import os
+
+import requests
+
 from log import logger
 from model import select_model
-
 
 api_url = "https://aihubmix.com/v1/chat/completions"
 api_key = os.environ.get(
@@ -12,21 +14,38 @@ api_key = os.environ.get(
 )
 
 
-# 函数：向ChatGPT提问并记录日志
-def ask_chatgpt(question):
+def load_conf():
+    config = configparser.ConfigParser()
+    config.read("tab_conf.conf")
+    system_role = config["system_message"]["content"]
+    temperature = config.getfloat("settings", "temperature")
+    return system_role, temperature
+
+
+def requester(question, model_type="gpt-4-turbo-preview"):
+    system_content,  temperature = load_conf()
+
     headers = {
         "Authorization": f"Bearer {api_key}",
         "Content-Type": "application/json",
     }
+
     payload = {
-        "model": select_model("gpt-4"),
+        "model": select_model(model_type),
         "messages": [
-            {"role": "system", "content": "You are a helpful assistant."},
+            {"role": "system", "content": system_content},
             {"role": "user", "content": question},
         ],
+        "temperature": temperature,
     }
-    # 在发送请求前记录用户的提问
+
+    # 记录headers和payload
+    logger.trace(f"Headers: {headers}")
+    logger.trace(f"Payload: {payload}")
+
+    # 记录用户的提问
     logger.trace(f"User question: {question}")
+
     response = requests.post(api_url, headers=headers, json=payload)
 
     if response.status_code == 200:
@@ -43,8 +62,8 @@ def ask_chatgpt(question):
         return {}
 
 
-def show(msg: str):
-    response = ask_chatgpt(msg)  # 调用ask_chatgpt函数获取OpenAI Response
-    content = response["choices"][0]["message"]["content"]  # 提取content部分的内容
+def ask(msg: str):
+    response = requester(msg) 
+    content = response["choices"][0]["message"]["content"]
     logger.success(content)
     return content

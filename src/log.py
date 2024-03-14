@@ -1,7 +1,7 @@
 import os
-from loguru import logger
 from datetime import datetime
 
+from loguru import logger
 
 user_home_path = os.path.expanduser("~")
 log_folder_path = os.path.join(user_home_path, ".openai_utils")
