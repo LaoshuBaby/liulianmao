@@ -1,38 +1,19 @@
 import requests
 import json
 import os
-from loguru import logger
-from datetime import datetime
+from log import logger
 
-MODEL = "gpt-3.5-turbo" # price = 0.75
+MODEL = "gpt-3.5-turbo"  # price = 0.75
 # MODEL = "gpt-4-turbo-preview" # price = 5.00
 # MODEL = "gpt-4" # price = 15.00
 # MODEL = "gpt-4-32k" # price = 30.00
 
 
-# 动态获取当前用户的主目录路径
-user_home_path = os.path.expanduser("~")
-# 定义日志文件存储的路径
-log_folder_path = os.path.join(user_home_path, ".openai_utils")
-
-# 检查.log_folder_path是否存在，如果不存在，则创建
-if not os.path.exists(log_folder_path):
-    os.makedirs(log_folder_path)
-
-# 配置logger，设置日志的存储文件，这里我们使用当前时间为日志文件命名
-logger.add(
-    os.path.join(
-        log_folder_path, f"{datetime.now().strftime('%Y-%m-%d_%H-%M-%S')}.log"
-    ),
-    format="{time} {level} {message}",
-    level="TRACE",
+api_url = "https://aihubmix.com/v1/chat/completions"
+api_key = os.environ.get(
+    "OPENAI_TOKEN",
+    "You may need to check your environment variables' confogure.",
 )
-
-
-with open("api.conf", "r") as file:
-    data = json.load(file)
-    api_url = data.get("api_url")
-    api_key = data.get("api_key")
 
 
 # 函数：向ChatGPT提问并记录日志

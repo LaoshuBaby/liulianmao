@@ -3,12 +3,6 @@ from openai_utils import logger
 import json
 
 
-def chat():
-    msg = """你好！世界！"""
-    response = show(msg)
-    # print(response)
-
-
 def spam_detect():
     # 读取模板文件
     with open("template.txt", "r", encoding="utf-8") as template_file:
