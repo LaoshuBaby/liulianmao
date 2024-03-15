@@ -1,7 +1,7 @@
 import os
 import platform
 
-from loguru import logger
+from .log import logger
 
 PROJECT_NAME = "LLMUC"
 PROJECT_FOLDER = "." + PROJECT_NAME.lower()
