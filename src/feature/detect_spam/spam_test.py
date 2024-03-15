@@ -1,6 +1,6 @@
-from openai_utils import ask
-from openai_utils import logger
 import json
+
+from openai_utils import ask, logger
 
 
 def spam_detect():

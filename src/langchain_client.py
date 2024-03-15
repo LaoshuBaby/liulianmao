@@ -2,9 +2,12 @@ import os
 
 from langchain_openai import ChatOpenAI
 
-API_URL = "https://aihubmix.com/v1"
+API_URL = os.environ.get(
+    "OPENAI_BASE_URL",
+    "https://aihubmix.com/v1",
+)
 API_SECRET_KEY = os.environ.get(
-    "OPENAI_TOKEN",
+    "OPENAI_API_KEY",
     "You may need to check your environment variables' confogure.",
 )
 
