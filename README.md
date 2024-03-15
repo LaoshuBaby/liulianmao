@@ -6,7 +6,11 @@
 
 若需要快速切换不同模型，可使用通过[one-api](https://github.com/songquanpeng/one-api)或[new-api](https://github.com/Calcium-Ion/new-api)聚合后的token。
 
-![Use in VSCode](screenshot.png)
+您可脱离IDE在纯命令行中无头调用，亦可在IDE中同时并列若干窗口，运行客户端交互式对话。
+
+| Use in VSCode                    | Use in PyCharm                     |
+|----------------------------------|------------------------------------|
+| ![VSCode](screenshot_vscode.png) | ![PyCharm](screenshot_pycharm.png) |
 
 ## 配置方法
 
