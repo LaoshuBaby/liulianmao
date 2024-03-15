@@ -12,6 +12,8 @@
 |----------------------------------|------------------------------------|
 | ![VSCode](screenshot_vscode.png) | ![PyCharm](screenshot_pycharm.png) |
 
+如果您是希望寻找图形化的客户端，可以去隔壁的[ChatBox](https://github.com/Bin-Huang/chatbox)、[ChatHub](https://github.com/chathub-dev/chathub)或[LibreChat](https://github.com/danny-avila/LibreChat)看看。
+
 ## 配置方法
 
 安装所需要的库：
@@ -36,6 +38,14 @@ pip install langchain langchain_openai
 
 * https://platform.openai.com/docs/api-reference/audio/createSpeech
 * https://platform.openai.com/docs/guides/text-to-speech
+
+## TODO
+
+目前有如下亟待解决的主要问题
+
+* 打包为各平台（Windows/MacOS，Linux用户请自求多福）上可独立执行的单文件程序，[“一键运行”](https://github.com/sherlock-project/sherlock/issues/2011)。
+* 允许将会话内容直接投射到txt中，并读取其更改自动作为回复。
+* 提供一个网页或GUI，直接映射两个文件的状态（可能没有必要，我们不是要重新发明一个图形化的客户端，已经有很多了）。
 
 ## 联系我
 
