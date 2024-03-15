@@ -6,6 +6,8 @@
 
 若需要快速切换不同模型，可使用通过one-api或new-api聚合后的token。
 
+![](screenshot.png)
+
 ## 配置方法
 
 安装所需要的库：
