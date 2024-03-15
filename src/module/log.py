@@ -3,11 +3,9 @@ from datetime import datetime
 
 from loguru import logger
 
-from storage import get_user_folder
+from .storage import get_user_folder, PROJECT_FOLDER
 
-log_folder_path = os.path.join(str(get_user_folder()), ".openai_utils", "logs")
-if not os.path.exists(log_folder_path):
-    os.makedirs(log_folder_path)
+log_folder_path = os.path.join(str(get_user_folder()), PROJECT_FOLDER, "logs")
 
 
 logger.add(

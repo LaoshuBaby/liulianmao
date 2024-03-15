@@ -1,8 +1,8 @@
 import os
 from os.path import isfile, join
 
-from log import logger
-from storage import get_user_folder
+from .log import logger
+from .storage import get_user_folder, PROJECT_FOLDER
 
 
 def get_env(var_name, default):
@@ -15,7 +15,7 @@ def get_env(var_name, default):
         return value
 
     # 尝试从用户目录的.openai_utils文件夹读取
-    var_file_path_user = join(get_user_folder(), ".openai_utils", var_name)
+    var_file_path_user = join(get_user_folder(), PROJECT_FOLDER, var_name)
     if isfile(var_file_path_user):
         try:
             with open(var_file_path_user) as f:

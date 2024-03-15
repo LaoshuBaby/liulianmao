@@ -1,4 +1,4 @@
-from log import logger
+from .log import logger
 
 # 使用Python字典和列表表示JSON结构
 MODELS = [

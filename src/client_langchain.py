@@ -1,6 +1,6 @@
 from langchain_openai import ChatOpenAI
 
-from authentication import API_KEY, API_URL
+from module.authentication import API_KEY, API_URL
 
 llm = ChatOpenAI(openai_api_key=API_KEY, openai_api_base=API_URL)
 
