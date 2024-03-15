@@ -9,8 +9,24 @@ from log import logger
 from model import select_model
 
 
+def init():
+    file_list = [
+        ("question.txt", "Hello World!"),
+        ("answer.txt", "Hello! How can I assist you today?"),
+    ]
+
+    for file_name, default_content in file_list:
+        try:
+            with open(f"terminal/{file_name}", "r", encoding="utf-8") as file:
+                file.read()
+        except FileNotFoundError:
+            logger.error(f"{file_name} not found. Creating a new file.")
+            with open(file_name, "w", encoding="utf-8") as file:
+                file.write(default_content)
+
+
 def load_conf():
-    with open("tab_conf.json", "r") as file:
+    with open("assets/config.json", "r") as file:
         config = json.load(file)
 
     system_role = config["system_message"]["content"]
@@ -18,12 +34,10 @@ def load_conf():
     return system_role, temperature
 
 
-conversation_history = []
+conversation = []
 
 
 def tts(msg):
-    # api https://platform.openai.com/docs/api-reference/audio/createSpeech
-    # package https://platform.openai.com/docs/guides/text-to-speech
     headers = {
         "Authorization": f"Bearer {API_KEY}",
         "Content-Type": "application/json",
@@ -58,11 +72,11 @@ def requester(question, model_type="gpt-4-turbo-preview"):
 
     payload = {
         "model": select_model(model_type),
-        "messages": conversation_history
-        + [
-            {"role": "system", "content": system_content},
-            {"role": "user", "content": question},
-        ],
+        "messages": (
+            [{"role": "system", "content": system_content}]
+            + conversation
+            + [{"role": "user", "content": question}]
+        ),
         "temperature": temperature,
         "max_tokens": 2048,
         "top_p": 1.0,
@@ -77,31 +91,30 @@ def requester(question, model_type="gpt-4-turbo-preview"):
         # ],
     }
 
-    logger.trace(f"Headers: {headers}")
-    logger.trace(f"Payload: {payload}")
-    logger.trace(f"User question: {question}")
+    logger.trace("[Headers]\n" + f"{headers}")
+    logger.trace("[Payload]\n" + f"{payload}")
+
+    flag_echo_input = False
+    if flag_echo_input:
+        logger.debug("[Question]\n" + f"{question}")
+    else:
+        logger.trace("[Question]\n" + f"{question}")
 
     response = requests.post(
         API_URL + "/v1/chat/completions", headers=headers, json=payload
     )
 
     if response.status_code == 200:
-        # response_dict = response.json()
-        # logger.trace(
-        #     f"OpenAI Response: {json.dumps(response_dict, ensure_ascii=False, indent=4)}"
-        # )
-        # return response_dict
-        response_data = response.json()
-        # 更新对话历史
-        conversation_history.append({"role": "user", "content": question})
-        conversation_history.append(
+        conversation.append({"role": "user", "content": question})
+        conversation.append(
             {
                 "role": "system",
-                "content": response_data["choices"][0]["message"]["content"],
+                "content": response.json()["choices"][0]["message"]["content"],
             }
         )
-        logger.trace(conversation_history)
-        return response_data
+        logger.trace("[History]\n" + str(conversation))
+        logger.trace("[Response]\n" + str(response.json()))
+        return response.json()
     else:
         logger.error(
             f"Error: {response.status_code} {response.content.decode('utf-8')}"
@@ -111,44 +124,31 @@ def requester(question, model_type="gpt-4-turbo-preview"):
 
 def ask(msg: str):
     response = requester(msg)
-    logger.trace(response)
     content = response["choices"][0]["message"]["content"]
-    logger.success(content)
+    logger.success("[Answer]\n" + content)
     return content
 
 
-def init():
-    file_list = [
-        ("tab_question.txt", "Hello World!"),
-        ("tab_answer.txt", "Hello! How can I assist you today?"),
-    ]
-
-    for file_name, default_content in file_list:
-        try:
-            with open(file_name, "r", encoding="utf-8") as file:
-                file.read()
-        except FileNotFoundError:
-            logger.error(f"{file_name} not found. Creating a new file.")
-            with open(file_name, "w", encoding="utf-8") as file:
-                file.write(default_content)
-
-
 def chat():
-    with open("tab_question.txt", "r", encoding="utf-8") as file:
+    with open("terminal/question.txt", "r", encoding="utf-8") as file:
         msg = file.read()
 
     flag_continue = True
     response = ask(msg)
 
     if flag_continue == False:
-        with open("tab_answer.txt", "w", encoding="utf-8") as file:
+        with open("terminal/answer.txt", "w", encoding="utf-8") as file:
             file.write(response)
     else:
         flag_end = False
         while flag_end == False:
-            append_question = input("请输入追问：")
+            import time
+
+            # 部分控制台输入是异步的，给足够的时间以保证不会打断输出
+            time.sleep(0.05)
+            logger.info("[Interaction] 请输入追问")
+            append_question = input()
             if append_question != "END" and append_question != "":
-                logger.info("请输入追问：" + append_question)
                 response = ask(append_question)
             else:
                 flag_end = True
@@ -156,11 +156,12 @@ def chat():
 
 
 def talk():
-    with open("tab_question.txt", "r", encoding="utf-8") as file:
+    with open("terminal/question.txt", "r", encoding="utf-8") as file:
         msg = file.read()
     tts(msg)
 
 
-init()
-chat()
-# talk()
+def main():
+    init()
+    chat()
+    # talk()

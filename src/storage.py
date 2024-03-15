@@ -1,6 +1,5 @@
 import os
 import platform
-from pathlib import Path
 
 
 def get_user_folder():

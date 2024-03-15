@@ -1,19 +1,18 @@
 from log import logger
 
-MODELS = {
-    "gpt-3.5-turbo": 0.75,
-    "gpt-4-turbo-preview": 5.00,
-    "gpt-4": 15.00,
-    "gpt-4-32k": 30.00,
-}
+# 使用Python字典和列表表示JSON结构
+MODELS = [
+    {"name": "gpt-3.5-turbo", "ratio": 0.75},
+    {"name": "gpt-4-turbo-preview", "ratio": 5.00},
+    {"name": "gpt-4", "ratio": 15.00},
+    {"name": "gpt-4-32k", "ratio": 30.00},
+]
 
 
 def select_model(model_name):
-    if model_name in MODELS:
-        logger.info(
-            f"Selected model: {model_name} (Price: ${MODELS[model_name]})"
-        )
-        return model_name
-    else:
-        logger.error("Model not found.")
-        return None
+    for model in MODELS:
+        if model["name"] == model_name:
+            logger.info(f"[Model] {model['name']} ({model['ratio']}x)")
+            return model_name
+    logger.error("[Model] Model not found.")
+    return None

@@ -1,12 +1,12 @@
 # LLM Unified Client
 
-**LLMUC**是LaoshuBaby自用的一个在命令行或者IDE中使用的大语言模型客户端。本项目主要为鼠宝宝及友人提供服务，亦用作个人codebase在各种机器人和实验性项目中快速调用。
+**LLMUC**是[@LaoshuBaby](https://github.com/LaoshuBaby)自用的一个在命令行或者IDE中使用的大语言模型客户端。本项目主要为鼠宝宝及友人提供服务，亦用作个人codebase在各种机器人和实验性项目中快速调用。
 
 目前仅测试了OpenAI提供的服务。理论上亦可直接用于零一万物或通义千问的服务。
 
-若需要快速切换不同模型，可使用通过one-api或new-api聚合后的token。
+若需要快速切换不同模型，可使用通过[one-api](https://github.com/songquanpeng/one-api)或[new-api](https://github.com/Calcium-Ion/new-api)聚合后的token。
 
-![](screenshot.png)
+![Use in VSCode](screenshot.png)
 
 ## 配置方法
 
@@ -22,7 +22,16 @@ pip install requests loguru
 pip install langchain langchain_openai
 ```
 
-在系统环境变量中配置`OPENAI_API_KEY`的值为你所使用的API。当然您亦可在代码中硬编码，但鼠宝宝不推荐这么做。（如果您配置过langchain，那就不需要再次配置了！）
+在系统环境变量中配置`OPENAI_API_KEY`的值为你所使用的API，`OPENAI_BASE_URL`的值为你使用的服务商的endpoint。 （如果您配置过langchain，那就不需要再次配置了！）
+
+如果您不懂什么是环境变量，也可以在同目录下放置同名文件，亦可在代码中硬编码，但鼠宝宝不推荐这么做。
+
+## 参考文档
+
+虽然我觉得正常用户用不到这东西，给自己看方便debug的
+
+* https://platform.openai.com/docs/api-reference/audio/createSpeech
+* https://platform.openai.com/docs/guides/text-to-speech
 
 ## 联系我
 

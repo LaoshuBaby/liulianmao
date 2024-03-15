@@ -44,7 +44,6 @@ def get_env(var_name, default):
     return default
 
 
-
 # 获取API URL和API KEY
 API_URL = get_env("OPENAI_BASE_URL", "https://api.openai.com")
 API_KEY = get_env(

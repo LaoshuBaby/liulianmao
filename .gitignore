@@ -183,5 +183,5 @@ fabric.properties
 
 # idea folder, uncomment if you don't need it
 .idea
-src/tab_answer.txt
-src/tab_question.txt
+src/terminal/answer.txt
+src/terminal/question.txt
