@@ -108,8 +108,6 @@ def requester(question, model_type="gpt-4-turbo-preview"):
                 "content": response_data["choices"][0]["message"]["content"],
             }
         )
-        logger.debug("conversation_history")
-        logger.debug(conversation_history)
         logger.trace(conversation_history)
         return response_data
     else:
@@ -121,7 +119,7 @@ def requester(question, model_type="gpt-4-turbo-preview"):
 
 def ask(msg: str):
     response = requester(msg)
-    logger.debug(response)
+    logger.trace(response)
     content = response["choices"][0]["message"]["content"]
     logger.success(content)
     return content
@@ -173,4 +171,4 @@ def talk():
 
 init()
 chat()
-talk()
+# talk()
