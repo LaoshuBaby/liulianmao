@@ -4,17 +4,9 @@ from pathlib import Path
 
 import requests
 
+from authentication import API_KEY, API_URL
 from log import logger
 from model import select_model
-
-api_url = os.environ.get(
-    "OPENAI_BASE_URL",
-    "https://aihubmix.com",
-)
-api_key = os.environ.get(
-    "OPENAI_API_KEY",
-    "You may need to check your environment variables' confogure.",
-)
 
 
 def load_conf():
@@ -33,13 +25,13 @@ def tts(msg):
     # api https://platform.openai.com/docs/api-reference/audio/createSpeech
     # package https://platform.openai.com/docs/guides/text-to-speech
     headers = {
-        "Authorization": f"Bearer {api_key}",
+        "Authorization": f"Bearer {API_KEY}",
         "Content-Type": "application/json",
     }
 
     data = {"model": "tts-1", "input": msg, "voice": "alloy"}
     response = requests.post(
-        api_url + "/v1/audio/speech", json=data, headers=headers
+        API_URL + "/v1/audio/speech", json=data, headers=headers
     )
 
     if response.status_code == 200:
@@ -60,7 +52,7 @@ def requester(question, model_type="gpt-4-turbo-preview"):
     system_content, temperature = load_conf()
 
     headers = {
-        "Authorization": f"Bearer {api_key}",
+        "Authorization": f"Bearer {API_KEY}",
         "Content-Type": "application/json",
     }
 
@@ -90,7 +82,7 @@ def requester(question, model_type="gpt-4-turbo-preview"):
     logger.trace(f"User question: {question}")
 
     response = requests.post(
-        api_url + "/v1/chat/completions", headers=headers, json=payload
+        API_URL + "/v1/chat/completions", headers=headers, json=payload
     )
 
     if response.status_code == 200:
