@@ -4,15 +4,16 @@ from hellologger import get_logger
 
 from .const import get_user_folder, PROJECT_FOLDER
 
-log_folder_path = os.path.join(str(get_user_folder()), PROJECT_FOLDER)
+log_folder_path = os.path.join(str(get_user_folder()), PROJECT_FOLDER, "log")
 
 
-if not os.path.exists(os.path.join(log_folder_path,"log")):
-    os.makedirs(os.path.join(log_folder_path,"log"))
+if not os.path.exists(log_folder_path):
+    os.makedirs(log_folder_path)
 
 
 logger = get_logger(
     log_path=log_folder_path,
+    log_file="log_{time}.log",
     log_target={
         "local": True,
         "aliyun": False,
