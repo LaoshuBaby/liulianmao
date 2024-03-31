@@ -1,21 +1,8 @@
 import os
-import platform
 
 from .log import logger
 
-PROJECT_NAME = "LLMUC"
-PROJECT_FOLDER = "." + PROJECT_NAME.lower()
-
-
-def get_user_folder():
-    """
-    Get the user directory based on the operating system.
-    """
-    if platform.system() == "Windows":
-        path_str = os.environ.get("USERPROFILE", "")
-    else:
-        path_str = os.environ.get("HOME", "")
-    return os.path.abspath(path_str)
+from .const import get_user_folder, PROJECT_FOLDER
 
 
 def init():
