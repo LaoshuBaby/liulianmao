@@ -4,7 +4,7 @@ from hellologger import get_logger
 
 from .const import get_user_folder, PROJECT_FOLDER
 
-log_folder_path = os.path.join(str(get_user_folder()), PROJECT_FOLDER, "log")
+log_folder_path = os.path.join(str(get_user_folder()), PROJECT_FOLDER, "logs")
 
 
 if not os.path.exists(log_folder_path):

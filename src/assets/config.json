@@ -1,8 +1,1 @@
-{
-  "system_message": {
-    "content": "You are a helpful assistant."
-  },
-  "settings": {
-    "temperature": 0.5
-  }
-}
+{"system_message":{"content":"You are a helpful assistant."},"settings":{"temperature":0.5}}
