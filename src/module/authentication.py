@@ -2,7 +2,7 @@ import os
 from os.path import isfile, join
 
 from .log import logger
-from .storage import get_user_folder, PROJECT_FOLDER
+from .storage import PROJECT_FOLDER, get_user_folder
 
 
 def get_env(var_name, default):

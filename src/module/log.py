@@ -2,7 +2,7 @@ import os
 
 from hellologger import get_logger
 
-from .const import get_user_folder, PROJECT_FOLDER
+from .const import PROJECT_FOLDER, get_user_folder
 
 log_folder_path = os.path.join(str(get_user_folder()), PROJECT_FOLDER, "logs")
 

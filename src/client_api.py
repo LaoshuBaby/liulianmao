@@ -6,11 +6,14 @@ import requests
 from module.authentication import API_KEY, API_URL
 from module.log import logger
 from module.model import select_model
-from module.storage import init, get_user_folder, PROJECT_FOLDER
+from module.storage import PROJECT_FOLDER, get_user_folder, init
 
 
 def load_conf():
-    with open("assets/config.json", "r") as file:
+    config_file_path = os.path.join(
+        get_user_folder(), PROJECT_FOLDER, "assets", "config.json"
+    )
+    with open(config_file_path, "r") as file:
         config = json.load(file)
 
     system_role = config["system_message"]["content"]

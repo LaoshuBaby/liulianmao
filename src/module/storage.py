@@ -1,10 +1,9 @@
+import json
 import os
 
+from .const import PROJECT_FOLDER, get_user_folder
 from .log import logger
 
-from .const import get_user_folder, PROJECT_FOLDER
-
-import json
 
 def init():
     # 假设file_list中的JSON字符串需要格式化
