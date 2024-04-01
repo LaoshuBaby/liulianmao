@@ -1,6 +1,6 @@
-# LLM Unified Client
+# liulianmao
 
-**LLMUC**是[@LaoshuBaby](https://github.com/LaoshuBaby)自用的一个在命令行或者IDE中使用的大语言模型客户端。本项目主要为鼠宝宝及友人提供服务，亦用作个人codebase在各种机器人和实验性项目中快速调用。
+**liulianmao**是[@LaoshuBaby](https://github.com/LaoshuBaby)自用的一个在命令行或者IDE中使用的大语言模型客户端。本项目主要为鼠宝宝及友人提供服务，亦用作个人codebase在各种机器人和实验性项目中快速调用。
 
 目前仅测试了OpenAI提供的服务。理论上亦可直接用于零一万物或通义千问的服务。
 
@@ -13,6 +13,8 @@
 | ![VSCode](screenshot_vscode.png) | ![PyCharm](screenshot_pycharm.png) |
 
 如果您是希望寻找图形化的客户端，可以去隔壁的[ChatBox](https://github.com/Bin-Huang/chatbox)、[ChatHub](https://github.com/chathub-dev/chathub)或[LibreChat](https://github.com/danny-avila/LibreChat)看看。
+
+仅提供简体中文文档。若有疑问您可以联系我。
 
 ## 配置方法
 
@@ -49,6 +51,13 @@ pip install langchain langchain_openai
 
 ## 联系我
 
-Telegram [@laoshubaby](https://t.me/laoshubaby)
+* Telegram: [@laoshubaby](https://t.me/laoshubaby)
+* Email: [laoshubaby@protonmail.com](mailto:laoshubaby@protonmail.com)
 
 ~~( 虽然是MIT协议，您可以自由使用，但如果您是在GitHub上搜到的这个项目，建议使用前先与我咨询，因为可能真的不好用。若能帮到您，就算交个朋友啦！**φ(゜▽゜*)♪** )~~
+
+## 关于命名
+
+Q: 如果是硬凑LLM首字母缩写，为什么不用“溜溜梅”？
+
+A：我怕来告我。

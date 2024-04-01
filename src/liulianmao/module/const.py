@@ -1,7 +1,7 @@
 import os
 import platform
 
-PROJECT_NAME = "LLMUC"
+PROJECT_NAME = "LIULIANMAO"
 PROJECT_FOLDER = "." + PROJECT_NAME.lower()
 
 

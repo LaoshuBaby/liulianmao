@@ -1,9 +1,18 @@
 [tool.poetry]
-name = "llm_core"
-version = "0.2.0"
-description = "一个在命令行或者IDE中使用的大语言模型客户端。"
+name = "liulianmao"
+version = "1.0.0"
+description = "A LLM client for use from the command line or IDE."
 authors = ["快乐的老鼠宝宝 <laoshubaby@protonmail.com>"]
-packages = [{ include = "llmuc", from = "src" }]
+license = "MIT"
+repository = "https://github.com/LaoshuBaby/liulianmao"
+readme = "README.md"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+]
+packages = [{ include = "liulianmao", from = "src" }]
+
 
 [tool.poetry.dependencies]
 python = "^3.6"
