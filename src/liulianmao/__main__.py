@@ -13,11 +13,11 @@ parent_dir = os.path.dirname(bundled_dir)
 if parent_dir not in sys.path:
     sys.path.append(parent_dir)
 
-print(__file__)
-print(bundled_dir)
-print(parent_dir)
-print(os.getcwd())
-print(os.listdir(bundled_dir))
+# print(__file__)
+# print(bundled_dir)
+# print(parent_dir)
+# print(os.getcwd())
+# print(os.listdir(bundled_dir))
 
 import importlib.util
 
@@ -26,6 +26,16 @@ spec = importlib.util.find_spec('.client_core', package='liulianmao')
 core = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(core)
 
+
+# FEATURE = {
+#     "core": True,
+#     "langchain": False
+# }
+
+# if FEATURE["langchain"]:
+#     spec = importlib.util.find_spec('.client_langchain', package='liulianmao')
+#     langchain = importlib.util.module_from_spec(spec)
+#     spec.loader.exec_module(langchain)
 
 FEATURE = {
     "core": True,
