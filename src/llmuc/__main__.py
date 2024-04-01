@@ -1,5 +1,10 @@
-from client_api import main as api
+FEATURE={
+    "core":True,
+    "langchain":False
+}
 
-# from client_langchain import main as langchain
+from .client_core import main as core
+if FEATURE["langchain"]:
+    from .client_langchain import main as langchain
 
-api()
+core()

@@ -3,10 +3,10 @@ import os
 
 import requests
 
-from module.authentication import API_KEY, API_URL
-from module.log import logger
-from module.model import select_model
-from module.storage import PROJECT_FOLDER, get_user_folder, init
+from .module.authentication import API_KEY, API_URL
+from .module.log import logger
+from .module.model import select_model
+from .module.storage import PROJECT_FOLDER, get_user_folder, init
 
 
 def load_conf():

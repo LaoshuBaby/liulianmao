@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "llm_unified_client"
+name = "llm_core"
 version = "0.2.0"
 description = "一个在命令行或者IDE中使用的大语言模型客户端。"
 authors = ["快乐的老鼠宝宝 <laoshubaby@protonmail.com>"]
