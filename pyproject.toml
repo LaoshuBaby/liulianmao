@@ -1,0 +1,22 @@
+[tool.poetry]
+name = "llm_unified_client"
+version = "0.2.0"
+description = "一个在命令行或者IDE中使用的大语言模型客户端。"
+authors = ["快乐的老鼠宝宝 <laoshubaby@protonmail.com>"]
+packages = [{ include = "llm_unified_client", from = "src" }]
+
+[tool.poetry.dependencies]
+python = "^3.6"
+requests = ">=2.26.0"
+loguru = ">=0.5.3"
+hellologger = "*"
+
+[tool.poetry.extras]
+langchain_support = ["langchain", "langchain_openai"]
+
+[tool.poetry.dev-dependencies]
+# Add your development dependencies here
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
