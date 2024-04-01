@@ -3,7 +3,7 @@ name = "llm_unified_client"
 version = "0.2.0"
 description = "一个在命令行或者IDE中使用的大语言模型客户端。"
 authors = ["快乐的老鼠宝宝 <laoshubaby@protonmail.com>"]
-packages = [{ include = "llm_unified_client", from = "src" }]
+packages = [{ include = "llmuc", from = "src" }]
 
 [tool.poetry.dependencies]
 python = "^3.6"
@@ -14,8 +14,6 @@ hellologger = "*"
 [tool.poetry.extras]
 langchain_support = ["langchain", "langchain_openai"]
 
-[tool.poetry.dev-dependencies]
-# Add your development dependencies here
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
