@@ -1,0 +1,50 @@
+这个是[Google Python Code Style](https://google.github.io/styleguide/pyguide.html)推荐的示例：
+
+```python
+def fetch_smalltable_rows(
+    table_handle: smalltable.Table,
+    keys: Sequence[bytes | str],
+    require_all_keys: bool = False,
+) -> Mapping[bytes, tuple[str, ...]]:
+    """Fetches rows from a Smalltable.
+
+    Retrieves rows pertaining to the given keys from the Table instance
+    represented by table_handle.  String keys will be UTF-8 encoded.
+
+    Args:
+        table_handle: An open smalltable.Table instance.
+        keys: A sequence of strings representing the key of each table
+          row to fetch.  String keys will be UTF-8 encoded.
+        require_all_keys: If True only rows with values set for all keys will be
+          returned.
+
+    Returns:
+        A dict mapping keys to the corresponding table row data
+        fetched. Each row is represented as a tuple of strings. For
+        example:
+
+        {b'Serak': ('Rigel VII', 'Preparer'),
+         b'Zim': ('Irk', 'Invader'),
+         b'Lrrr': ('Omicron Persei 8', 'Emperor')}
+
+        Returned keys are always bytes.  If a key from the keys argument is
+        missing from the dictionary, then that row was not found in the
+        table (and require_all_keys must have been False).
+
+    Raises:
+        IOError: An error occurred accessing the smalltable.
+    """
+```
+
+我在下方会给出一个文件，请你把所有函数的中英文文档都校对和补充完整。
+
+```python
+{{code}}
+```
+
+注意：
+0. 只需要给我每个函数重写的文档和改进的地方，无需重新复述函数内部的代码。
+1. 不要删掉中文部分，即使Google风格要求你这么做。
+2. 上面的代码逻辑与内容与我下面给出的业务代码无关。
+
+如果你认为现有的代码已经基本符合Google Python风格指南，无需做出大的修改，请直接告诉我无需修改。
