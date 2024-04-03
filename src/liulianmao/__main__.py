@@ -1,8 +1,7 @@
 import os
 import sys
 
-
-if getattr(sys, 'frozen', False):
+if getattr(sys, "frozen", False):
     # we are running in a |PyInstaller| bundle
     bundled_dir = sys._MEIPASS
 else:
@@ -21,29 +20,34 @@ if parent_dir not in sys.path:
 
 import importlib.util
 
-# 动态加载 client_core 模块
-spec = importlib.util.find_spec('.client_core', package='liulianmao')
+spec = importlib.util.find_spec(".core", package="client")
 core = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(core)
 
 
-# FEATURE = {
-#     "core": True,
-#     "langchain": False
-# }
-
-# if FEATURE["langchain"]:
-#     spec = importlib.util.find_spec('.client_langchain', package='liulianmao')
-#     langchain = importlib.util.module_from_spec(spec)
-#     spec.loader.exec_module(langchain)
-
-FEATURE = {
-    "core": True,
-    "langchain": False
-}
+FEATURE = {"core": True, "langchain": False}
 
 if FEATURE["langchain"]:
-    from liulianmao.client_langchain import main as langchain
+    # spec = importlib.util.find_spec('.langchain', package='client')
+    # langchain = importlib.util.module_from_spec(spec)
+    # spec.loader.exec_module(langchain)
+    from liulianmao.langchain import main as langchain
 
-core.main()
+operations = {
+    "init": core.init,
+    "chat": core.chat,
+}
 
+
+def main(recipe):
+    for operation_name in recipe:
+        operation = operations.get(operation_name)
+        if operation:
+            operation()
+        else:
+            print(f"Operation {operation_name} is not defined.")
+
+
+if __name__ == "__main__":
+    recipe = ["init", "chat"]
+    main(recipe)

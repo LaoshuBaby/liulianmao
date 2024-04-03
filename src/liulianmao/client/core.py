@@ -1,12 +1,16 @@
 import json
 import os
+import sys
 
 import requests
 
-from .module.authentication import API_KEY, API_URL
-from .module.log import logger
-from .module.model import select_model
-from .module.storage import PROJECT_FOLDER, get_user_folder, init
+current_dir = os.path.dirname(os.path.realpath(__file__))
+sys.path.append(os.path.join(current_dir, ".."))
+
+from module.authentication import API_KEY, API_URL
+from module.log import logger
+from module.model import select_model
+from module.storage import PROJECT_FOLDER, get_user_folder, init
 
 
 def load_conf():
@@ -166,6 +170,9 @@ def talk():
 
 
 def main():
-    init()
-    chat()
-    # talk()
+    logger.critical("THIS PROGRAM NOT INTENT TO RUN SUBMODULE".upper())
+    exit(0)
+
+
+if __name__ == "__main__":
+    main()
