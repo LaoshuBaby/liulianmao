@@ -60,4 +60,12 @@ pip install langchain langchain_openai
 
 Q: 如果是硬凑LLM首字母缩写，为什么不用“溜溜梅”？
 
-A：我怕来告我。
+A: 我怕来告我。
+
+Q: 如果我觉得鼠宝宝是在重新发明轮子，其实有很多这种简易客户端了，怎么办？
+
+A: 好问题，我也觉得。
+
+Q: 有没有类似榴莲猫的项目？
+
+A: 如果您有小米智能音响，可以试试[yihong0618/xiaogpt](https://github.com/yihong0618/xiaogpt)，给小爱同学装上最强大脑。
