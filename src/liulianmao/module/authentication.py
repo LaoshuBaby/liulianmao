@@ -1,46 +1,54 @@
 import os
-from os.path import isfile, join
+from os.path import abspath, dirname, isfile, join
+from typing import Optional
 
 from .log import logger
 from .storage import PROJECT_FOLDER, get_user_folder
 
 
-def get_env(var_name, default):
+def get_env(var_name: str, default: str) -> str:
     """
-    尝试从环境变量获取值，如果失败，尝试从用户目录的.openai_utils下和同目录下的文件读取，最后使用默认值。
+    尝试从环境变量获取值，如果失败，尝试从用户目录下和同目录下的文件读取，最后使用默认值。
     """
-    # 从环境变量中获取
-    value = os.environ.get(var_name)
-    if value is not None:
-        return value
 
-    # 尝试从用户目录的.openai_utils文件夹读取
-    var_file_path_user = join(get_user_folder(), PROJECT_FOLDER, var_name)
-    if isfile(var_file_path_user):
-        try:
-            with open(var_file_path_user) as f:
-                return f.read().strip()
-        except Exception as e:
-            logger.error(
-                f"Error reading {var_name} from user folder file: {e}"
-            )
+    def get_from_env(var_name: str) -> Optional[str]:
+        """尝试从环境变量获取值。"""
+        return os.environ.get(var_name)
 
-    # 尝试从当前文件所在目录读取
-    current_dir = os.path.dirname(os.path.abspath(__file__))
-    var_file_path_current = join(current_dir, var_name)
-    if isfile(var_file_path_current):
-        try:
-            with open(var_file_path_current) as f:
-                return f.read().strip()
-        except Exception as e:
-            logger.error(
-                f"Error reading {var_name} from current directory file: {e}"
-            )
+    def get_from_user_folder(var_name: str) -> Optional[str]:
+        """尝试从用户目录的文件夹读取。"""
+        var_file_path = join(get_user_folder(), PROJECT_FOLDER, var_name)
+        if isfile(var_file_path):
+            try:
+                with open(var_file_path) as f:
+                    return f.read().strip()
+            except Exception as e:
+                logger.error(f"Error reading {var_name} from user folder file: {e}")
+        return None
 
-    # 记录错误并返回默认值
-    logger.error(
-        f"{var_name} not found in environment variables, user folder, or current directory file, using default."
-    )
+    def get_from_current_dir(var_name: str) -> Optional[str]:
+        """尝试从当前文件所在目录读取。"""
+        var_file_path = join(dirname(abspath(__file__)), var_name)
+        if isfile(var_file_path):
+            try:
+                with open(var_file_path) as f:
+                    return f.read().strip()
+            except Exception as e:
+                logger.error(f"Error reading {var_name} from current directory file: {e}")
+        return None
+
+
+    # 定义尝试顺序
+    attempts = [get_from_env, get_from_user_folder, get_from_current_dir]
+
+    for attempt in attempts:
+        result = attempt(var_name)
+        if result is not None:
+            logger.trace("[Authentication]\n" + f"{var_name} = {result}")
+            return result
+
+    # 如果所有尝试都失败了，记录错误并返回默认值
+    logger.error(f"{var_name} not found in environment variables, user folder, or current directory file, using default.")
     return default
 
 
