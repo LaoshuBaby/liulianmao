@@ -20,6 +20,7 @@ def load_conf():
     with open(config_file_path, "r") as file:
         config = json.load(file)
 
+    logger.trace("[Config]\n" + f"{config}")
     system_role = config["system_message"]["content"]
     temperature = float(config["settings"]["temperature"])
     return system_role, temperature

@@ -33,17 +33,15 @@ def init_env():
         sys.path.append(parent_dir)
 
 
-def main(recipe: List[str], question: bool):
+def main(recipe: List[str], actions: List[str]):
     """Execute the operations specified in the recipe list.
 
-    如果question为真，则打开并打印'question.txt'文件的内容。
-    根据提供的recipe列表执行一系列操作。
+    根据提供的recipe列表和actions列表执行一系列操作。
 
     Args:
-        recipe: A list of strings representing the operations to be processed.
-            默认为["init", "chat"]。
-        question: A boolean flag that, when True, triggers the reading and printing
-            of the 'question.txt' file's content.
+        recipe: A list of strings representing the operations to be processed.默认为["init", "chat"]。
+        actions: A list of strings representing additional actions to be taken.
+
 
     示例：
     - `python your_script.py` 将使用默认的recipe（即["init", "chat"]）。
@@ -51,14 +49,22 @@ def main(recipe: List[str], question: bool):
     - `python your_script.py --question` 将打开并打印`question.txt`文件的内容，并使用默认的recipe。
     - `python your_script.py --question --recipe init other_operation` 将打开并打印`question.txt`文件的内容，并使用自定义的recipe。
     """
-
-    if question:
+    if "question" in actions:
         from module.const import PROJECT_FOLDER, get_user_folder
 
         question_file_path = os.path.join(
             str(get_user_folder()), PROJECT_FOLDER, "terminal", "question.txt"
         )
         os.startfile(question_file_path)
+        exit(0)
+
+    if "config" in actions:
+        from module.const import PROJECT_FOLDER, get_user_folder
+
+        config_file_path = os.path.join(
+            str(get_user_folder()), PROJECT_FOLDER, "assets", "config.json"
+        )
+        os.startfile(config_file_path)
         exit(0)
 
     import importlib.util
@@ -96,11 +102,20 @@ if __name__ == "__main__":
         "--question", action="store_true", help="Read the question.txt file"
     )
     parser.add_argument(
+        "--config", action="store_true", help="Read the config.txt file"
+    )
+    parser.add_argument(
         "--recipe",
         nargs="*",
         default=default_recipe,
         help="List of operations to process",
     )
     args = parser.parse_args()
-    print("AAA")
-    main(recipe=args.recipe, question=args.question)
+
+    actions = []
+    if args.question:
+        actions.append("question")
+    if args.config:
+        actions.append("config")
+
+    main(recipe=args.recipe, actions=actions)

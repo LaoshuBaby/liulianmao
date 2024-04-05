@@ -1,3 +1,6 @@
+import os
+import sys
+
 from langchain_openai import ChatOpenAI
 
 current_dir = os.path.dirname(os.path.realpath(__file__))
