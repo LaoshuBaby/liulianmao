@@ -58,13 +58,6 @@ def main(recipe: List[str], actions: List[str]):
     Args:
         recipe: A list of strings representing the operations to be processed.默认为["init", "chat"]。
         actions: A list of strings representing additional actions to be taken.
-
-
-    示例：
-    - `python your_script.py` 将使用默认的recipe（即["init", "chat"]）。
-    - `python your_script.py --recipe init other_operation` 将使用自定义的recipe（即["init", "other_operation"]）。
-    - `python your_script.py --question` 将打开并打印`question.txt`文件的内容，并使用默认的recipe。
-    - `python your_script.py --question --recipe init other_operation` 将打开并打印`question.txt`文件的内容，并使用自定义的recipe。
     """
     if "question" in actions:
         from module.const import PROJECT_FOLDER, get_user_folder
@@ -73,7 +66,7 @@ def main(recipe: List[str], actions: List[str]):
             str(get_user_folder()), PROJECT_FOLDER, "terminal", "question.txt"
         )
         os.startfile(question_file_path)
-        exit(0)
+        sys.exit(0)
 
     if "config" in actions:
         from module.const import PROJECT_FOLDER, get_user_folder
@@ -82,7 +75,7 @@ def main(recipe: List[str], actions: List[str]):
             str(get_user_folder()), PROJECT_FOLDER, "assets", "config.json"
         )
         os.startfile(config_file_path)
-        exit(0)
+        sys.exit(0)
 
     import importlib.util
 

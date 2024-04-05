@@ -34,6 +34,13 @@ pip install langchain langchain_openai
 
 如果您不懂什么是环境变量，也可以在同目录下放置同名文件，亦可在代码中硬编码，但鼠宝宝不推荐这么做。
 
+## 示例
+
+- `python your_script.py` 将使用默认的recipe（即["init", "chat"]）。
+- `python your_script.py --recipe init other_operation` 将使用自定义的recipe（即["init", "other_operation"]）。
+- `python your_script.py --question` 将打开并打印`question.txt`文件的内容，并使用默认的recipe。
+- `python your_script.py --question --recipe init other_operation` 将打开并打印`question.txt`文件的内容，并使用自定义的recipe。
+
 ## 参考文档
 
 虽然我觉得正常用户用不到这东西，给自己看方便debug的
