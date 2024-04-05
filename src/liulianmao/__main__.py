@@ -23,11 +23,28 @@ def init_env():
 
     parent_dir = os.path.dirname(bundled_dir)
 
-    # print(__file__)
-    # print(bundled_dir)
-    # print(parent_dir)
-    # print(os.getcwd())
-    # print(os.listdir(bundled_dir))
+    try:
+        from module.log import logger
+
+        logger.debug(f'[ENV] "__file__" = {__file__}')
+        logger.debug(f'[ENV] "bundled_dir" = {bundled_dir}')
+        logger.debug(f'[ENV] "parent_dir" = {parent_dir}')
+        logger.debug(f'[ENV] "os.getcwd()" = {os.getcwd()}')
+        logger.debug(
+            f'[ENV] "os.listdir(bundled_dir)" = {os.listdir(bundled_dir)}'
+        )
+    except Exception as e:
+        print(
+            __file__,
+            "\n",
+            bundled_dir,
+            "\n",
+            parent_dir,
+            "\n",
+            os.getcwd(),
+            "\n",
+            os.listdir(bundled_dir),
+        )
 
     if parent_dir not in sys.path:
         sys.path.append(parent_dir)

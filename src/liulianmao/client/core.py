@@ -12,6 +12,7 @@ from module.log import logger
 from module.model import select_model
 from module.storage import PROJECT_FOLDER, get_user_folder, init
 
+conversation = []
 
 def load_conf():
     config_file_path = os.path.join(
@@ -21,12 +22,7 @@ def load_conf():
         config = json.load(file)
 
     logger.trace("[Config]\n" + f"{config}")
-    system_role = config["system_message"]["content"]
-    temperature = float(config["settings"]["temperature"])
-    return system_role, temperature
-
-
-conversation = []
+    return config
 
 
 def tts(msg):
@@ -55,9 +51,12 @@ def tts(msg):
             response.content.decode("utf-8"),
         )
 
+def requester(question):
+    config = load_conf()
+    model_type = config["model_type"]
+    system_content = config["system_message"]["content"]
+    temperature = float(config["settings"]["temperature"])
 
-def requester(question, model_type="gpt-4-turbo-preview"):
-    system_content, temperature = load_conf()
 
     headers = {
         "Authorization": f"Bearer {API_KEY}",

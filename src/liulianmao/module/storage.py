@@ -12,6 +12,7 @@ def init():
         (["terminal", "answer.txt"], "Hello! How can I assist you today?"),
         # 使用json.dumps()格式化JSON字符串，并指定缩进为4个空格
         (["assets", "config.json"], json.dumps({
+            "model_type": "gpt-4-turbo-preview",
             "system_message": {"content": "You are a helpful assistant."},
             "settings": {"temperature": 0.5}
         }, indent=4))
