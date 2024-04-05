@@ -33,27 +33,6 @@ def init_env():
         sys.path.append(parent_dir)
 
 
-import importlib.util
-
-spec = importlib.util.find_spec(".core", package="client")
-core = importlib.util.module_from_spec(spec)
-spec.loader.exec_module(core)
-
-
-FEATURE = {"core": True, "langchain": False}
-
-if FEATURE["langchain"]:
-    # spec = importlib.util.find_spec('.langchain', package='client')
-    # langchain = importlib.util.module_from_spec(spec)
-    # spec.loader.exec_module(langchain)
-    from client.langchain import main as langchain
-
-operations = {
-    "init": core.init,
-    "chat": core.chat,
-}
-
-
 def main(recipe: List[str], question: bool):
     """Execute the operations specified in the recipe list.
 
@@ -74,8 +53,32 @@ def main(recipe: List[str], question: bool):
     """
 
     if question:
-        with open("question.txt", "r") as file:
-            print(file.read())
+        from module.const import PROJECT_FOLDER, get_user_folder
+
+        question_file_path = os.path.join(
+            str(get_user_folder()), PROJECT_FOLDER, "terminal", "question.txt"
+        )
+        os.startfile(question_file_path)
+        exit(0)
+
+    import importlib.util
+
+    FEATURE = {"core": True, "langchain": False}
+
+    spec = importlib.util.find_spec(".core", package="client")
+    core = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(core)
+
+    if FEATURE["langchain"]:
+        # spec = importlib.util.find_spec('.langchain', package='client')
+        # langchain = importlib.util.module_from_spec(spec)
+        # spec.loader.exec_module(langchain)
+        from client.langchain import main as langchain
+
+    operations = {
+        "init": core.init,
+        "chat": core.chat,
+    }
 
     for operation_name in recipe:
         operation = operations.get(operation_name)
@@ -86,6 +89,7 @@ def main(recipe: List[str], question: bool):
 
 
 if __name__ == "__main__":
+    init_env()
     default_recipe = ["init", "chat"]
     parser = argparse.ArgumentParser(description="Process some operations.")
     parser.add_argument(
@@ -98,4 +102,5 @@ if __name__ == "__main__":
         help="List of operations to process",
     )
     args = parser.parse_args()
+    print("AAA")
     main(recipe=args.recipe, question=args.question)
