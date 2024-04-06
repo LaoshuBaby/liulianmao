@@ -51,6 +51,46 @@ def tts(msg):
             response.content.decode("utf-8"),
         )
 
+
+def requester_models():
+    headers = {
+        "Authorization": f"Bearer {API_KEY}",
+        "Content-Type": "application/json",
+    }
+    logger.trace("[Headers]\n" + f"{headers}")
+
+    response = requests.get(
+        API_URL + "/v1/models", headers=headers
+    )
+
+    def extract_ids(data):
+        collected_ids = []
+
+        for item in data:
+            for key, value in item.items():
+                if key == 'id':
+                    if value[0:3].lower() == "gpt":
+                        collected_ids.append(value)
+
+        return collected_ids
+
+    if response.status_code == 200:
+        logger.trace("[Debug] response.status_code == 200")
+        # judge mime
+        try:
+            logger.trace("[Response]\n" + str(response.json()))
+        except Exception as e:
+            logger.trace(e)
+            logger.critical("RESPONSE NOT JSON")
+        extracted_ids=extract_ids(response.json()["data"])
+        logger.debug(extracted_ids)
+        return extracted_ids
+    else:
+        logger.trace("[Debug] response.status_code != 200")
+        logger.error(
+            f"Error: {response.status_code} {response.content.decode('utf-8')}"
+        )
+        return {}
 def requester(question):
     config = load_conf()
     model_type = config["model_type"]
@@ -98,17 +138,29 @@ def requester(question):
     )
 
     if response.status_code == 200:
-        conversation.append({"role": "user", "content": question})
-        conversation.append(
-            {
-                "role": "system",
-                "content": response.json()["choices"][0]["message"]["content"],
-            }
-        )
+        logger.trace("[Debug] response.status_code == 200")
+        # judge mime
+        try:
+            logger.trace("[Response]\n" + str(response.json()))
+        except Exception as e:
+            logger.trace(e)
+            logger.critical("RESPONSE NOT JSON")
+        # judge schema
+        try:
+            conversation.append({"role": "user", "content": question})
+            conversation.append(
+                {
+                    "role": "system",
+                    "content": response.json()["choices"][0]["message"]["content"],
+                }
+            )
+        except Exception as e:
+            logger.trace(e)
+            logger.critical("WRONG RESPONSE SCHEMA")
         logger.trace("[History]\n" + str(conversation))
-        logger.trace("[Response]\n" + str(response.json()))
         return response.json()
     else:
+        logger.trace("[Debug] response.status_code != 200")
         logger.error(
             f"Error: {response.status_code} {response.content.decode('utf-8')}"
         )

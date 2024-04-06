@@ -94,6 +94,7 @@ def main(recipe: List[str], actions: List[str]):
     operations = {
         "init": core.init,
         "chat": core.chat,
+        "requester_models": core.requester_models,
     }
 
     for operation_name in recipe:
