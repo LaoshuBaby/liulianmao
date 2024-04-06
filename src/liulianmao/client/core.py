@@ -25,34 +25,7 @@ def load_conf():
     return config
 
 
-def tts(msg):
-    headers = {
-        "Authorization": f"Bearer {API_KEY}",
-        "Content-Type": "application/json",
-    }
-
-    data = {"model": "tts-1", "input": msg, "voice": "alloy"}
-    response = requests.post(
-        API_URL + "/v1/audio/speech", json=data, headers=headers
-    )
-
-    if response.status_code == 200:
-        speech_file_path = os.path.join(
-            get_user_folder(), PROJECT_FOLDER, "audios", "speech.mp3"
-        )
-        with open(speech_file_path, "wb") as f:
-            f.write(response.content)
-        logger.success("音频文件保存成功。")
-    else:
-        logger.error(
-            "生成语音失败。状态码：",
-            response.status_code,
-            "\n",
-            response.content.decode("utf-8"),
-        )
-
-
-def requester_models():
+def models():
     headers = {
         "Authorization": f"Bearer {API_KEY}",
         "Content-Type": "application/json",
@@ -91,7 +64,35 @@ def requester_models():
             f"Error: {response.status_code} {response.content.decode('utf-8')}"
         )
         return {}
-def requester(question):
+
+
+def speech(msg):
+    headers = {
+        "Authorization": f"Bearer {API_KEY}",
+        "Content-Type": "application/json",
+    }
+
+    data = {"model": "tts-1", "input": msg, "voice": "alloy"}
+    response = requests.post(
+        API_URL + "/v1/audio/speech", json=data, headers=headers
+    )
+
+    if response.status_code == 200:
+        speech_file_path = os.path.join(
+            get_user_folder(), PROJECT_FOLDER, "audios", "speech.mp3"
+        )
+        with open(speech_file_path, "wb") as f:
+            f.write(response.content)
+        logger.success("音频文件保存成功。")
+    else:
+        logger.error(
+            "生成语音失败。状态码：",
+            response.status_code,
+            "\n",
+            response.content.decode("utf-8"),
+        )
+
+def completion(question):
     config = load_conf()
     model_type = config["model_type"]
     system_content = config["system_message"]["content"]
@@ -168,13 +169,15 @@ def requester(question):
 
 
 def ask(msg: str):
-    response = requester(msg)
+    response = completion(msg)
     content = response["choices"][0]["message"]["content"]
     logger.success("[Answer]\n" + content)
     return content
 
 
 def chat():
+    available_models=models()
+
     with open(
         os.path.join(
             get_user_folder(), PROJECT_FOLDER, "terminal", "question.txt"
@@ -218,7 +221,7 @@ def chat():
 def talk():
     with open("terminal/question.txt", "r", encoding="utf-8") as file:
         msg = file.read()
-    tts(msg)
+    speech(msg)
 
 
 def main():

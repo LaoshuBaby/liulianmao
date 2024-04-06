@@ -92,9 +92,9 @@ def main(recipe: List[str], actions: List[str]):
         from client.langchain import main as langchain
 
     operations = {
-        "init": core.init,
         "chat": core.chat,
-        "requester_models": core.requester_models,
+        "talk": core.talk,
+        "models": core.models,
     }
 
     for operation_name in recipe:
@@ -107,7 +107,7 @@ def main(recipe: List[str], actions: List[str]):
 
 if __name__ == "__main__":
     init_env()
-    default_recipe = ["init", "chat"]
+    default_recipe = ["models"]
     parser = argparse.ArgumentParser(description="Process some operations.")
     parser.add_argument(
         "--question", action="store_true", help="Read the question.txt file"
