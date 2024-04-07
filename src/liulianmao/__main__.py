@@ -107,7 +107,7 @@ def main(recipe: List[str], actions: List[str]):
 
 if __name__ == "__main__":
     init_env()
-    default_recipe = ["models"]
+    default_recipe = ["chat"]
     parser = argparse.ArgumentParser(description="Process some operations.")
     parser.add_argument(
         "--question", action="store_true", help="Read the question.txt file"

@@ -39,7 +39,7 @@ def get_env(var_name: str, default: str) -> str:
 
 
     # 定义尝试顺序
-    attempts = [get_from_env, get_from_user_folder, get_from_current_dir]
+    attempts = [get_from_user_folder, get_from_current_dir, get_from_env]
 
     for attempt in attempts:
         result = attempt(var_name)

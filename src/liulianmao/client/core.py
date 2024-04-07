@@ -1,6 +1,7 @@
 import json
 import os
 import sys
+from typing import List
 
 import requests
 
@@ -92,7 +93,7 @@ def speech(msg):
             response.content.decode("utf-8"),
         )
 
-def completion(question):
+def completion(question,available_models:List[str]=[]):
     config = load_conf()
     model_type = config["model_type"]
     system_content = config["system_message"]["content"]
@@ -105,7 +106,7 @@ def completion(question):
     }
 
     payload = {
-        "model": select_model(model_type),
+        "model": select_model(model_type,available_models,direct_debug=True),
         "messages": (
             [{"role": "system", "content": system_content}]
             + conversation
@@ -168,8 +169,8 @@ def completion(question):
         return {}
 
 
-def ask(msg: str):
-    response = completion(msg)
+def ask(msg: str,available_models:List[str]):
+    response = completion(msg,available_models)
     content = response["choices"][0]["message"]["content"]
     logger.success("[Answer]\n" + content)
     return content
@@ -188,7 +189,7 @@ def chat():
         msg = file.read()
 
     flag_continue = True
-    response = ask(msg)
+    response = ask(msg,available_models)
 
     if not flag_continue:
         with open(
@@ -212,7 +213,7 @@ def chat():
                 " ", ""
             )
             if append_question_judge != "END" and append_question_judge != "":
-                response = ask(append_question)
+                response = ask(append_question,available_models)
             else:
                 flag_end = True
                 break
