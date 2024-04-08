@@ -11,6 +11,13 @@ def get_env(var_name: str, default: str) -> str:
     尝试从环境变量获取值，如果失败，尝试从用户目录下和同目录下的文件读取，最后使用默认值。
     """
 
+    def get_valid_value(value: str) -> Optional[str]:
+        """判断字符串是否有效，如果有效则返回该字符串，否则返回None。"""
+        value = value.strip()
+        if value and not value.startswith("#"):
+            return value
+        return None
+
     def get_from_env(var_name: str) -> Optional[str]:
         """尝试从环境变量获取值。"""
         return os.environ.get(var_name)
@@ -21,7 +28,10 @@ def get_env(var_name: str, default: str) -> str:
         if isfile(var_file_path):
             try:
                 with open(var_file_path) as f:
-                    return f.read().strip()
+                    values = f.read().split("\n")
+                    for value in values:
+                        if get_valid_value(value):
+                            return value
             except Exception as e:
                 logger.error(f"Error reading {var_name} from user folder file: {e}")
         return None
@@ -32,7 +42,10 @@ def get_env(var_name: str, default: str) -> str:
         if isfile(var_file_path):
             try:
                 with open(var_file_path) as f:
-                    return f.read().strip()
+                    values = f.read().split("\n")
+                    for value in values:
+                        if get_valid_value(value):
+                            return value
             except Exception as e:
                 logger.error(f"Error reading {var_name} from current directory file: {e}")
         return None
