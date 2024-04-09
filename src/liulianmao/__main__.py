@@ -114,14 +114,36 @@ if __name__ == "__main__":
         "-question",
         "--question",
         action="store_true",
-        help="Read the question.txt file",
+        help="Open the question.txt file with default program",
     )
     parser.add_argument(
         "-c",
         "-config",
         "--config",
         action="store_true",
-        help="Read the config.txt file",
+        help="Open the config.txt file with default program",
+    )
+    parser.add_argument(
+        "-l",
+        "-log",
+        "--log",
+        action="store_true",
+        help="Open Log folder",
+    )
+    parser.add_argument(
+        "-k",
+        "-key",
+        "--key",
+        action="store_true",
+        help="Open OPENAI_API_KEY and OPENAI_BASE_URL files with default program",
+    )
+    parser.add_argument(
+        "-i",
+        help="Specify input file, read this file as question, not default question.txt",
+    )
+    parser.add_argument(
+        "-o",
+        help="Specify output file, write answer to this file, not default answer.txt",
     )
     parser.add_argument(
         "-r",
