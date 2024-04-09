@@ -110,12 +110,22 @@ if __name__ == "__main__":
     default_recipe = ["chat"]
     parser = argparse.ArgumentParser(description="Process some operations.")
     parser.add_argument(
-        "--question", action="store_true", help="Read the question.txt file"
+        "-q",
+        "-question",
+        "--question",
+        action="store_true",
+        help="Read the question.txt file",
     )
     parser.add_argument(
-        "--config", action="store_true", help="Read the config.txt file"
+        "-c",
+        "-config",
+        "--config",
+        action="store_true",
+        help="Read the config.txt file",
     )
     parser.add_argument(
+        "-r",
+        "-recipe",
         "--recipe",
         nargs="*",
         default=default_recipe,
