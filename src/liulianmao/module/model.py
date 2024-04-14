@@ -42,9 +42,22 @@ MODEL_INFO = {
     }
 }
 
-def select_model(input_model_name, available_models, direct_debug:bool=False):
-    if direct_debug == True:
-        return input_model_name
+
+def select_model(
+    input_model_name, available_models, direct_debug: bool = False
+):
+    def log_and_return(model_name, ratio="NaN"):
+        """
+        辅助函数，用于记录日志并返回模型名称。
+        如果在直接调试模式下，比率记录为NaN；否则，记录实际的比率。
+        """
+        logger.info(f"[Model] {model_name} ({ratio}x)")
+        return model_name
+
+    if direct_debug:
+        # 直接调试模式下，不查找MODEL_INFO，直接记录日志并返回模型名称
+        return log_and_return(input_model_name)
+
     input_model_name = input_model_name.lower()
     for model_name, model_info in MODEL_INFO.items():
         variants = model_info["variants"]
@@ -53,12 +66,9 @@ def select_model(input_model_name, available_models, direct_debug:bool=False):
             if available_variants:
                 # 选择最新的变体
                 selected_variant = max(available_variants)
-                ratio = model_info["ratio"]
-                if ratio is not None:
-                    logger.info(f"[Model] {selected_variant} ({ratio}x)")
-                    return selected_variant
-                else:
-                    logger.error(f"[Model] No ratio defined for {selected_variant}.")
-                    return None
+                return log_and_return(
+                    selected_variant, model_info.get("ratio")
+                )
+
     logger.error("[Model] Model not found.")
     return None
