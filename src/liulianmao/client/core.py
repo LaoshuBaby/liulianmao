@@ -15,6 +15,7 @@ from module.storage import PROJECT_FOLDER, get_user_folder, init
 
 conversation = []
 
+
 def load_conf():
     config_file_path = os.path.join(
         get_user_folder(), PROJECT_FOLDER, "assets", "config.json"
@@ -33,16 +34,14 @@ def models():
     }
     logger.trace("[Headers]\n" + f"{headers}")
 
-    response = requests.get(
-        API_URL + "/v1/models", headers=headers
-    )
+    response = requests.get(API_URL + "/v1/models", headers=headers)
 
     def extract_ids(data):
         collected_ids = []
 
         for item in data:
             for key, value in item.items():
-                if key == 'id':
+                if key == "id":
                     if value[0:3].lower() == "gpt":
                         collected_ids.append(value)
 
@@ -56,7 +55,7 @@ def models():
         except Exception as e:
             logger.trace(e)
             logger.critical("RESPONSE NOT JSON")
-        extracted_ids=extract_ids(response.json()["data"])
+        extracted_ids = extract_ids(response.json()["data"])
         logger.debug("[Available Models]\n" + str(extracted_ids))
         return extracted_ids
     else:
@@ -93,12 +92,12 @@ def speech(msg):
             response.content.decode("utf-8"),
         )
 
-def completion(question,available_models:List[str]=[]):
+
+def completion(question, available_models: List[str] = []):
     config = load_conf()
     model_type = config["model_type"]
     system_content = config["system_message"]["content"]
     temperature = float(config["settings"]["temperature"])
-
 
     headers = {
         "Authorization": f"Bearer {API_KEY}",
@@ -106,7 +105,7 @@ def completion(question,available_models:List[str]=[]):
     }
 
     payload = {
-        "model": select_model(model_type,available_models,direct_debug=True),
+        "model": select_model(model_type, available_models, direct_debug=True),
         "messages": (
             [{"role": "system", "content": system_content}]
             + conversation
@@ -153,7 +152,9 @@ def completion(question,available_models:List[str]=[]):
             conversation.append(
                 {
                     "role": "system",
-                    "content": response.json()["choices"][0]["message"]["content"],
+                    "content": response.json()["choices"][0]["message"][
+                        "content"
+                    ],
                 }
             )
         except Exception as e:
@@ -169,27 +170,43 @@ def completion(question,available_models:List[str]=[]):
         return {}
 
 
-def ask(msg: str,available_models:List[str]):
-    response = completion(msg,available_models)
+def ask(msg: str, available_models: List[str]):
+    response = completion(msg, available_models)
     try:
-        response__choices__0__message__content = response["choices"][0]["message"]["content"]
-        response__usage__completion_tokens= response['usage']['completion_tokens']
-        response__usage__prompt_tokens= response['usage']['prompt_tokens']
-        response__usage__total_tokens= response['usage']['total_tokens']
+        response__choices__0__message__content = response["choices"][0][
+            "message"
+        ]["content"]
+        response__usage__completion_tokens = response["usage"][
+            "completion_tokens"
+        ]
+        response__usage__prompt_tokens = response["usage"]["prompt_tokens"]
+        response__usage__total_tokens = response["usage"]["total_tokens"]
     except Exception as e:
         try:
             logger.critical(e)
             sys.exit()
         except Exception as ee:
-            print(e,ee)
+            print(e, ee)
             sys.exit()
-    logger.debug("[Token Usage]\n"+json.dumps({"response.usage.completion_tokens":response__usage__completion_tokens,"response.usage.prompt_tokens":response__usage__prompt_tokens,"response.usage.total_tokens":response__usage__total_tokens},indent=2,ensure_ascii=False,sort_keys=False))
+    logger.debug(
+        "[Token Usage]\n"
+        + json.dumps(
+            {
+                "response.usage.completion_tokens": response__usage__completion_tokens,
+                "response.usage.prompt_tokens": response__usage__prompt_tokens,
+                "response.usage.total_tokens": response__usage__total_tokens,
+            },
+            indent=2,
+            ensure_ascii=False,
+            sort_keys=False,
+        )
+    )
     logger.success("[Answer]\n" + response__choices__0__message__content)
     return response__choices__0__message__content
 
 
 def chat():
-    available_models=models()
+    available_models = models()
 
     with open(
         os.path.join(
@@ -201,7 +218,7 @@ def chat():
         msg = file.read()
 
     flag_continue = True
-    response = ask(msg,available_models)
+    response = ask(msg, available_models)
 
     if not flag_continue:
         with open(
@@ -225,7 +242,7 @@ def chat():
                 " ", ""
             )
             if append_question_judge != "END" and append_question_judge != "":
-                response = ask(append_question,available_models)
+                response = ask(append_question, available_models)
             else:
                 flag_end = True
                 break

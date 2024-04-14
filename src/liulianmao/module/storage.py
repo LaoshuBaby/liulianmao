@@ -11,11 +11,19 @@ def init():
         (["terminal", "question.txt"], "Hello World!"),
         (["terminal", "answer.txt"], "Hello! How can I assist you today?"),
         # 使用json.dumps()格式化JSON字符串，并指定缩进为4个空格
-        (["assets", "config.json"], json.dumps({
-            "model_type": "gpt-4-turbo-preview",
-            "system_message": {"content": "You are a helpful assistant."},
-            "settings": {"temperature": 0.5}
-        }, indent=4))
+        (
+            ["assets", "config.json"],
+            json.dumps(
+                {
+                    "model_type": "gpt-4-turbo-preview",
+                    "system_message": {
+                        "content": "You are a helpful assistant."
+                    },
+                    "settings": {"temperature": 0.5},
+                },
+                indent=4,
+            ),
+        ),
     ]
     folder_list = ["logs", "audios", "terminal", "assets"]
 
@@ -25,11 +33,15 @@ def init():
             os.makedirs(folder_path)
 
     for file_path_parts, default_content in file_list:
-        file_path = os.path.join(get_user_folder(), PROJECT_FOLDER, *file_path_parts)
+        file_path = os.path.join(
+            get_user_folder(), PROJECT_FOLDER, *file_path_parts
+        )
         try:
             with open(file_path, "r", encoding="utf-8") as file:
                 file.read()
         except FileNotFoundError:
-            logger.error(f"{'/'.join(file_path_parts)} not found. Creating a new file.")
+            logger.error(
+                f"{'/'.join(file_path_parts)} not found. Creating a new file."
+            )
             with open(file_path, "w", encoding="utf-8") as file:
                 file.write(default_content)

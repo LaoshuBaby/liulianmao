@@ -17,7 +17,7 @@ def get_env(var_name: str, default: str) -> str:
         if value and not value.startswith("#"):
             return value
         return None
-    
+
     def read_and_log_file(file_path: str) -> Optional[str]:
         """读取文件，并记录每一行，返回第一个有效值。"""
         if isfile(file_path):
@@ -42,7 +42,7 @@ def get_env(var_name: str, default: str) -> str:
     def get_from_user_folder(var_name: str) -> Optional[str]:
         """尝试从用户目录的文件夹读取。"""
         """复用read_and_log_file函数。"""
-        value=read_and_log_file(
+        value = read_and_log_file(
             join(get_user_folder(), PROJECT_FOLDER, var_name)
         )
         return value
@@ -50,7 +50,7 @@ def get_env(var_name: str, default: str) -> str:
     def get_from_current_dir(var_name: str) -> Optional[str]:
         """尝试从当前文件所在目录读取。"""
         """复用read_and_log_file函数。"""
-        value= read_and_log_file(join(dirname(abspath(__file__)), var_name))
+        value = read_and_log_file(join(dirname(abspath(__file__)), var_name))
         return value
 
     # 定义尝试顺序
