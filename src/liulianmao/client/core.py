@@ -171,60 +171,30 @@ def completion(question, available_models: List[str] = [], amount: int = 1):
         return {}
 
 
-def ask1(msg: str, available_models: List[str]):
-    default_amount = 1
-    response = completion(msg, available_models, amount=default_amount)
-    try:
-        response__choices__0__message__content = response["choices"][0][
-            "message"
-        ]["content"]
-        response__usage__completion_tokens = response["usage"][
-            "completion_tokens"
-        ]
-        response__usage__prompt_tokens = response["usage"]["prompt_tokens"]
-        response__usage__total_tokens = response["usage"]["total_tokens"]
-    except Exception as e:
-        try:
-            logger.critical(e)
-            sys.exit()
-        except Exception as ee:
-            print(e, ee)
-            sys.exit()
-    logger.debug(
-        "[Token Usage]\n"
-        + json.dumps(
-            {
-                "response.usage.completion_tokens": response__usage__completion_tokens,
-                "response.usage.prompt_tokens": response__usage__prompt_tokens,
-                "response.usage.total_tokens": response__usage__total_tokens,
-                "verify": f"{response__usage__completion_tokens} + {response__usage__prompt_tokens} = {response__usage__completion_tokens+response__usage__prompt_tokens}",
-            },
-            indent=2,
-            ensure_ascii=False,
-            sort_keys=False,
-        )
-    )
-    logger.success("[Answer]\n" + response__choices__0__message__content)
-    return response__choices__0__message__content
-
-
 def ask(msg: str, available_models: List[str], default_amount: int = 1):
     response = completion(msg, available_models, amount=default_amount)
     try:
-        choices = response["choices"]
-        # 使用展平路径的变量命名方式
-        response_usage_completion_tokens = response["usage"][
-            "completion_tokens"
-        ]
-        response_usage_prompt_tokens = response["usage"]["prompt_tokens"]
-        response_usage_total_tokens = response["usage"]["total_tokens"]
+        choices = response.get("choices", [])
+
+        # 使用.get()方法更安全地访问字典键值，以避免KeyError异常
+        response_usage_completion_tokens = response.get("usage", {}).get(
+            "completion_tokens", -1
+        )
+        response_usage_prompt_tokens = response.get("usage", {}).get(
+            "prompt_tokens", -1
+        )
+        response_usage_total_tokens = response.get("usage", {}).get(
+            "total_tokens", -1
+        )
+
+        # 假设这里有一些处理response的代码
+
     except Exception as e:
-        try:
-            logger.critical(e)
-            sys.exit()
-        except Exception as ee:
-            print(e, ee)
-            sys.exit()
+        # 记录关键错误信息而不是直接退出程序，提供更好的错误上下文
+        logger.exception(f"An error occurred: {e}", exc_info=True)
+        # 可以在这里处理特定的清理工作，如果有必要的话
+        # 最后，可能会根据程序的需要选择是否退出
+        # sys.exit()
 
     # 使用展平路径的变量名进行日志记录
     logger.debug(
