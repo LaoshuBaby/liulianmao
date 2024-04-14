@@ -17,6 +17,23 @@ def get_env(var_name: str, default: str) -> str:
         if value and not value.startswith("#"):
             return value
         return None
+    
+    def read_and_log_file(file_path: str) -> Optional[str]:
+        """读取文件，并记录每一行，返回第一个有效值。"""
+        if isfile(file_path):
+            try:
+                with open(file_path) as f:
+                    values = f.read().split("\n")
+                    logger.trace("[Authentication]\n" + str(values))
+                    for value in values:
+                        valid_value = get_valid_value(value)
+                        if valid_value:
+                            return valid_value
+            except Exception as e:
+                logger.error(
+                    f"Error reading from file: {file_path}, Error: {e}"
+                )
+        return None
 
     def get_from_env(var_name: str) -> Optional[str]:
         """尝试从环境变量获取值。"""
@@ -24,32 +41,17 @@ def get_env(var_name: str, default: str) -> str:
 
     def get_from_user_folder(var_name: str) -> Optional[str]:
         """尝试从用户目录的文件夹读取。"""
-        var_file_path = join(get_user_folder(), PROJECT_FOLDER, var_name)
-        if isfile(var_file_path):
-            try:
-                with open(var_file_path) as f:
-                    values = f.read().split("\n")
-                    for value in values:
-                        if get_valid_value(value):
-                            return value
-            except Exception as e:
-                logger.error(f"Error reading {var_name} from user folder file: {e}")
-        return None
+        """复用read_and_log_file函数。"""
+        value=read_and_log_file(
+            join(get_user_folder(), PROJECT_FOLDER, var_name)
+        )
+        return value
 
     def get_from_current_dir(var_name: str) -> Optional[str]:
         """尝试从当前文件所在目录读取。"""
-        var_file_path = join(dirname(abspath(__file__)), var_name)
-        if isfile(var_file_path):
-            try:
-                with open(var_file_path) as f:
-                    values = f.read().split("\n")
-                    for value in values:
-                        if get_valid_value(value):
-                            return value
-            except Exception as e:
-                logger.error(f"Error reading {var_name} from current directory file: {e}")
-        return None
-
+        """复用read_and_log_file函数。"""
+        value= read_and_log_file(join(dirname(abspath(__file__)), var_name))
+        return value
 
     # 定义尝试顺序
     attempts = [get_from_user_folder, get_from_current_dir, get_from_env]
@@ -61,7 +63,9 @@ def get_env(var_name: str, default: str) -> str:
             return result
 
     # 如果所有尝试都失败了，记录错误并返回默认值
-    logger.error(f"{var_name} not found in environment variables, user folder, or current directory file, using default.")
+    logger.error(
+        f"{var_name} not found in environment variables, user folder, or current directory file, using default."
+    )
     return default
 
 

@@ -57,7 +57,7 @@ def models():
             logger.trace(e)
             logger.critical("RESPONSE NOT JSON")
         extracted_ids=extract_ids(response.json()["data"])
-        logger.debug(extracted_ids)
+        logger.debug("[Available Models]\n" + str(extracted_ids))
         return extracted_ids
     else:
         logger.trace("[Debug] response.status_code != 200")
