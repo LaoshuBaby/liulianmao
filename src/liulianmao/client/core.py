@@ -20,7 +20,7 @@ def load_conf():
     config_file_path = os.path.join(
         get_user_folder(), PROJECT_FOLDER, "assets", "config.json"
     )
-    with open(config_file_path, "r") as file:
+    with open(config_file_path, "r", encoding="utf-8") as file:
         config = json.load(file)
 
     logger.trace("[Config]\n" + f"{config}")
