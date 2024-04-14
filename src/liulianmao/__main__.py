@@ -2,8 +2,9 @@ import argparse
 import os
 import sys
 from typing import List
+from module.log import logger
 
-
+@logger.catch(level="CRITICAL")
 def init_env():
     """
     Initialize the execution environment by setting system paths.
@@ -24,8 +25,6 @@ def init_env():
     parent_dir = os.path.dirname(bundled_dir)
 
     try:
-        from module.log import logger
-
         logger.debug(f'[ENV] "__file__" = {__file__}')
         logger.debug(f'[ENV] "bundled_dir" = {bundled_dir}')
         logger.debug(f'[ENV] "parent_dir" = {parent_dir}')
@@ -50,6 +49,7 @@ def init_env():
         sys.path.append(parent_dir)
 
 
+@logger.catch(level="CRITICAL")
 def main(recipe: List[str], actions: List[str]):
     """Execute the operations specified in the recipe list.
 
