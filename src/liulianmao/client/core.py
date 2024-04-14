@@ -171,9 +171,21 @@ def completion(question,available_models:List[str]=[]):
 
 def ask(msg: str,available_models:List[str]):
     response = completion(msg,available_models)
-    content = response["choices"][0]["message"]["content"]
-    logger.success("[Answer]\n" + content)
-    return content
+    try:
+        response__choices__0__message__content = response["choices"][0]["message"]["content"]
+        response__usage__completion_tokens= response['usage']['completion_tokens']
+        response__usage__prompt_tokens= response['usage']['prompt_tokens']
+        response__usage__total_tokens= response['usage']['total_tokens']
+    except Exception as e:
+        try:
+            logger.critical(e)
+            sys.exit()
+        except Exception as ee:
+            print(e,ee)
+            sys.exit()
+    logger.debug("[Token Usage]\n"+json.dumps({"response.usage.completion_tokens":response__usage__completion_tokens,"response.usage.prompt_tokens":response__usage__prompt_tokens,"response.usage.total_tokens":response__usage__total_tokens},indent=2,ensure_ascii=False,sort_keys=False))
+    logger.success("[Answer]\n" + response__choices__0__message__content)
+    return response__choices__0__message__content
 
 
 def chat():
