@@ -50,7 +50,7 @@ def select_model(
         辅助函数，用于记录日志并返回模型名称。
         如果在直接调试模式下，比率记录为NaN；否则，记录实际的比率。
         """
-        logger.info(f"[Model] {model_name} ({ratio}x)")
+        logger.info(f"[Model] {model_name} ({ratio} x)")
         return model_name
 
     if direct_debug:

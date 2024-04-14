@@ -93,7 +93,7 @@ def speech(msg):
         )
 
 
-def completion(question, available_models: List[str] = []):
+def completion(question, available_models: List[str] = [], amount: int = 1):
     config = load_conf()
     model_type = config["model_type"]
     system_content = config["system_message"]["content"]
@@ -117,6 +117,7 @@ def completion(question, available_models: List[str] = []):
         "frequency_penalty": 0.0,
         "presence_penalty": 0.0,
         "stop": None,
+        "n": amount,
         # "plugins": [
         #     {
         #         "name": "plugin_name_here",
@@ -170,8 +171,9 @@ def completion(question, available_models: List[str] = []):
         return {}
 
 
-def ask(msg: str, available_models: List[str]):
-    response = completion(msg, available_models)
+def ask1(msg: str, available_models: List[str]):
+    default_amount = 1
+    response = completion(msg, available_models, amount=default_amount)
     try:
         response__choices__0__message__content = response["choices"][0][
             "message"
@@ -195,6 +197,7 @@ def ask(msg: str, available_models: List[str]):
                 "response.usage.completion_tokens": response__usage__completion_tokens,
                 "response.usage.prompt_tokens": response__usage__prompt_tokens,
                 "response.usage.total_tokens": response__usage__total_tokens,
+                "verify": f"{response__usage__completion_tokens} + {response__usage__prompt_tokens} = {response__usage__completion_tokens+response__usage__prompt_tokens}",
             },
             indent=2,
             ensure_ascii=False,
@@ -203,6 +206,51 @@ def ask(msg: str, available_models: List[str]):
     )
     logger.success("[Answer]\n" + response__choices__0__message__content)
     return response__choices__0__message__content
+
+
+def ask(msg: str, available_models: List[str], default_amount: int = 1):
+    response = completion(msg, available_models, amount=default_amount)
+    try:
+        choices = response["choices"]
+        # 使用展平路径的变量命名方式
+        response_usage_completion_tokens = response["usage"][
+            "completion_tokens"
+        ]
+        response_usage_prompt_tokens = response["usage"]["prompt_tokens"]
+        response_usage_total_tokens = response["usage"]["total_tokens"]
+    except Exception as e:
+        try:
+            logger.critical(e)
+            sys.exit()
+        except Exception as ee:
+            print(e, ee)
+            sys.exit()
+
+    # 使用展平路径的变量名进行日志记录
+    logger.debug(
+        "[Token Usage]\n"
+        + json.dumps(
+            {
+                "response_usage_completion_tokens": response_usage_completion_tokens,
+                "response_usage_prompt_tokens": response_usage_prompt_tokens,
+                "response_usage_total_tokens": response_usage_total_tokens,
+                # 计算验证
+                "verify": f"{response_usage_completion_tokens} + {response_usage_prompt_tokens} = {response_usage_completion_tokens + response_usage_prompt_tokens}",
+            },
+            indent=2,
+            ensure_ascii=False,
+            sort_keys=False,
+        )
+    )
+
+    # 根据choices的数量来输出
+    for i, choice in enumerate(choices):
+        logger.success(
+            f"[Answer] ({i + 1}/{len(choices)})\n{choice['message']['content']}"
+        )
+
+    # 为了保持函数的兼容性（返回单一或多个答案），返回整个choices列表的消息内容
+    return [choice["message"]["content"] for choice in choices]
 
 
 def chat():
@@ -218,7 +266,7 @@ def chat():
         msg = file.read()
 
     flag_continue = True
-    response = ask(msg, available_models)
+    conversation = ask(msg, available_models)
 
     if not flag_continue:
         with open(
@@ -228,7 +276,7 @@ def chat():
             "w",
             encoding="utf-8",
         ) as file:
-            file.write(response)
+            file.write(conversation)
     else:
         flag_end = False
         while not flag_end:
@@ -242,7 +290,7 @@ def chat():
                 " ", ""
             )
             if append_question_judge != "END" and append_question_judge != "":
-                response = ask(append_question, available_models)
+                conversation = ask(append_question, available_models)
             else:
                 flag_end = True
                 break
