@@ -4,6 +4,7 @@ import sys
 from typing import List
 from module.log import logger
 
+
 @logger.catch(level="CRITICAL")
 def init_env():
     """

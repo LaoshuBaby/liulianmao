@@ -93,6 +93,24 @@ def speech(msg):
         )
 
 
+def completion_llama(question: str, model: str, amount: int = 1):
+    headers = {
+        "Content-Type": "application/json",
+    }
+    payload = {
+        "model": model,
+        "messages": question,
+        "temperature": temperature,
+        "n": amount,
+    }
+    logger.trace("[Headers]\n" + f"{headers}")
+    logger.trace("[Payload]\n" + f"{payload}")
+    response = requests.post(
+        API_URL + "/completions", headers=headers, json=payload
+    )
+    return response
+
+
 def completion(question, available_models: List[str] = [], amount: int = 1):
     config = load_conf()
     model_type = config["model_type"]
