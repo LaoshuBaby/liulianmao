@@ -93,9 +93,10 @@ def main(recipe: List[str], actions: List[str]):
         from client.langchain import main as langchain
 
     operations = {
+        "models": core.models,
         "chat": core.chat,
         "talk": core.talk,
-        "models": core.models,
+        "draw": core.draw,
     }
 
     for operation_name in recipe:

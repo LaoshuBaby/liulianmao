@@ -187,6 +187,41 @@ def completion(question, available_models: List[str] = [], amount: int = 1):
             f"Error: {response.status_code} {response.content.decode('utf-8')}"
         )
         return {}
+    
+def generate_image(prompt, num_images: int = 1):
+    config = load_conf()
+    api_key = config["api_key"]
+    headers = {
+        "Authorization": f"Bearer {api_key}",
+        "Content-Type": "application/json",
+    }
+
+    payload = {
+        "prompt": prompt,
+        "num_images": num_images,
+    }
+
+    logger.trace("[Headers]\n" + f"{headers}")
+    logger.trace("[Payload]\n" + f"{payload}")
+
+    response = requests.post(
+        API_URL+"/v1/images", headers=headers, json=payload
+    )
+
+    if response.status_code == 200:
+        logger.trace("[Debug] response.status_code == 200")
+        try:
+            logger.trace("[Response]\n" + str(response.json()))
+        except Exception as e:
+            logger.trace(e)
+            logger.critical("RESPONSE NOT JSON")
+        return response.json()
+    else:
+        logger.trace("[Debug] response.status_code != 200")
+        logger.error(
+            f"Error: {response.status_code} {response.content.decode('utf-8')}"
+        )
+        return {}
 
 
 def ask(msg: str, available_models: List[str], default_amount: int = 1):
@@ -289,6 +324,9 @@ def talk():
         msg = file.read()
     speech(msg)
 
+def draw():
+    with open("") as f:
+        pass
 
 def main():
     logger.critical("THIS PROGRAM NOT INTENT TO RUN SUBMODULE".upper())
