@@ -320,13 +320,18 @@ def chat():
 
 
 def talk():
-    with open("terminal/question.txt", "r", encoding="utf-8") as file:
-        msg = file.read()
+    with open(os.path.join(
+                get_user_folder(), PROJECT_FOLDER, "terminal", "question.txt"
+            ), "r", encoding="utf-8") as f:
+        msg = f.read()
     speech(msg)
 
 def draw():
-    with open("") as f:
-        pass
+    with open(os.path.join(
+                get_user_folder(), PROJECT_FOLDER, "terminal", "question.txt"
+            ),"r",encoding="utf-8") as f:
+        msg = f.read()
+    
 
 def main():
     logger.critical("THIS PROGRAM NOT INTENT TO RUN SUBMODULE".upper())

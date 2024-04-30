@@ -99,6 +99,7 @@ def main(recipe: List[str], actions: List[str]):
         "draw": core.draw,
     }
 
+    logger.debug(f"[Recipe]: {recipe}")
     for operation_name in recipe:
         operation = operations.get(operation_name)
         if operation:
