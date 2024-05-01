@@ -6,6 +6,8 @@ from datetime import datetime
 
 import requests
 
+from .api.openai import openai_models
+
 current_dir = os.path.dirname(os.path.realpath(__file__))
 sys.path.append(os.path.join(current_dir, ".."))
 
@@ -13,6 +15,7 @@ from module.authentication import API_KEY, API_URL
 from module.log import logger
 from module.model import select_model
 from module.storage import PROJECT_FOLDER, get_user_folder, init
+
 
 conversation = []
 
@@ -28,49 +31,6 @@ def load_conf():
     return config
 
 
-def models(model_series :str = ""):
-    logger.debug(f"[model_series]: {model_series}")
-    headers = {
-        "Authorization": f"Bearer {API_KEY}",
-        "Content-Type": "application/json",
-    }
-    logger.trace("[Headers]\n" + f"{headers}")
-
-    response = requests.get(API_URL + "/v1/models", headers=headers)
-
-    def extract_ids(data):
-        collected_ids = []
-
-        for item in data:
-            for key, value in item.items():
-                if key == "id":
-                    if model_series!= "" and model_series in value.lower():
-                        collected_ids.append(value)
-                    elif model_series == "":
-                        collected_ids.append(value)
-
-
-        return collected_ids
-
-    if response.status_code == 200:
-        logger.trace("[Debug] response.status_code == 200")
-        # judge mime
-        try:
-            logger.trace("[Response]\n" + str(response.json()))
-        except Exception as e:
-            logger.trace(e)
-            logger.critical("RESPONSE NOT JSON")
-        extracted_ids = extract_ids(response.json()["data"])
-        logger.debug("[Available Models]\n" + str(extracted_ids))
-        return extracted_ids
-    else:
-        logger.trace("[Debug] response.status_code != 200")
-        logger.error(
-            f"Error: {response.status_code} {response.content.decode('utf-8')}"
-        )
-        return {}
-
-
 def speech(msg):
     headers = {
         "Authorization": f"Bearer {API_KEY}",
@@ -83,10 +43,13 @@ def speech(msg):
     )
 
     if response.status_code == 200:
-        current_time = datetime.now().isoformat(timespec='milliseconds')
-        safe_filename = current_time.replace(':', '_')
+        current_time = datetime.now().isoformat(timespec="milliseconds")
+        safe_filename = current_time.replace(":", "_")
         speech_file_path = os.path.join(
-            get_user_folder(), PROJECT_FOLDER, "audios", "tts_"+safe_filename+".mp3"
+            get_user_folder(),
+            PROJECT_FOLDER,
+            "audios",
+            "tts_" + safe_filename + ".mp3",
         )
         with open(speech_file_path, "wb") as f:
             f.write(response.content)
@@ -219,7 +182,6 @@ def generate_image(prompt, num_images: int = 1):
     )
 
     def download_image(url, save_path):
-        
         from urllib.parse import parse_qs, urlparse
 
         parsed_url = urlparse(url)
@@ -339,7 +301,7 @@ def ask(msg: str, available_models: List[str], default_amount: int = 1):
 
 def chat():
     init()
-    available_models = models("gpt")
+    available_models = openai_models("gpt")
 
     with open(
         os.path.join(
@@ -383,7 +345,7 @@ def chat():
 
 def talk():
     init()
-    available_models = models("tts")
+    available_models = openai_models("tts")
 
     with open(
         os.path.join(
@@ -398,7 +360,7 @@ def talk():
 
 def draw():
     init()
-    available_models = models("dall-e")
+    available_models = openai_models("dall-e")
     with open(
         os.path.join(
             get_user_folder(), PROJECT_FOLDER, "terminal", "question.txt"

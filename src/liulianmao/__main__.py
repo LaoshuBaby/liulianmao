@@ -87,6 +87,10 @@ def main(recipe: List[str], actions: List[str]):
     core = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(core)
 
+    spec2 = importlib.util.find_spec(".api.openai", package="client")
+    core2 = importlib.util.module_from_spec(spec2)
+    spec2.loader.exec_module(core2)
+
     if FEATURE["langchain"]:
         # spec = importlib.util.find_spec('.langchain', package='client')
         # langchain = importlib.util.module_from_spec(spec)
@@ -95,7 +99,7 @@ def main(recipe: List[str], actions: List[str]):
 
     operations = {
         "default": core.chat,
-        "models": core.models,
+        "models": core2.openai_models,
         "chat": core.chat,
         "talk": core.talk,
         "draw": core.draw,
