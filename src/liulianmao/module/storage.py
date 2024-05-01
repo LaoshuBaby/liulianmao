@@ -25,7 +25,7 @@ def init():
             ),
         ),
     ]
-    folder_list = ["logs", "audios", "terminal", "assets"]
+    folder_list = ["logs", "audios", "images", "terminal", "assets"]
 
     for folder in folder_list:
         folder_path = os.path.join(get_user_folder(), PROJECT_FOLDER, folder)

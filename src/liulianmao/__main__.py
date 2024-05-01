@@ -2,6 +2,7 @@ import argparse
 import os
 import sys
 from typing import List
+
 from module.log import logger
 
 

@@ -187,7 +187,8 @@ def completion(question, available_models: List[str] = [], amount: int = 1):
             f"Error: {response.status_code} {response.content.decode('utf-8')}"
         )
         return {}
-    
+
+
 def generate_image(prompt, num_images: int = 1):
     config = load_conf()
     headers = {
@@ -204,42 +205,66 @@ def generate_image(prompt, num_images: int = 1):
     logger.trace("[Payload]\n" + f"{payload}")
 
     response = requests.post(
-        API_URL+"/v1/images/generations", headers=headers, json=payload
+        API_URL + "/v1/images/generations", headers=headers, json=payload
     )
 
     def download_image(url, save_path):
-        try:
-            response = requests.get(url)
-            if response.status_code == 200:
-                with open(save_path, 'wb') as f:
-                    f.write(response.content)
-                logger.success(f"图片 {url} 已保存到 {save_path}")
-            else:
-                logger.error(f"下载图片失败：{url}, 状态码：{response.status_code}")
-        except Exception as e:
-            logger.error(f"下载图片时发生异常：{url}, 错误：{str(e)}")
+        from datetime import datetime
+        from urllib.parse import parse_qs, urlparse
 
-    ## 
+        parsed_url = urlparse(url)
+        file_name = parsed_url.path.split("/")[-1]
+        file_params = parse_qs(parsed_url.query)
+
+        # 检查并根据内容类型更改文件后缀
+        response = requests.head(url)
+        if "Content-Type" in response.headers:
+            content_type = response.headers["Content-Type"]
+            file_extension = content_type.split("/")[-1]
+            file_name_no_ext = os.path.splitext(file_name)[0]
+            file_name = f"{file_name_no_ext}.{file_extension}"
+
+        logger.trace(f"[file_name]: {file_name}")
+
+        # 下载文件
+        response = requests.get(url)
+        if response.status_code == 200:
+            full_save_path = os.path.join(save_path, file_name)
+            with open(full_save_path, "wb") as f:
+                f.write(response.content)
+            print(f"File downloaded as {full_save_path}")
+        else:
+            print("Failed to download the file.")
 
     if response.status_code == 200:
-        content_type = response.headers.get('Content-Type', '')
+        content_type = response.headers.get("Content-Type", "")
 
-        if 'application/json' in content_type:
+        if "application/json" in content_type:
             try:
                 url_list_json = response.json().get("data", [])
                 for url_item in url_list_json:
                     url = url_item.get("url")
+                    logger.trace(f"[img_url]: {url}")
+
                     if url:
-                        filename = url.split('/')[-1]
-                        save_path = os.path.join(get_user_folder(), PROJECT_FOLDER, "images", filename)
+                        filename = url.split("/")[-1]
+                        save_path = os.path.join(
+                            get_user_folder(), PROJECT_FOLDER, "images"
+                        )
+                        logger.trace(f"[save_path]: {save_path}")
                         download_image(url, save_path)
                     else:
                         logger.warning("找不到URL。")
             except ValueError as e:
                 logger.error("解析JSON失败。")
                 logger.error(str(e))
-        elif 'image/png' in content_type:
-            img_file_path = os.path.join(get_user_folder(), PROJECT_FOLDER, "images", "downloaded_image.png")
+        elif "image/png" in content_type:
+            img_file_path = os.path.join(
+                get_user_folder(),
+                PROJECT_FOLDER,
+                "images",
+                "downloaded_image.png",
+            )
             with open(img_file_path, "wb") as f:
                 f.write(response.content)
             logger.success("图片文件保存成功。")
@@ -247,7 +272,7 @@ def generate_image(prompt, num_images: int = 1):
             logger.warning("未知的内容类型。")
     else:
         logger.error(f"响应状态码错误：{response.status_code}")
-        logger.error(response.content.decode('utf-8'))
+        logger.error(response.content.decode("utf-8"))
 
 
 def ask(msg: str, available_models: List[str], default_amount: int = 1):
@@ -303,6 +328,7 @@ def ask(msg: str, available_models: List[str], default_amount: int = 1):
 
 
 def chat():
+    init()
     available_models = models()
 
     with open(
@@ -346,18 +372,30 @@ def chat():
 
 
 def talk():
-    with open(os.path.join(
-                get_user_folder(), PROJECT_FOLDER, "terminal", "question.txt"
-            ), "r", encoding="utf-8") as f:
+    init()
+    with open(
+        os.path.join(
+            get_user_folder(), PROJECT_FOLDER, "terminal", "question.txt"
+        ),
+        "r",
+        encoding="utf-8",
+    ) as f:
         msg = f.read()
     speech(msg)
 
+
 def draw():
-    with open(os.path.join(
-                get_user_folder(), PROJECT_FOLDER, "terminal", "question.txt"
-            ),"r",encoding="utf-8") as f:
+    init()
+    with open(
+        os.path.join(
+            get_user_folder(), PROJECT_FOLDER, "terminal", "question.txt"
+        ),
+        "r",
+        encoding="utf-8",
+    ) as f:
         msg = f.read()
     generate_image(msg)
+
 
 def main():
     logger.critical("THIS PROGRAM NOT INTENT TO RUN SUBMODULE".upper())
