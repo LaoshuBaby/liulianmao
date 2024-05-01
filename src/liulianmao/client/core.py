@@ -197,8 +197,11 @@ def generate_image(prompt, num_images: int = 1):
     }
 
     payload = {
+        # "model": "dall-e-3",
         "prompt": prompt,
-        "num_images": num_images,
+        "size": "1024x1024",
+        "quality": "standard",
+        "n": 1,
     }
 
     logger.trace("[Headers]\n" + f"{headers}")
@@ -373,6 +376,8 @@ def chat():
 
 def talk():
     init()
+    available_models = models()
+    
     with open(
         os.path.join(
             get_user_folder(), PROJECT_FOLDER, "terminal", "question.txt"
@@ -386,6 +391,7 @@ def talk():
 
 def draw():
     init()
+    available_models = models()
     with open(
         os.path.join(
             get_user_folder(), PROJECT_FOLDER, "terminal", "question.txt"

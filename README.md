@@ -47,6 +47,7 @@ pip install langchain langchain_openai
 
 * https://platform.openai.com/docs/api-reference/audio/createSpeech
 * https://platform.openai.com/docs/guides/text-to-speech
+* https://platform.openai.com/docs/guides/images/language-specific-tips
 
 ## TODO
 
