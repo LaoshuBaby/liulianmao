@@ -94,6 +94,7 @@ def main(recipe: List[str], actions: List[str]):
         from client.langchain import main as langchain
 
     operations = {
+        "default": core.chat,
         "models": core.models,
         "chat": core.chat,
         "talk": core.talk,
@@ -111,7 +112,7 @@ def main(recipe: List[str], actions: List[str]):
 
 if __name__ == "__main__":
     init_env()
-    default_recipe = ["chat"]
+    default_recipe = ["default"]
     parser = argparse.ArgumentParser(description="Process some operations.")
     parser.add_argument(
         "-q",

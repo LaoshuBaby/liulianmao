@@ -2,6 +2,7 @@ import json
 import os
 import sys
 from typing import List
+from datetime import datetime
 
 import requests
 
@@ -27,7 +28,8 @@ def load_conf():
     return config
 
 
-def models():
+def models(model_series :str = ""):
+    logger.debug(f"[model_series]: {model_series}")
     headers = {
         "Authorization": f"Bearer {API_KEY}",
         "Content-Type": "application/json",
@@ -42,8 +44,11 @@ def models():
         for item in data:
             for key, value in item.items():
                 if key == "id":
-                    if value[0:3].lower() == "gpt":
+                    if model_series!= "" and model_series in value.lower():
                         collected_ids.append(value)
+                    elif model_series == "":
+                        collected_ids.append(value)
+
 
         return collected_ids
 
@@ -78,8 +83,10 @@ def speech(msg):
     )
 
     if response.status_code == 200:
+        current_time = datetime.now().isoformat(timespec='milliseconds')
+        safe_filename = current_time.replace(':', '_')
         speech_file_path = os.path.join(
-            get_user_folder(), PROJECT_FOLDER, "audios", "speech.mp3"
+            get_user_folder(), PROJECT_FOLDER, "audios", "tts_"+safe_filename+".mp3"
         )
         with open(speech_file_path, "wb") as f:
             f.write(response.content)
@@ -212,7 +219,7 @@ def generate_image(prompt, num_images: int = 1):
     )
 
     def download_image(url, save_path):
-        from datetime import datetime
+        
         from urllib.parse import parse_qs, urlparse
 
         parsed_url = urlparse(url)
@@ -332,7 +339,7 @@ def ask(msg: str, available_models: List[str], default_amount: int = 1):
 
 def chat():
     init()
-    available_models = models()
+    available_models = models("gpt")
 
     with open(
         os.path.join(
@@ -376,8 +383,8 @@ def chat():
 
 def talk():
     init()
-    available_models = models()
-    
+    available_models = models("tts")
+
     with open(
         os.path.join(
             get_user_folder(), PROJECT_FOLDER, "terminal", "question.txt"
@@ -391,7 +398,7 @@ def talk():
 
 def draw():
     init()
-    available_models = models()
+    available_models = models("dall-e")
     with open(
         os.path.join(
             get_user_folder(), PROJECT_FOLDER, "terminal", "question.txt"
