@@ -41,14 +41,6 @@ pip install langchain langchain_openai
 - `python your_script.py --question` 将打开并打印`question.txt`文件的内容，并使用默认的recipe。
 - `python your_script.py --question --recipe init other_operation` 将打开并打印`question.txt`文件的内容，并使用自定义的recipe。
 
-## 参考文档
-
-虽然我觉得正常用户用不到这东西，给自己看方便debug的
-
-* https://platform.openai.com/docs/api-reference/audio/createSpeech
-* https://platform.openai.com/docs/guides/text-to-speech
-* https://platform.openai.com/docs/guides/images/language-specific-tips
-
 ## TODO
 
 目前有如下亟待解决的主要问题
@@ -57,7 +49,7 @@ pip install langchain langchain_openai
 * 允许将会话内容直接投射到txt中，并读取其更改自动作为回复。
 * 提供一个网页或GUI，直接映射两个文件的状态（可能没有必要，我们不是要重新发明一个图形化的客户端，已经有很多了）。
 * 提供除OpenAI模型以外其他模型的支持，如llama（可能需要考虑一下国内通义千问和文心一言两大模型的API兼容情况。而零一万物已知于OpenAI兼容）。在此基础上，目前的“core”可能要跟进调整，以及适应langchain的`langchain`+`langchain-core`+`langchain-openai`的模块名结构，考虑用`basic`等名称来命名通用部分。毕竟liulianmao是分为restful、sdk、langchain三条路径并驾齐驱，皆可用于展开对话的（核心也是用于CLI对话）。
-  这可能需要同时兼容远端和本地的API实例。并且目前能基于llama模型部署的包括[meta-llama](https://github.com/meta-llama)官方[示例代码](https://github.com/meta-llama/llama3/blob/main/example_chat_completion.py)、[Ollama](https://github.com/ollama/ollama)、[Jan](https://github.com/janhq/jan)等，或许可以考虑尽可能多的适配其API。（好在Ollama提供了[兼容OpenAI](https://github.com/ollama/ollama/blob/main/docs/openai.md)的文档和[原生](https://github.com/ollama/ollama/blob/main/docs/api.md#generate-a-completion)文档）
+  这可能需要同时兼容远端和本地的API实例。并且目前能基于llama模型部署的包括[meta-llama](https://github.com/meta-llama)官方[示例代码](https://github.com/meta-llama/llama3/blob/main/example_chat_completion.py)、[Ollama](https://github.com/ollama/ollama)、[Jan](https://github.com/janhq/jan)等，或许可以考虑尽可能多的适配其API。
 
 ## Prompt仓库
 

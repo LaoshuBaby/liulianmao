@@ -3,39 +3,18 @@ import os
 import sys
 from typing import List
 
-import requests
-
 from .api.openai import (
-    openai_models,
     openai_audio_speech,
     openai_chat_completion,
     openai_images_generations,
+    openai_models,
 )
 
 current_dir = os.path.dirname(os.path.realpath(__file__))
 sys.path.append(os.path.join(current_dir, ".."))
 
-from module.authentication import API_URL
 from module.log import logger
 from module.storage import PROJECT_FOLDER, get_user_folder, init
-
-
-def llama_completion(question: str, model: str, amount: int = 1):
-    headers = {
-        "Content-Type": "application/json",
-    }
-    payload = {
-        "model": model,
-        "messages": question,
-        "temperature": temperature,
-        "n": amount,
-    }
-    logger.trace("[Headers]\n" + f"{headers}")
-    logger.trace("[Payload]\n" + f"{payload}")
-    response = requests.post(
-        API_URL + "/completions", headers=headers, json=payload
-    )
-    return response
 
 
 def ask(msg: str, available_models: List[str], default_amount: int = 1):
