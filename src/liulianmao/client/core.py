@@ -20,20 +20,6 @@ from module.log import logger
 from module.storage import PROJECT_FOLDER, get_user_folder, init
 
 
-conversation = []
-
-
-def load_conf():
-    config_file_path = os.path.join(
-        get_user_folder(), PROJECT_FOLDER, "assets", "config.json"
-    )
-    with open(config_file_path, "r", encoding="utf-8") as file:
-        config = json.load(file)
-
-    logger.trace("[Config]\n" + f"{config}")
-    return config
-
-
 def llama_completion(question: str, model: str, amount: int = 1):
     headers = {
         "Content-Type": "application/json",

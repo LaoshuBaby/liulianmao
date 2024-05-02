@@ -5,13 +5,17 @@ import requests
 import os
 import sys
 
-from src.liulianmao import load_conf, conversation
 
 current_dir = os.path.dirname(os.path.realpath(__file__))
 sys.path.append(os.path.join(current_dir, ".."))
 
 from module.authentication import API_KEY, API_URL
 from module.log import logger
+from module.model import select_model
+from module.storage import PROJECT_FOLDER, get_user_folder, init
+from client.utils.config import load_conf
+
+conversation = []
 
 
 def openai_models(model_series: str = ""):
