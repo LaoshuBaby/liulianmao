@@ -17,7 +17,7 @@ from module.log import logger
 from module.storage import PROJECT_FOLDER, get_user_folder, init
 
 
-def ask(msg: str, available_models: List[str], default_amount: int = 1):
+def ask(msg: str, available_models: List[str] = [], default_amount: int = 1):
     """
     Sends a message to the OpenAI chat completion API and processes the response.
 
@@ -50,6 +50,22 @@ def ask(msg: str, available_models: List[str], default_amount: int = 1):
     抛出：
         Exception: 处理API响应或记录时发生错误。
     """
+    if msg == "":
+        logger.warning(
+            "\n"
+            + "You run /client.core.ask() without pass a question to it."
+            + "\n"
+            + "Maybe you are run headless want a one-time-one-sentence ask and don't want to chat a lot"
+        )
+        msg = "你好！你会喵喵叫吗！"
+    if available_models == []:
+        logger.info(
+            "\n"
+            + "You run /client.core.ask() without pass available model to it. "
+            + "\n"
+            + "Don't worry, liulianmao will auto fetch this."
+        )
+        available_models = openai_models("gpt")
     response = openai_chat_completion(
         msg, available_models, amount=default_amount
     )

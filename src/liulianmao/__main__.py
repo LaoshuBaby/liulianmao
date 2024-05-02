@@ -87,9 +87,9 @@ def main(recipe: List[str], actions: List[str]):
     core = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(core)
 
-    spec2 = importlib.util.find_spec(".api.openai", package="client")
-    core2 = importlib.util.module_from_spec(spec2)
-    spec2.loader.exec_module(core2)
+    spec_openai = importlib.util.find_spec(".api.openai", package="client")
+    api_openai = importlib.util.module_from_spec(spec_openai)
+    spec_openai.loader.exec_module(api_openai)
 
     if FEATURE["langchain"]:
         # spec = importlib.util.find_spec('.langchain', package='client')
@@ -99,7 +99,8 @@ def main(recipe: List[str], actions: List[str]):
 
     operations = {
         "default": core.chat,
-        "models": core2.openai_models,
+        "models": api_openai.openai_models,
+        "ask": core.ask,
         "chat": core.chat,
         "talk": core.talk,
         "draw": core.draw,
@@ -109,7 +110,10 @@ def main(recipe: List[str], actions: List[str]):
     for operation_name in recipe:
         operation = operations.get(operation_name)
         if operation:
-            operation()
+            if operation_name == "ask":
+                operation(actions["question"])
+            else:
+                operation()
         else:
             print(f"Operation {operation_name} is not defined.")
 
