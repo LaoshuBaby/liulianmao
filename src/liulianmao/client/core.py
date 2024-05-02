@@ -31,16 +31,42 @@ def load_conf():
     return config
 
 
-def speech(msg):
+def speech(
+    msg,
+    model: str = "tts-1",
+    voice: str = "alloy",
+    response_format: str = "mp3",
+    speed: int = 1,
+):
+    def get_voice(voice: str) -> str:
+        voice_list = ["alloy", "echo", "fable", "onyx", "nova", "shimmer"]
+        return voice_list[0]
+
     headers = {
         "Authorization": f"Bearer {API_KEY}",
         "Content-Type": "application/json",
     }
 
-    data = {"model": "tts-1", "input": msg, "voice": "alloy"}
+    data = {
+        "input": msg,
+        "model": model,
+        "voice": get_voice(voice),
+        "response_format": response_format,
+        "speed": speed,
+    }
+
+    def check_valid_format(format) -> None:
+        format_list = ["mp3", "opus", "aac", "flac", "wav", "pcm"]
+        if format not in format_list:
+            logger.error("format not supported")
+            # sys.exit(-1)
+
+    check_valid_format(response_format)
+
     response = requests.post(
         API_URL + "/v1/audio/speech", json=data, headers=headers
     )
+    # "v1/audio:synthesize"
 
     if response.status_code == 200:
         current_time = datetime.now().isoformat(timespec="milliseconds")
@@ -53,7 +79,7 @@ def speech(msg):
         )
         with open(speech_file_path, "wb") as f:
             f.write(response.content)
-        logger.success("音频文件保存成功。")
+        logger.success(f"音频文件保存成功。{speech_file_path}")
     else:
         logger.error(
             "生成语音失败。状态码：",
