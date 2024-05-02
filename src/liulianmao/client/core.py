@@ -159,7 +159,13 @@ def completion(question, available_models: List[str] = [], amount: int = 1):
         return {}
 
 
-def generate_image(prompt, num_images: int = 1):
+def generate_image(
+    prompt,
+    model: str = "dall-e-3",
+    size: str = "1024x1024",
+    quality: str = "standard",
+    num: int = 1,
+):
     config = load_conf()
     headers = {
         "Authorization": f"Bearer {API_KEY}",
@@ -167,11 +173,11 @@ def generate_image(prompt, num_images: int = 1):
     }
 
     payload = {
-        # "model": "dall-e-3",
+        "model": model,
         "prompt": prompt,
-        "size": "1024x1024",
-        "quality": "standard",
-        "n": 1,
+        "size": size,
+        "quality": quality,
+        "n": num,
     }
 
     logger.trace("[Headers]\n" + f"{headers}")
@@ -186,16 +192,69 @@ def generate_image(prompt, num_images: int = 1):
 
         parsed_url = urlparse(url)
         file_name = parsed_url.path.split("/")[-1]
-        file_params = parse_qs(parsed_url.query)
 
         # 检查并根据内容类型更改文件后缀
+        file_params = parse_qs(parsed_url.query)
+        logger.trace(f"[extension_check:file_params]: {file_params}")
         response = requests.head(url)
-        if "Content-Type" in response.headers:
-            content_type = response.headers["Content-Type"]
-            file_extension = content_type.split("/")[-1]
-            file_name_no_ext = os.path.splitext(file_name)[0]
-            file_name = f"{file_name_no_ext}.{file_extension}"
+        logger.trace(f"[extension_check:response.headers]: {response.headers}")
 
+        def get_content_type():
+            if file_params.get("rsct", []) != []:
+                return str(file_params["rsct"][0])
+            elif "Content-Type" in response.headers:
+                return str(response.headers["Content-Type"])
+            else:
+                return ""
+
+        if get_content_type():
+            content_type = get_content_type()
+            file_name_ext = content_type.split("/")[-1]
+            file_name_stem = os.path.splitext(file_name)[0]
+            file_name = f"{file_name_stem}.{file_name_ext}"
+
+            def generate_unique_file_name(
+                save_path, file_name_stem, file_name_ext
+            ):
+                full_file_name = f"{file_name_stem}.{file_name_ext}"
+                full_save_path = os.path.join(save_path, full_file_name)
+                file_number = 0
+
+                # 检查文件是否存在，如果存在则在文件名中增加编号
+                if os.path.exists(full_save_path):
+                    logger.trace(
+                        f"[file_name:collision.number]: {full_save_path}"
+                    )
+                    logger.trace(
+                        f"[file_name:collision.exist]: {full_save_path}"
+                    )
+                    while os.path.exists(full_save_path):
+                        logger.trace(
+                            f"[file_name:collision.number]: {full_save_path}"
+                        )
+                        logger.trace(
+                            f"[file_name:collision.exist]: {full_save_path}"
+                        )
+                        file_number += 1
+                        full_file_name = (
+                            f"{file_name_stem}({file_number}).{file_name_ext}"
+                        )
+                        full_save_path = os.path.join(
+                            save_path, full_file_name
+                        )
+
+                    return f"{file_name_stem}({file_number}).{file_name_ext}"
+                else:
+                    return f"{file_name_stem}.{file_name_ext}"
+
+            file_name = generate_unique_file_name(
+                save_path, file_name_stem, file_name_ext
+            )
+        else:
+            logger.warning(
+                "haven't get image content_type and use default filename"
+            )
+            file_name = file_name
         logger.trace(f"[file_name]: {file_name}")
 
         # 下载文件
