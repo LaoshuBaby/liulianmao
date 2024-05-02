@@ -36,11 +36,33 @@ def speech(
     model: str = "tts-1",
     voice: str = "alloy",
     response_format: str = "mp3",
-    speed: int = 1,
+    speed: float = 1.0,
 ):
-    def get_voice(voice: str) -> str:
+    def validate_voice(voice: str) -> str:
         voice_list = ["alloy", "echo", "fable", "onyx", "nova", "shimmer"]
-        return voice_list[0]
+        if voice not in voice_list:
+            logger.error("voice not supported")
+            return voice_list[0]
+        else:
+            return voice
+
+    def validate_format(response_format: str) -> str:
+        format_list = ["mp3", "opus", "aac", "flac", "wav", "pcm"]
+        if response_format not in format_list:
+            logger.error("responce_format not supported")
+            return format_list[0]
+        else:
+            return response_format
+
+    def validate_speed(speed: float) -> None:
+        min_speed = 0.25
+        max_speed = 4.0
+
+        if speed > max_speed or speed < min_speed:
+            logger.error("speed not supported")
+            return 1.0
+        else:
+            return speed
 
     headers = {
         "Authorization": f"Bearer {API_KEY}",
@@ -50,23 +72,14 @@ def speech(
     data = {
         "input": msg,
         "model": model,
-        "voice": get_voice(voice),
-        "response_format": response_format,
-        "speed": speed,
+        "voice": validate_voice(voice),
+        "response_format": validate_format(response_format),
+        "speed": validate_speed(speed),
     }
-
-    def check_valid_format(format) -> None:
-        format_list = ["mp3", "opus", "aac", "flac", "wav", "pcm"]
-        if format not in format_list:
-            logger.error("format not supported")
-            # sys.exit(-1)
-
-    check_valid_format(response_format)
 
     response = requests.post(
         API_URL + "/v1/audio/speech", json=data, headers=headers
     )
-    # "v1/audio:synthesize"
 
     if response.status_code == 200:
         current_time = datetime.now().isoformat(timespec="milliseconds")
@@ -75,7 +88,7 @@ def speech(
             get_user_folder(),
             PROJECT_FOLDER,
             "audios",
-            "tts_" + safe_filename + ".mp3",
+            f"tts_{safe_filename.lower()}.{response_format.lower()}",
         )
         with open(speech_file_path, "wb") as f:
             f.write(response.content)
