@@ -70,16 +70,14 @@ def ask(msg: str, available_models: List[str] = [], default_amount: int = 1):
         available_models = openai_models("gpt")
 
     config = load_conf()
-    model_type = config["model_type"]
-    prompt_system = config["system_message"]["content"]
-    temperature = float(config["settings"]["temperature"])
-    select_model(model_type, available_models, direct_debug=True)
 
     response = openai_chat_completion(
-        msg,
-        prompt_system,
-        model=select_model,
-        temperature=temperature,
+        prompt_question=msg,
+        prompt_system=config["system_message"]["content"],
+        model=select_model(
+            config["model_type"], available_models, direct_debug=True
+        ),
+        temperature=float(config["settings"]["temperature"]),
         amount=default_amount,
     )
     try:

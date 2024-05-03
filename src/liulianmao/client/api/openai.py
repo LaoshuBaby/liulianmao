@@ -1,7 +1,7 @@
 import os
 import sys
 from datetime import datetime
-from typing import List
+from typing import List, Optional
 
 import requests
 
@@ -140,7 +140,7 @@ def openai_chat_completion(
     presence_penalty: float = 0.0,
     stop=None,
     amount: int = 1,
-):
+) -> Optional[dict]:
     def validate_temperature(temperature: float) -> float:
         min_temperature = 0.0
         max_temperature = 1.0
@@ -162,7 +162,7 @@ def openai_chat_completion(
             + [{"role": "user", "content": prompt_question}]
         ),
         "model": model,
-        "temperature": temperature,
+        "temperature": validate_temperature(temperature),
         "max_tokens": max_tokens,
         "top_p": top_p,
         "frequency_penalty": frequency_penalty,
