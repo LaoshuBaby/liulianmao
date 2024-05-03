@@ -17,9 +17,8 @@ def main() -> None:
     print(global_const)
     # run
     build_file_read = open("pyproject.toml", "r", encoding="utf-8")
-    build_file_content = (
-        build_file_read.read()
-        .replace("__LIULIANMAO_VERSION__", global_const["LIULIANMAO_VERSION"])
+    build_file_content = build_file_read.read().replace(
+        "__LIULIANMAO_VERSION__", global_const["LIULIANMAO_VERSION"]
     )
     build_file_read.close()
     os.remove("pyproject.toml")

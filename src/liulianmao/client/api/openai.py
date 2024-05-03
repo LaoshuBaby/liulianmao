@@ -131,12 +131,29 @@ def openai_audio_speech(
 
 
 def openai_chat_completion(
-    question, available_models: List[str] = [], amount: int = 1
+    question,
+    available_models: List[str] = [],
+    temperature: float = 0.5,
+    max_tokens: int = 2048,
+    top_p: float = 1.0,
+    frequency_penalty: float = 0.0,
+    presence_penalty: float = 0.0,
+    stop=None,
+    amount: int = 1,
 ):
     config = load_conf()
     model_type = config["model_type"]
     system_content = config["system_message"]["content"]
     temperature = float(config["settings"]["temperature"])
+
+    def validate_temperature(temperature: float) -> float:
+        min_temperature = 0.0
+        max_temperature = 1.0
+        if temperature > max_temperature or temperature < min_temperature:
+            logger.error("temperature not supported")
+            return 0.5
+        else:
+            return temperature
 
     headers = {
         "Authorization": f"Bearer {API_KEY}",
@@ -151,11 +168,11 @@ def openai_chat_completion(
             + [{"role": "user", "content": question}]
         ),
         "temperature": temperature,
-        "max_tokens": 2048,
-        "top_p": 1.0,
-        "frequency_penalty": 0.0,
-        "presence_penalty": 0.0,
-        "stop": None,
+        "max_tokens": max_tokens,
+        "top_p": top_p,
+        "frequency_penalty": frequency_penalty,
+        "presence_penalty": presence_penalty,
+        "stop": stop,
         "n": amount,
         # "plugins": [
         #     {
@@ -215,7 +232,7 @@ def openai_images_generations(
     model: str = "dall-e-3",
     size: str = "1024x1024",
     quality: str = "standard",
-    num: int = 1,
+    amount: int = 1,
 ):
     config = load_conf()
     headers = {
@@ -228,7 +245,7 @@ def openai_images_generations(
         "prompt": prompt,
         "size": size,
         "quality": quality,
-        "n": num,
+        "n": amount,
     }
 
     logger.trace("[Headers]\n" + f"{headers}")
