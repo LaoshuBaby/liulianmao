@@ -8,10 +8,9 @@ import requests
 current_dir = os.path.dirname(os.path.realpath(__file__))
 sys.path.append(os.path.join(current_dir, "..", ".."))
 
-from client.utils.config import load_conf
+
 from module.authentication import API_KEY, API_URL
 from module.log import logger
-from module.model import select_model
 from module.storage import PROJECT_FOLDER, get_user_folder, init
 
 conversation = []
@@ -131,8 +130,9 @@ def openai_audio_speech(
 
 
 def openai_chat_completion(
-    question,
-    available_models: List[str] = [],
+    prompt_question,
+    prompt_system,
+    model,
     temperature: float = 0.5,
     max_tokens: int = 2048,
     top_p: float = 1.0,
@@ -141,11 +141,6 @@ def openai_chat_completion(
     stop=None,
     amount: int = 1,
 ):
-    config = load_conf()
-    model_type = config["model_type"]
-    system_content = config["system_message"]["content"]
-    temperature = float(config["settings"]["temperature"])
-
     def validate_temperature(temperature: float) -> float:
         min_temperature = 0.0
         max_temperature = 1.0
@@ -161,12 +156,12 @@ def openai_chat_completion(
     }
 
     payload = {
-        "model": select_model(model_type, available_models, direct_debug=True),
         "messages": (
-            [{"role": "system", "content": system_content}]
+            [{"role": "system", "content": prompt_system}]
             + conversation
-            + [{"role": "user", "content": question}]
+            + [{"role": "user", "content": prompt_question}]
         ),
+        "model": model,
         "temperature": temperature,
         "max_tokens": max_tokens,
         "top_p": top_p,
@@ -187,9 +182,9 @@ def openai_chat_completion(
 
     flag_echo_input = False
     if flag_echo_input:
-        logger.debug("[Question]\n" + f"{question}")
+        logger.debug("[Question]\n" + f"{prompt_question}")
     else:
-        logger.trace("[Question]\n" + f"{question}")
+        logger.trace("[Question]\n" + f"{prompt_question}")
 
     response = requests.post(
         API_URL + "/v1/chat/completions", headers=headers, json=payload
@@ -205,7 +200,7 @@ def openai_chat_completion(
             logger.critical("RESPONSE NOT JSON")
         # judge schema
         try:
-            conversation.append({"role": "user", "content": question})
+            conversation.append({"role": "user", "content": prompt_question})
             conversation.append(
                 {
                     "role": "system",
@@ -234,7 +229,6 @@ def openai_images_generations(
     quality: str = "standard",
     amount: int = 1,
 ):
-    config = load_conf()
     headers = {
         "Authorization": f"Bearer {API_KEY}",
         "Content-Type": "application/json",

@@ -13,7 +13,9 @@ from .api.openai import (
 current_dir = os.path.dirname(os.path.realpath(__file__))
 sys.path.append(os.path.join(current_dir, ".."))
 
+from client.utils.config import load_conf
 from module.log import logger
+from module.model import select_model
 from module.storage import PROJECT_FOLDER, get_user_folder, init
 
 
@@ -66,8 +68,19 @@ def ask(msg: str, available_models: List[str] = [], default_amount: int = 1):
             + "Don't worry, liulianmao will auto fetch this."
         )
         available_models = openai_models("gpt")
+
+    config = load_conf()
+    model_type = config["model_type"]
+    prompt_system = config["system_message"]["content"]
+    temperature = float(config["settings"]["temperature"])
+    select_model(model_type, available_models, direct_debug=True)
+
     response = openai_chat_completion(
-        msg, available_models, amount=default_amount
+        msg,
+        prompt_system,
+        model=select_model,
+        temperature=temperature,
+        amount=default_amount,
     )
     try:
         choices = response.get("choices", [])
