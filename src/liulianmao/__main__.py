@@ -52,7 +52,7 @@ def init_env():
 
 
 @logger.catch(level="CRITICAL")
-def main(recipe: List[str], actions: List[str]):
+def main(recipe: List[str], actions: List[str], **kwargs):
     """Execute the operations specified in the recipe list.
 
     根据提供的recipe列表和actions列表执行一系列操作。
@@ -68,6 +68,15 @@ def main(recipe: List[str], actions: List[str]):
             str(get_user_folder()), PROJECT_FOLDER, "terminal", "question.txt"
         )
         os.startfile(question_file_path)
+        sys.exit(0)
+
+    if "answer" in actions:
+        from module.const import PROJECT_FOLDER, get_user_folder
+
+        answer_file_path = os.path.join(
+            str(get_user_folder()), PROJECT_FOLDER, "terminal", "answer.txt"
+        )
+        os.startfile(answer_file_path)
         sys.exit(0)
 
     if "config" in actions:
@@ -111,7 +120,7 @@ def main(recipe: List[str], actions: List[str]):
         operation = operations.get(operation_name)
         if operation:
             if operation_name == "ask":
-                operation(actions["question"])
+                operation("this is a question")
             else:
                 operation()
         else:
@@ -126,8 +135,17 @@ if __name__ == "__main__":
         "-q",
         "-question",
         "--question",
+        nargs='?',
+        const=True,
+        default=False,
+        help="Open the question.txt file with default program or pass a specific message"
+    )
+    parser.add_argument(
+        "-a",
+        "-answer",
+        "--answer",
         action="store_true",
-        help="Open the question.txt file with default program",
+        help="Open the answer.txt file with default program",
     )
     parser.add_argument(
         "-c",
@@ -151,11 +169,11 @@ if __name__ == "__main__":
         help="Open OPENAI_API_KEY and OPENAI_BASE_URL files with default program",
     )
     parser.add_argument(
-        "-i",
+        "-i","-input","--input"
         help="Specify input file, read this file as question, not default question.txt",
     )
     parser.add_argument(
-        "-o",
+        "-o","-output","--output"
         help="Specify output file, write answer to this file, not default answer.txt",
     )
     parser.add_argument(
@@ -169,9 +187,11 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     actions = []
-    if args.question:
+    if args.question is True:
         actions.append("question")
-    if args.config:
+    if args.answer is True:
+        actions.append("answer")
+    if args.config is True:
         actions.append("config")
 
     main(recipe=args.recipe, actions=actions)

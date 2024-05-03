@@ -140,6 +140,7 @@ def openai_chat_completion(
     presence_penalty: float = 0.0,
     stop=None,
     amount: int = 1,
+    use_plugin: bool = False,  # 新增参数来控制是否使用插件
 ) -> Optional[dict]:
     def validate_temperature(temperature: float) -> float:
         min_temperature = 0.0
@@ -155,10 +156,10 @@ def openai_chat_completion(
         "Content-Type": "application/json",
     }
 
+    # 初始化payload
     payload = {
         "messages": (
             [{"role": "system", "content": prompt_system}]
-            + conversation
             + [{"role": "user", "content": prompt_question}]
         ),
         "model": model,
@@ -169,13 +170,36 @@ def openai_chat_completion(
         "presence_penalty": presence_penalty,
         "stop": stop,
         "n": amount,
-        # "plugins": [
-        #     {
-        #         "name": "plugin_name_here",
-        #         "parameters": {"param1": "value1", "param2": "value2"},
-        #     }
-        # ],
     }
+
+    # 如果启用插件，添加到payload中
+    if use_plugin:
+        payload["tools"] = [
+            {
+                "type": "function",
+                "function": {
+                    "name": "get_current_weather",
+                    "description": "Get the current weather in a given location",
+                    "parameters": {
+                        "type": "object",
+                        "properties": {
+                            "location": {
+                                "type": "string",
+                                "description": "The city and state, e.g. San Francisco, CA",
+                            },
+                            "unit": {
+                                "type": "string",
+                                "enum": ["celsius", "fahrenheit"],
+                            },
+                        },
+                        "required": ["location"],
+                    },
+                },
+            }
+        ]
+        payload["tool_choice"] = (
+            "auto",
+        )  # auto is default, but we'll be explicit
 
     logger.trace("[Headers]\n" + f"{headers}")
     logger.trace("[Payload]\n" + f"{payload}")
