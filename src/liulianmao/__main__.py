@@ -135,10 +135,10 @@ if __name__ == "__main__":
         "-q",
         "-question",
         "--question",
-        nargs='?',
+        nargs="?",
         const=True,
         default=False,
-        help="Open the question.txt file with default program or pass a specific message"
+        help="Open the question.txt file with default program or pass a specific message",
     )
     parser.add_argument(
         "-a",
@@ -169,11 +169,15 @@ if __name__ == "__main__":
         help="Open OPENAI_API_KEY and OPENAI_BASE_URL files with default program",
     )
     parser.add_argument(
-        "-i","-input","--input"
+        "-i",
+        "-input",
+        "--input",
         help="Specify input file, read this file as question, not default question.txt",
     )
     parser.add_argument(
-        "-o","-output","--output"
+        "-o",
+        "-output",
+        "--output",
         help="Specify output file, write answer to this file, not default answer.txt",
     )
     parser.add_argument(
