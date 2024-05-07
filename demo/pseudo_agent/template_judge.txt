@@ -1,0 +1,23 @@
+请你判断下列提问过程中是否需要调用外部程序？目前支持的外部程序的列表有：{func_list}。
+
+如果你认为需要，则请输出:
+
+```
+PSEUDO_AGENT:TRUE
+PSEUDO_AGENT.ACTION:{{The function you think need to call, including parameters}}
+=+=+=
+```
+
+如果你认为不需要调用外部程序，则请输出
+
+```
+PSEUDO_AGENT:FALSE
+=+=+=
+```
+
+
+如下是一段需要发送给AI进行提问的内容:
+
+```
+{question}
+```
