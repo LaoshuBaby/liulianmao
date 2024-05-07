@@ -89,7 +89,10 @@ def ask(
             amount=default_amount,
         )
     elif model_series == "zhipu":
-        response = zhipu_completion(question=msg)
+        response = zhipu_completion(
+            prompt_question=msg,
+            prompt_system=config["system_message"]["content"],
+        )
     else:
         response = {"choices": [{"message": {"content": "啊哈？"}}]}
 
@@ -160,8 +163,10 @@ def chat(model_series: str = "openai"):
     """
     init()
 
+    logger.warning(model_series)
+
     # model_series = "llama" # for debug
-    model_series = "zhipu"  # for debug
+    # model_series = "zhipu"  # for debug
 
     if model_series == "openai":
         available_models = openai_models("gpt")

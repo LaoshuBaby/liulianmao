@@ -12,14 +12,22 @@ from module.log import logger
 conversation = []
 
 
-def zhipu_completion(question: str, model: str = "glm-4", amount: int = 1):
+def zhipu_completion(
+    prompt_question: str,
+    prompt_system: str,
+    model: str = "glm-4",
+    amount: int = 1,
+):
     headers = {
         "Content-Type": "application/json",
         "Authorization": f"Bearer {API_KEY}",
     }
     payload = {
         "model": "glm-4",
-        "messages": [{"role": "user", "content": question}],
+        "messages": [
+            {"role": "system", "content": prompt_question},
+            {"role": "user", "content": prompt_question},
+        ],
     }
     logger.trace("[Headers]\n" + f"{headers}")
     logger.trace("[Payload]\n" + f"{payload}")
@@ -37,7 +45,7 @@ def zhipu_completion(question: str, model: str = "glm-4", amount: int = 1):
             logger.critical("RESPONSE NOT JSON")
         # judge json schema
         try:
-            conversation.append({"role": "user", "content": question})
+            conversation.append({"role": "user", "content": prompt_question})
             conversation.append(
                 {
                     "role": "system",

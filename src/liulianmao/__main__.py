@@ -121,6 +121,8 @@ def main(recipe: List[str], actions: List[str], **kwargs):
         if operation:
             if operation_name == "ask":
                 operation("this is a question")
+            if operation_name == "chat" or operation_name == "default":
+                operation(model_series=kwargs.get("series", "").lower())
             else:
                 operation()
         else:
@@ -188,6 +190,13 @@ if __name__ == "__main__":
         default=default_recipe,
         help="List of operations to process",
     )
+    parser.add_argument(
+        "-s",
+        "-series",
+        "--series",
+        type=str,
+        help="A string representing a series",
+    )
     args = parser.parse_args()
 
     actions = []
@@ -198,4 +207,9 @@ if __name__ == "__main__":
     if args.config is True:
         actions.append("config")
 
-    main(recipe=args.recipe, actions=actions)
+    if args.series != None and args.series != "":
+        series = args.series
+    else:
+        series = "openai"
+
+    main(recipe=args.recipe, actions=actions, series=series)
