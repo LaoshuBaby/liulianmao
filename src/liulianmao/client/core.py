@@ -20,7 +20,12 @@ from module.model import select_model
 from module.storage import PROJECT_FOLDER, get_user_folder, init
 
 
-def ask(msg: str, available_models: List[str] = [], default_amount: int = 1, model_series:str = "openai"):
+def ask(
+    msg: str,
+    available_models: List[str] = [],
+    default_amount: int = 1,
+    model_series: str = "openai",
+):
     """
     Sends a message to the OpenAI chat completion API and processes the response.
 
@@ -53,6 +58,8 @@ def ask(msg: str, available_models: List[str] = [], default_amount: int = 1, mod
     抛出：
         Exception: 处理API响应或记录时发生错误。
     """
+    logger.info(f"[model_series]: {model_series}")
+
     if msg == "":
         logger.warning(
             "\n"
@@ -61,7 +68,7 @@ def ask(msg: str, available_models: List[str] = [], default_amount: int = 1, mod
             + "Maybe you are run headless want a one-time-one-sentence ask and don't want to chat a lot"
         )
         msg = "你好！你会喵喵叫吗！"
-    if available_models == [] :
+    if available_models == []:
         logger.info(
             "\n"
             + "You run /client.core.ask() without pass available model to it. "
@@ -82,11 +89,9 @@ def ask(msg: str, available_models: List[str] = [], default_amount: int = 1, mod
             amount=default_amount,
         )
     elif model_series == "zhipu":
-        response = zhipu_completion(
-            question=msg
-        )
+        response = zhipu_completion(question=msg)
     else:
-        response = {"choices":['message': {'content': "啊哈？"}]}
+        response = {"choices": [{"message": {"content": "啊哈？"}}]}
 
     try:
         choices = response.get("choices", [])
@@ -119,16 +124,12 @@ def ask(msg: str, available_models: List[str] = [], default_amount: int = 1, mod
             )
         )
 
-
-
-
     except Exception as e:
         # 记录关键错误信息而不是直接退出程序，提供更好的错误上下文
         logger.exception(f"An error occurred: {e}", exc_info=True)
         # 可以在这里处理特定的清理工作，如果有必要的话
         # 最后，可能会根据程序的需要选择是否退出
         # sys.exit()
-
 
     # 根据choices的数量来输出
     for i, choice in enumerate(choices):
@@ -140,7 +141,7 @@ def ask(msg: str, available_models: List[str] = [], default_amount: int = 1, mod
     return [choice["message"]["content"] for choice in choices]
 
 
-def chat(model_series:str = "openai"):
+def chat(model_series: str = "openai"):
     """
     Initiates a chat conversation by reading a question from a file and calling the OpenAI API.
 
@@ -160,7 +161,7 @@ def chat(model_series:str = "openai"):
     init()
 
     # model_series = "llama" # for debug
-    model_series = "zhipu" # for debug
+    model_series = "zhipu"  # for debug
 
     if model_series == "openai":
         available_models = openai_models("gpt")
@@ -205,7 +206,11 @@ def chat(model_series:str = "openai"):
                 " ", ""
             )
             if append_question_judge != "END" and append_question_judge != "":
-                conversation = ask(append_question, available_models, model_series=model_series)
+                conversation = ask(
+                    append_question,
+                    available_models,
+                    model_series=model_series,
+                )
             else:
                 flag_end = True
                 break
