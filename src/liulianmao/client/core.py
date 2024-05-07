@@ -290,6 +290,9 @@ def chat(model_series: str = "openai"):
 
         if agent_judge_result.get("PSEUDO_AGENT", False) in ["TRUE", True]:
             # 找到 PSEUDO_AGENT.ACTION.NAME 对应的函数并调用一下
+
+            ## 构建函数文件库
+
             func_file_list = list(
                 filter(
                     bool,
@@ -306,6 +309,8 @@ def chat(model_series: str = "openai"):
                     ],
                 )
             )
+
+            ## 尝试找到需要import的文件
 
             target_file_name = ""
             for func_file in func_file_list:
@@ -329,7 +334,10 @@ def chat(model_series: str = "openai"):
 
             logger.debug(f"[target_file_name]: {target_file_name}")
 
+            ## 尝试import那个文件并调用函数
+
             import importlib
+            import json
 
             module_name = target_file_name.replace(".py", "")
             spec = importlib.util.spec_from_file_location(
@@ -341,10 +349,11 @@ def chat(model_series: str = "openai"):
             logger.success("[Agent] dynamical load called file")
 
             action_name = agent_judge_result["PSEUDO_AGENT.ACTION.NAME"]
-            params = agent_judge_result["PSEUDO_AGENT.ACTION.PARA"]
+            params = json.loads(agent_judge_result["PSEUDO_AGENT.ACTION.PARA"])
 
             logger.debug(f"[action_name]: {action_name}")
             logger.debug(f"[params]: {params}")
+            logger.debug(f"[type(params)]: {type(params)}")
 
             try:
                 # 获取并执行模块中的函数
@@ -352,7 +361,8 @@ def chat(model_series: str = "openai"):
 
                 if callable(function_to_call):
                     # 调用函数并传入参数
-                    result = function_to_call(**params)
+                    # result = function_to_call(**params)
+                    result = function_to_call(city=params["city"])
                     # 打印或返回结果
                     logger.info(result)
                 else:
@@ -369,6 +379,24 @@ def chat(model_series: str = "openai"):
                 )
 
     # conduct conversation
+    if flag_agent == True:
+        msg = (
+            json.dumps(
+                {
+                    "AGENT.ACTION.NAME": agent_judge_result[
+                        "PSEUDO_AGENT.ACTION.NAME"
+                    ],
+                    "AGENT.ACTION.PARA": agent_judge_result[
+                        "PSEUDO_AGENT.ACTION.PARA"
+                    ],
+                    "AGENT.EXEC.RESULT": result,
+                },
+                indent=2,
+                ensure_ascii=False,
+                sort_keys=False,
+            )
+            + msg
+        )
     conversation = ask(msg, available_models, model_series=model_series)
 
     if not flag_continue:
