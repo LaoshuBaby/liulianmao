@@ -182,21 +182,33 @@ def chat(model_series: str = "openai"):
     ) as file:
         msg = file.read()
 
-
     # predefine flags
     flag_continue = True
     flag_agent = True
 
     # judge whether should call func if agent set to True
     if flag_agent == True:
-        func_file_list=list(filter(bool,[i if i!="__init__.py" else "" for i in os.listdir(os.path.dirname(os.path.realpath(__file__),"pseudo_agent"))]))
-        logger.debug(func_file_list)
-        
+        func_file_list = list(
+            filter(
+                bool,
+                [
+                    i if i != "__init__.py" else ""
+                    for i in os.listdir(
+                        os.path.join(
+                            os.path.dirname(os.path.realpath(__file__)),
+                            "pseudo_agent",
+                        )
+                    )
+                ],
+            )
+        )
+        logger.debug(f"[func_file_list]: {func_file_list}")
 
-        func_proto_list=[]
+        func_proto_list = []
 
         def extract_function_prototypes(code):
             import re
+
             pattern = r"def\s+(.*?)\((.*?)\)\s*->\s*(.*?):"
             matches = re.findall(pattern, code)
 
@@ -205,46 +217,60 @@ def chat(model_series: str = "openai"):
                 function_name = match[0]
                 args = match[1]
                 return_annotation = match[2]
-                function_prototypes.append(f"def {function_name}({args}) -> {return_annotation}")
+                function_prototypes.append(
+                    f"def {function_name}({args}) -> {return_annotation}"
+                )
 
             return function_prototypes
-        
+
         for func_file in func_file_list:
-            with open(os.path.join(os.path.dirname(os.path.realpath(__file__)),"pseudo_agent",func_file),"r",encoding="utf-8") as f:
-                code=f.read()
+            with open(
+                os.path.join(
+                    os.path.dirname(os.path.realpath(__file__)),
+                    "pseudo_agent",
+                    func_file,
+                ),
+                "r",
+                encoding="utf-8",
+            ) as f:
+                code = f.read()
                 prototypes = extract_function_prototypes(code)
                 for prototype in prototypes:
                     logger.trace(prototype)
                     func_proto_list.append(prototype)
 
-        agent_judge_question=agent_judge_template.replace("{func_list}","\n".join(func_proto_list))
-        logger.debug(agent_judge_question)
+        agent_judge_question = agent_judge_template.replace(
+            "{func_list}", "\n".join(func_proto_list)
+        ).replace("{question}", msg)
+        logger.trace(f"[agent_judge_question]:\n{agent_judge_question}")
 
-        # conversation = ask(agent_judge_question, available_models, model_series=model_series)
-        # def extract_pseudo_agent_variables(input_text):
-        #     variables = {}
-            
-        #     lines = input_text.split("\n")
-        #     for line in lines:
-        #         if line.startswith("PSEUDO_AGENT:"):
-        #             key, value = line.split(":")[1].split(".")
-        #             variables[key] = value
-        #         elif line.startswith("PSEUDO_AGENT."):
-        #             key, value = line.split(":")[0].split(".")
-        #             variables[key] = value
-        #         elif line == "=+=+=":
-        #             break
-            
-        #     return variables
+        agent_judge_conversation = ask(
+            agent_judge_question, available_models, model_series=model_series
+        )
+        logger.debug(
+            f"[agent_judge_conversation]:\n{agent_judge_conversation}"
+        )
 
-        # input_text = '''
-        # PSEUDO_AGENT:TRUE
-        # PSEUDO_AGENT.ACTION:get_weather("北京")
-        # =+=+=
-        # '''
+        def extract_pseudo_agent_variables(input_text):
+            variables = {}
 
-        # result = extract_pseudo_agent_variables(input_text)
-        # print(result)
+            lines = input_text.split("\n")
+            for line in lines:
+                if line.startswith("PSEUDO_AGENT:"):
+                    key, value = line.split(":")[1].split(".")
+                    variables[key] = value
+                elif line.startswith("PSEUDO_AGENT."):
+                    key, value = line.split(":")[0].split(".")
+                    variables[key] = value
+                elif line == "=+=+=":
+                    break
+
+            return variables
+
+        agent_judge_result = extract_pseudo_agent_variables(
+            agent_judge_conversation
+        )
+        logger.debug(f"[agent_judge_result]: {agent_judge_result}")
 
     # conduct conversation
     conversation = ask(msg, available_models, model_series=model_series)
