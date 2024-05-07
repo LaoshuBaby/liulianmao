@@ -9,6 +9,7 @@ from .api.openai import (
     openai_images_generations,
     openai_models,
 )
+from .api.zhipu import zhipu_completion
 
 current_dir = os.path.dirname(os.path.realpath(__file__))
 sys.path.append(os.path.join(current_dir, ".."))
@@ -71,14 +72,17 @@ def ask(msg: str, available_models: List[str] = [], default_amount: int = 1):
 
     config = load_conf()
 
-    response = openai_chat_completion(
-        prompt_question=msg,
-        prompt_system=config["system_message"]["content"],
-        model=select_model(
-            config["model_type"], available_models, direct_debug=True
-        ),
-        temperature=float(config["settings"]["temperature"]),
-        amount=default_amount,
+    # response = openai_chat_completion(
+    #     prompt_question=msg,
+    #     prompt_system=config["system_message"]["content"],
+    #     model=select_model(
+    #         config["model_type"], available_models, direct_debug=True
+    #     ),
+    #     temperature=float(config["settings"]["temperature"]),
+    #     amount=default_amount,
+    # )
+    response = zhipu_completion(
+        question=msg
     )
     try:
         choices = response.get("choices", [])
