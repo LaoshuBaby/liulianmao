@@ -5,6 +5,8 @@ from typing import List
 
 from module.log import logger
 
+from const import LIULIANMAO_VERSION
+
 
 @logger.catch(level="CRITICAL")
 def init_env():
@@ -131,6 +133,7 @@ def main(recipe: List[str], actions: List[str], **kwargs):
 
 if __name__ == "__main__":
     init_env()
+    logger.success(f"=== LIULIANMAO:{LIULIANMAO_VERSION} ===")
     default_recipe = ["default"]
     parser = argparse.ArgumentParser(description="Process some operations.")
     parser.add_argument(
