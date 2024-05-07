@@ -288,98 +288,92 @@ def chat(model_series: str = "openai"):
     if flag_agent == True:
         agent_judge_result = agent_judge(msg, available_models, model_series)
 
-        if agent_judge_result.get("PSEUDO_AGENT", False) in ["TRUE", True]:
-            # 找到 PSEUDO_AGENT.ACTION.NAME 对应的函数并调用一下
+    def run_agent(msg, agent_judge_result):
+        # 找到 PSEUDO_AGENT.ACTION.NAME 对应的函数并调用一下
 
-            ## 构建函数文件库
+        ## 构建函数文件库
 
-            func_file_list = list(
-                filter(
-                    bool,
-                    [
-                        i
-                        if (i != "__init__.py" and i != "__pycache__")
-                        else ""
-                        for i in os.listdir(
-                            os.path.join(
-                                os.path.dirname(os.path.realpath(__file__)),
-                                "pseudo_agent",
-                            )
+        func_file_list = list(
+            filter(
+                bool,
+                [
+                    i if (i != "__init__.py" and i != "__pycache__") else ""
+                    for i in os.listdir(
+                        os.path.join(
+                            os.path.dirname(os.path.realpath(__file__)),
+                            "pseudo_agent",
                         )
-                    ],
-                )
+                    )
+                ],
             )
+        )
 
-            ## 尝试找到需要import的文件
+        ## 尝试找到需要import的文件
 
-            target_file_name = ""
-            for func_file in func_file_list:
-                with open(
-                    os.path.join(
+        target_file_name = ""
+        for func_file in func_file_list:
+            with open(
+                os.path.join(
+                    os.path.dirname(os.path.realpath(__file__)),
+                    "pseudo_agent",
+                    func_file,
+                ),
+                "r",
+                encoding="utf-8",
+            ) as f:
+                code = f.read()
+                if agent_judge_result["PSEUDO_AGENT.ACTION.NAME"] in code:
+                    target_file_name = os.path.join(
                         os.path.dirname(os.path.realpath(__file__)),
                         "pseudo_agent",
                         func_file,
-                    ),
-                    "r",
-                    encoding="utf-8",
-                ) as f:
-                    code = f.read()
-                    if agent_judge_result["PSEUDO_AGENT.ACTION.NAME"] in code:
-                        target_file_name = os.path.join(
-                            os.path.dirname(os.path.realpath(__file__)),
-                            "pseudo_agent",
-                            func_file,
-                        )
-                        break
-
-            logger.debug(f"[target_file_name]: {target_file_name}")
-
-            ## 尝试import那个文件并调用函数
-
-            import importlib
-            import json
-
-            module_name = target_file_name.replace(".py", "")
-            spec = importlib.util.spec_from_file_location(
-                module_name, target_file_name
-            )
-            module = importlib.util.module_from_spec(spec)
-            spec.loader.exec_module(module)
-
-            logger.success("[Agent] dynamical load called file")
-
-            action_name = agent_judge_result["PSEUDO_AGENT.ACTION.NAME"]
-            params = json.loads(agent_judge_result["PSEUDO_AGENT.ACTION.PARA"])
-
-            logger.debug(f"[action_name]: {action_name}")
-            logger.debug(f"[params]: {params}")
-            logger.debug(f"[type(params)]: {type(params)}")
-
-            try:
-                # 获取并执行模块中的函数
-                function_to_call = getattr(module, action_name)
-
-                if callable(function_to_call):
-                    # 调用函数并传入参数
-                    # result = function_to_call(**params)
-                    result = function_to_call(city=params["city"])
-                    # 打印或返回结果
-                    logger.info(result)
-                else:
-                    logger.info(
-                        f"Error: {action_name} is not a callable function."
                     )
-            except AttributeError as e:
-                logger.info(
-                    f"Error: Function {action_name} not found in module."
-                )
-            except Exception as e:
-                logger.info(
-                    f"An error occurred while running the function: {e}"
-                )
+                    break
 
-    # conduct conversation
-    if flag_agent == True:
+        logger.debug(f"[target_file_name]: {target_file_name}")
+
+        ## 尝试import那个文件并调用函数
+
+        import importlib
+        import json
+
+        module_name = target_file_name.replace(".py", "")
+        spec = importlib.util.spec_from_file_location(
+            module_name, target_file_name
+        )
+        module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(module)
+
+        logger.success("[Agent] dynamical load called file")
+
+        action_name = agent_judge_result["PSEUDO_AGENT.ACTION.NAME"]
+        params = json.loads(agent_judge_result["PSEUDO_AGENT.ACTION.PARA"])
+
+        logger.debug(f"[action_name]: {action_name}")
+        logger.debug(f"[params]: {params}")
+        logger.debug(f"[type(params)]: {type(params)}")
+
+        try:
+            # 获取并执行模块中的函数
+            function_to_call = getattr(module, action_name)
+
+            if callable(function_to_call):
+                # 调用函数并传入参数
+                # result = function_to_call(**params)
+                result = function_to_call(city=params["city"])
+                # 打印或返回结果
+                logger.info(result)
+            else:
+                logger.info(
+                    f"Error: {action_name} is not a callable function."
+                )
+        except AttributeError as e:
+            logger.info(f"Error: Function {action_name} not found in module.")
+        except Exception as e:
+            logger.info(f"An error occurred while running the function: {e}")
+
+        ## 在msg前面添加内容
+
         msg = (
             json.dumps(
                 {
@@ -397,6 +391,12 @@ def chat(model_series: str = "openai"):
             )
             + msg
         )
+
+    # conduct conversation
+    if flag_agent == True and agent_judge_result.get(
+        "PSEUDO_AGENT", False
+    ) in ["TRUE", True]:
+        msg = run_agent(msg, agent_judge_result)
     conversation = ask(msg, available_models, model_series=model_series)
 
     if not flag_continue:
@@ -421,10 +421,14 @@ def chat(model_series: str = "openai"):
                 " ", ""
             )
             if append_question_judge != "END" and append_question_judge != "":
-                # if flag_agent == True:
-                #     agent_judge_result = agent_judge(
-                #         msg, available_models, model_series
-                #     )
+                if flag_agent == True:
+                    agent_judge_result = agent_judge(
+                        msg, available_models, model_series
+                    )
+                if flag_agent == True and agent_judge_result.get(
+                    "PSEUDO_AGENT", False
+                ) in ["TRUE", True]:
+                    append_question = run_agent(append_question, agent_judge_result)
                 conversation = ask(
                     append_question,
                     available_models,
