@@ -189,10 +189,35 @@ def chat(model_series: str = "openai"):
 
     # judge whether should call func if agent set to True
     if flag_agent == True:
-        get_func_file_list=list(filter(bool,[i if i!="__init__.py" else "" for i in os.listdir(os.path.join(os.path.dirname(os.path.realpath(__file__)),"pseudo_agent"))]))
-        agent_judge_question=agent_judge_template.replace("{func_list}","\n".join(get_func_file_list))
+        func_file_list=list(filter(bool,[i if i!="__init__.py" else "" for i in os.listdir(os.path.dirname(os.path.realpath(__file__),"pseudo_agent"))]))
+        logger.debug(func_file_list)
+        
 
-        logger.debug(get_func_file_list)
+        func_proto_list=[]
+
+        def extract_function_prototypes(code):
+            import re
+            pattern = r"def\s+(.*?)\((.*?)\)\s*->\s*(.*?):"
+            matches = re.findall(pattern, code)
+
+            function_prototypes = []
+            for match in matches:
+                function_name = match[0]
+                args = match[1]
+                return_annotation = match[2]
+                function_prototypes.append(f"def {function_name}({args}) -> {return_annotation}")
+
+            return function_prototypes
+        
+        for func_file in func_file_list:
+            with open(os.path.join(os.path.dirname(os.path.realpath(__file__)),"pseudo_agent",func_file),"r",encoding="utf-8") as f:
+                code=f.read()
+                prototypes = extract_function_prototypes(code)
+                for prototype in prototypes:
+                    logger.trace(prototype)
+                    func_proto_list.append(prototype)
+
+        agent_judge_question=agent_judge_template.replace("{func_list}","\n".join(func_proto_list))
         logger.debug(agent_judge_question)
 
         # conversation = ask(agent_judge_question, available_models, model_series=model_series)

@@ -1,4 +1,4 @@
-agent_judge_template="""
+agent_judge_template = """
 请你判断下列提问过程中是否需要调用外部程序？
 
 目前支持的外部程序的列表有：
