@@ -153,7 +153,7 @@ def agent_judge(msg, available_models, model_series):
         filter(
             bool,
             [
-                i if i != "__init__.py" else ""
+                i if (i != "__init__.py" and i != "__pycache__") else ""
                 for i in os.listdir(
                     os.path.join(
                         os.path.dirname(os.path.realpath(__file__)),
@@ -292,20 +292,22 @@ def chat(model_series: str = "openai"):
             # 找到 PSEUDO_AGENT.ACTION.NAME 对应的函数并调用一下
             func_file_list = list(
                 filter(
-                bool,
-                [
-                    i if i != "__init__.py" else ""
-                    for i in os.listdir(
-                        os.path.join(
-                            os.path.dirname(os.path.realpath(__file__)),
-                            "pseudo_agent",
+                    bool,
+                    [
+                        i
+                        if (i != "__init__.py" and i != "__pycache__")
+                        else ""
+                        for i in os.listdir(
+                            os.path.join(
+                                os.path.dirname(os.path.realpath(__file__)),
+                                "pseudo_agent",
+                            )
                         )
-                    )
-                ],
+                    ],
                 )
             )
 
-            target_file_name=""
+            target_file_name = ""
             for func_file in func_file_list:
                 with open(
                     os.path.join(
@@ -317,36 +319,54 @@ def chat(model_series: str = "openai"):
                     encoding="utf-8",
                 ) as f:
                     code = f.read()
-                    if PSEUDO_AGENT.ACTION.NAME in code:
-                        target_file_name=PSEUDO_AGENT.ACTION.NAME 
+                    if agent_judge_result["PSEUDO_AGENT.ACTION.NAME"] in code:
+                        target_file_name = os.path.join(
+                            os.path.dirname(os.path.realpath(__file__)),
+                            "pseudo_agent",
+                            func_file,
+                        )
                         break
 
+            logger.debug(f"[target_file_name]: {target_file_name}")
 
             import importlib
-            from types import FunctionType
 
-            # 获取模块名称（不带.py）
-            module_name = target_file_name.replace('.py', '')
-
-            # 动态导入模块
-            spec = importlib.util.spec_from_file_location(module_name, target_file_name)
+            module_name = target_file_name.replace(".py", "")
+            spec = importlib.util.spec_from_file_location(
+                module_name, target_file_name
+            )
             module = importlib.util.module_from_spec(spec)
             spec.loader.exec_module(module)
 
-            # 获取函数并执行
+            logger.success("[Agent] dynamical load called file")
+
+            action_name = agent_judge_result["PSEUDO_AGENT.ACTION.NAME"]
+            params = agent_judge_result["PSEUDO_AGENT.ACTION.PARA"]
+
+            logger.debug(f"[action_name]: {action_name}")
+            logger.debug(f"[params]: {params}")
+
             try:
-                # 假设 PSEUDO_AGENT 是一个类，ACTION 是它的一个属性，NAME 是一个方法
-                # 如果 PSEUDO_AGENT.ACTION 是一个函数或方法的直接引用，下面这行代码需要适当修改
-                function_to_call = getattr(getattr(module.PSEUDO_AGENT, 'ACTION'), 'NAME')
-                
-                if isinstance(function_to_call, FunctionType):
-                    function_to_call()  # 调用函数
+                # 获取并执行模块中的函数
+                function_to_call = getattr(module, action_name)
+
+                if callable(function_to_call):
+                    # 调用函数并传入参数
+                    result = function_to_call(**params)
+                    # 打印或返回结果
+                    logger.info(result)
                 else:
-                    print(f"Error: {function_to_call} is not a function.")
+                    logger.info(
+                        f"Error: {action_name} is not a callable function."
+                    )
             except AttributeError as e:
-                print(f"Error: {e}")
+                logger.info(
+                    f"Error: Function {action_name} not found in module."
+                )
             except Exception as e:
-                print(f"An error occurred while running the function: {e}")
+                logger.info(
+                    f"An error occurred while running the function: {e}"
+                )
 
     # conduct conversation
     conversation = ask(msg, available_models, model_series=model_series)

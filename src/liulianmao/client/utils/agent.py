@@ -11,7 +11,7 @@ agent_judge_template = """
 
 ```pagentcommand
 PSEUDO_AGENT:TRUE
-PSEUDO_AGENT.ACTION:{{The function you think need to call, including parameters}}
+PSEUDO_AGENT.ACTION:{{Prototype of function you think need to call, including parameters and typing}}
 PSEUDO_AGENT.ACTION.NAME:{{The function's name}}
 PSEUDO_AGENT.ACTION.PARA:{{The function's parameters in json}}
 =+=+=
