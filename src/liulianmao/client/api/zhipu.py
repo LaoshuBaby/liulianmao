@@ -17,7 +17,12 @@ def zhipu_completion(
     prompt_system: str,
     model: str = "glm-4",
     amount: int = 1,
+    no_history: bool = False,
 ):
+    if no_history:
+        append_conversation = []
+    else:
+        append_conversation = conversation
     headers = {
         "Content-Type": "application/json",
         "Authorization": f"Bearer {API_KEY}",
@@ -27,7 +32,7 @@ def zhipu_completion(
         "messages": [
             {"role": "system", "content": prompt_system},
         ]
-        + conversation
+        + append_conversation
         + [{"role": "user", "content": prompt_question}],
     }
     logger.trace("[Headers]\n" + f"{headers}")
@@ -46,15 +51,18 @@ def zhipu_completion(
             logger.critical("RESPONSE NOT JSON")
         # judge json schema
         try:
-            conversation.append({"role": "user", "content": prompt_question})
-            conversation.append(
-                {
-                    "role": "system",
-                    "content": response.json()["choices"][0]["message"][
-                        "content"
-                    ],
-                }
-            )
+            if no_history == False:
+                conversation.append(
+                    {"role": "user", "content": prompt_question}
+                )
+                conversation.append(
+                    {
+                        "role": "system",
+                        "content": response.json()["choices"][0]["message"][
+                            "content"
+                        ],
+                    }
+                )
         except Exception as e:
             logger.trace(e)
             logger.critical("WRONG RESPONSE SCHEMA")

@@ -141,6 +141,7 @@ def openai_chat_completion(
     stop=None,
     amount: int = 1,
     use_plugin: bool = False,  # 新增参数来控制是否使用插件
+    no_history: bool = False,
 ) -> Optional[dict]:
     def validate_temperature(temperature: float) -> float:
         min_temperature = 0.0
@@ -157,10 +158,14 @@ def openai_chat_completion(
     }
 
     # 初始化payload
+    if no_history:
+        append_conversation = []
+    else:
+        append_conversation = conversation
     payload = {
         "messages": (
             [{"role": "system", "content": prompt_system}]
-            + conversation
+            + append_conversation
             + [{"role": "user", "content": prompt_question}]
         ),
         "model": model,
@@ -225,15 +230,18 @@ def openai_chat_completion(
             logger.critical("RESPONSE NOT JSON")
         # judge schema
         try:
-            conversation.append({"role": "user", "content": prompt_question})
-            conversation.append(
-                {
-                    "role": "system",
-                    "content": response.json()["choices"][0]["message"][
-                        "content"
-                    ],
-                }
-            )
+            if no_history == False:
+                conversation.append(
+                    {"role": "user", "content": prompt_question}
+                )
+                conversation.append(
+                    {
+                        "role": "system",
+                        "content": response.json()["choices"][0]["message"][
+                            "content"
+                        ],
+                    }
+                )
         except Exception as e:
             logger.trace(e)
             logger.critical("WRONG RESPONSE SCHEMA")

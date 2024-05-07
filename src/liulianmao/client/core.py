@@ -26,6 +26,7 @@ def ask(
     available_models: List[str] = [],
     default_amount: int = 1,
     model_series: str = "openai",
+    no_history: bool = False,
 ):
     """
     Sends a message to the OpenAI chat completion API and processes the response.
@@ -88,11 +89,13 @@ def ask(
             ),
             temperature=float(config["settings"]["temperature"]),
             amount=default_amount,
+            no_history=no_history,
         )
     elif model_series == "zhipu":
         response = zhipu_completion(
             prompt_question=msg,
             prompt_system=config["system_message"]["content"],
+            no_history=no_history,
         )
     else:
         response = {"choices": [{"message": {"content": "啊哈？"}}]}
@@ -245,19 +248,27 @@ def chat(model_series: str = "openai"):
         logger.trace(f"[agent_judge_question]:\n{agent_judge_question}")
 
         agent_judge_conversation = ask(
-            agent_judge_question, available_models, model_series=model_series
+            agent_judge_question,
+            available_models,
+            model_series=model_series,
+            no_history=True,
         )[0]
         logger.debug(
             f"[agent_judge_conversation]:\n{agent_judge_conversation}"
         )
 
         def extract_pseudo_agent_variables(input_str: str) -> Dict[str, str]:
-            slice_input=input_str.split("\n")
-            valid_tag=list(filter(bool,[i if "PSEUDO_AGENT" in i else "" for i in slice_input]))
+            slice_input = input_str.split("\n")
+            valid_tag = list(
+                filter(
+                    bool,
+                    [i if "PSEUDO_AGENT" in i else "" for i in slice_input],
+                )
+            )
 
             pseudo_agent_dict = {}
             for line in valid_tag:
-                parts = line.split(':', 1)  # 限制分割一次，防止冒号在值中出现
+                parts = line.split(":", 1)  # 限制分割一次，防止冒号在值中出现
                 if len(parts) == 2:
                     key, value = parts
                     pseudo_agent_dict[key] = value.strip()  # 移除值前后的空格
@@ -270,7 +281,7 @@ def chat(model_series: str = "openai"):
             )
         except Exception as e:
             logger.error(e)
-            agent_judge_result = {"PSEUDO_AGENT":"FALSE"}
+            agent_judge_result = {"PSEUDO_AGENT": "FALSE"}
         logger.debug(f"[agent_judge_result]: {agent_judge_result}")
 
     # conduct conversation
