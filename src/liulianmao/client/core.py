@@ -1,7 +1,7 @@
 import json
 import os
 import sys
-from typing import List
+from typing import Dict, List
 
 from .api.openai import (
     openai_audio_speech,
@@ -246,26 +246,31 @@ def chat(model_series: str = "openai"):
 
         agent_judge_conversation = ask(
             agent_judge_question, available_models, model_series=model_series
-        )
+        )[0]
         logger.debug(
             f"[agent_judge_conversation]:\n{agent_judge_conversation}"
         )
 
-        def extract_pseudo_agent_variables(input_text):
-            variables = {}
+        def extract_pseudo_agent_variables(input_str: str) -> Dict[str, str]:
+            import re
+            # 使用正则表达式找到所有以 PSEUDO_AGENT 开头，并包含冒号分隔的行
+            pattern = re.compile(r'^PSEUDO_AGENT:(.*?)$', re.MULTILINE)
 
-            lines = input_text.split("\n")
-            for line in lines:
-                if line.startswith("PSEUDO_AGENT:"):
-                    key, value = line.split(":")[1].split(".")
-                    variables[key] = value
-                elif line.startswith("PSEUDO_AGENT."):
-                    key, value = line.split(":")[0].split(".")
-                    variables[key] = value
-                elif line == "=+=+=":
-                    break
+            # 在输入字符串中查找所有匹配项直到 =+=+=
+            end_pattern = re.compile(r'^=+\+=+=$', re.MULTILINE)
+            end_match = end_pattern.search(input_str)
+            
+            if end_match:
+                # 截断字符串直到 =+=+=
+                input_str = input_str[:end_match.start()]
 
-            return variables
+            # 查找所有匹配项
+            matches = pattern.findall(input_str)
+
+            # 将找到的匹配项转换为字典
+            pseudo_agent_dict = {match.split(':')[0]: match.split(':')[1].strip() for match in matches}
+
+            return pseudo_agent_dict
 
         agent_judge_result = extract_pseudo_agent_variables(
             agent_judge_conversation
