@@ -20,7 +20,7 @@ from module.model import select_model
 from module.storage import PROJECT_FOLDER, get_user_folder, init
 
 
-def ask(msg: str, available_models: List[str] = [], default_amount: int = 1):
+def ask(msg: str, available_models: List[str] = [], default_amount: int = 1, model_series:str = "openai"):
     """
     Sends a message to the OpenAI chat completion API and processes the response.
 
@@ -68,7 +68,12 @@ def ask(msg: str, available_models: List[str] = [], default_amount: int = 1):
             + "\n"
             + "Don't worry, liulianmao will auto fetch this."
         )
-        available_models = openai_models("gpt")
+        if model_series == "openai":
+            available_models = openai_models("gpt")
+        elif model_series == "zhipu" or model_series == "llama":
+            available_models = ["FOR_DEBUG"]
+        else:
+            available_models = []
 
     config = load_conf()
 
@@ -134,7 +139,7 @@ def ask(msg: str, available_models: List[str] = [], default_amount: int = 1):
     return [choice["message"]["content"] for choice in choices]
 
 
-def chat():
+def chat(model_series:str = "openai"):
     """
     Initiates a chat conversation by reading a question from a file and calling the OpenAI API.
 
@@ -152,7 +157,16 @@ def chat():
     没有参数或返回值。此功能通过文件IO和日志记录等副作用进行操作。
     """
     init()
-    available_models = openai_models("gpt")
+
+    # model_series = "llama" # for debug
+    model_series = "zhipu" # for debug
+
+    if model_series == "openai":
+        available_models = openai_models("gpt")
+    elif model_series == "zhipu" or model_series == "llama":
+        available_models = []
+    else:
+        available_models = []
 
     with open(
         os.path.join(
@@ -164,7 +178,7 @@ def chat():
         msg = file.read()
 
     flag_continue = True
-    conversation = ask(msg, available_models)
+    conversation = ask(msg, available_models, model_series=model_series)
 
     if not flag_continue:
         with open(

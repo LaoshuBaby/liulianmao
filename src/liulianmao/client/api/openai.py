@@ -16,7 +16,7 @@ from module.storage import PROJECT_FOLDER, get_user_folder, init
 conversation = []
 
 
-def openai_models(model_series: str = ""):
+def openai_models(model_series: str = "") -> List[str]:
     logger.debug(f"[model_series]: {model_series}")
     headers = {
         "Authorization": f"Bearer {API_KEY}",
