@@ -10,6 +10,7 @@ from .api.openai import (
     openai_models,
 )
 from .api.zhipu import zhipu_completion
+from .utils.agent import agent_judge_template
 
 current_dir = os.path.dirname(os.path.realpath(__file__))
 sys.path.append(os.path.join(current_dir, ".."))
@@ -181,7 +182,46 @@ def chat(model_series: str = "openai"):
     ) as file:
         msg = file.read()
 
+
+    # predefine flags
     flag_continue = True
+    flag_agent = True
+
+    # judge whether should call func if agent set to True
+    if flag_agent == True:
+        get_func_file_list=list(filter(bool,[i if i!="__init__.py" else "" for i in os.listdir(os.path.join(os.path.dirname(os.path.realpath(__file__)),"pseudo_agent"))]))
+        agent_judge_question=agent_judge_template.replace("{func_list}","\n".join(get_func_file_list))
+
+        logger.debug(get_func_file_list)
+        logger.debug(agent_judge_question)
+
+        # conversation = ask(agent_judge_question, available_models, model_series=model_series)
+        # def extract_pseudo_agent_variables(input_text):
+        #     variables = {}
+            
+        #     lines = input_text.split("\n")
+        #     for line in lines:
+        #         if line.startswith("PSEUDO_AGENT:"):
+        #             key, value = line.split(":")[1].split(".")
+        #             variables[key] = value
+        #         elif line.startswith("PSEUDO_AGENT."):
+        #             key, value = line.split(":")[0].split(".")
+        #             variables[key] = value
+        #         elif line == "=+=+=":
+        #             break
+            
+        #     return variables
+
+        # input_text = '''
+        # PSEUDO_AGENT:TRUE
+        # PSEUDO_AGENT.ACTION:get_weather("北京")
+        # =+=+=
+        # '''
+
+        # result = extract_pseudo_agent_variables(input_text)
+        # print(result)
+
+    # conduct conversation
     conversation = ask(msg, available_models, model_series=model_series)
 
     if not flag_continue:
