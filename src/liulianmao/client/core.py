@@ -252,29 +252,25 @@ def chat(model_series: str = "openai"):
         )
 
         def extract_pseudo_agent_variables(input_str: str) -> Dict[str, str]:
-            import re
-            # 使用正则表达式找到所有以 PSEUDO_AGENT 开头，并包含冒号分隔的行
-            pattern = re.compile(r'^PSEUDO_AGENT:(.*?)$', re.MULTILINE)
+            slice_input=input_str.split("\n")
+            valid_tag=list(filter(bool,[i if "PSEUDO_AGENT" in i else "" for i in slice_input]))
 
-            # 在输入字符串中查找所有匹配项直到 =+=+=
-            end_pattern = re.compile(r'^=+\+=+=$', re.MULTILINE)
-            end_match = end_pattern.search(input_str)
-            
-            if end_match:
-                # 截断字符串直到 =+=+=
-                input_str = input_str[:end_match.start()]
-
-            # 查找所有匹配项
-            matches = pattern.findall(input_str)
-
-            # 将找到的匹配项转换为字典
-            pseudo_agent_dict = {match.split(':')[0]: match.split(':')[1].strip() for match in matches}
+            pseudo_agent_dict = {}
+            for line in valid_tag:
+                parts = line.split(':', 1)  # 限制分割一次，防止冒号在值中出现
+                if len(parts) == 2:
+                    key, value = parts
+                    pseudo_agent_dict[key] = value.strip()  # 移除值前后的空格
 
             return pseudo_agent_dict
 
-        agent_judge_result = extract_pseudo_agent_variables(
-            agent_judge_conversation
-        )
+        try:
+            agent_judge_result = extract_pseudo_agent_variables(
+                agent_judge_conversation
+            )
+        except Exception as e:
+            logger.error(e)
+            agent_judge_result = {"PSEUDO_AGENT":"FALSE"}
         logger.debug(f"[agent_judge_result]: {agent_judge_result}")
 
     # conduct conversation
