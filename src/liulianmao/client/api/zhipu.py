@@ -15,47 +15,41 @@ conversation = []
 def zhipu_completion(question: str, model: str = "glm-4", amount: int = 1):
     headers = {
         "Content-Type": "application/json",
-        "Authorization": f"Bearer {API_KEY}"
+        "Authorization": f"Bearer {API_KEY}",
     }
     payload = {
         "model": "glm-4",
-        "messages": [
-	        {
-	            "role": "user",
-	            "content": question
-	        }
-	    ],
+        "messages": [{"role": "user", "content": question}],
     }
     logger.trace("[Headers]\n" + f"{headers}")
     logger.trace("[Payload]\n" + f"{payload}")
     response = requests.post(
         API_URL + "/paas/v4/chat/completions", headers=headers, json=payload
     )
-    
-    
+
     if response.status_code == 200:
         logger.trace("[Debug] response.status_code == 200")
-        # judge mime
+        # judge content_type
         try:
             logger.trace("[Response]\n" + str(response.json()))
         except Exception as e:
             logger.trace(e)
             logger.critical("RESPONSE NOT JSON")
-        # judge schema
-        # try:
-        #     conversation.append({"role": "user", "content": prompt_question})
-        #     conversation.append(
-        #         {
-        #             "role": "system",
-        #             "content": response.json()["choices"][0]["message"][
-        #                 "content"
-        #             ],
-        #         }
-        #     )
-        # except Exception as e:
-        #     logger.trace(e)
-        #     logger.critical("WRONG RESPONSE SCHEMA")
-        # logger.trace("[History]\n" + str(conversation))
+        # judge json schema
+        try:
+            conversation.append({"role": "user", "content": question})
+            conversation.append(
+                {
+                    "role": "system",
+                    "content": response.json()["choices"][0]["message"][
+                        "content"
+                    ],
+                }
+            )
+        except Exception as e:
+            logger.trace(e)
+            logger.critical("WRONG RESPONSE SCHEMA")
+        logger.trace("[History]\n" + str(conversation))
         return response.json()
     else:
         logger.trace("[Debug] response.status_code != 200")

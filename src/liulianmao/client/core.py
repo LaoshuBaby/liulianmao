@@ -61,34 +61,33 @@ def ask(msg: str, available_models: List[str] = [], default_amount: int = 1, mod
             + "Maybe you are run headless want a one-time-one-sentence ask and don't want to chat a lot"
         )
         msg = "你好！你会喵喵叫吗！"
-    if available_models == []:
+    if available_models == [] :
         logger.info(
             "\n"
             + "You run /client.core.ask() without pass available model to it. "
             + "\n"
             + "Don't worry, liulianmao will auto fetch this."
         )
-        if model_series == "openai":
-            available_models = openai_models("gpt")
-        elif model_series == "zhipu" or model_series == "llama":
-            available_models = ["FOR_DEBUG"]
-        else:
-            available_models = []
 
     config = load_conf()
 
-    # response = openai_chat_completion(
-    #     prompt_question=msg,
-    #     prompt_system=config["system_message"]["content"],
-    #     model=select_model(
-    #         config["model_type"], available_models, direct_debug=True
-    #     ),
-    #     temperature=float(config["settings"]["temperature"]),
-    #     amount=default_amount,
-    # )
-    response = zhipu_completion(
-        question=msg
-    )
+    if model_series == "openai":
+        response = openai_chat_completion(
+            prompt_question=msg,
+            prompt_system=config["system_message"]["content"],
+            model=select_model(
+                config["model_type"], available_models, direct_debug=True
+            ),
+            temperature=float(config["settings"]["temperature"]),
+            amount=default_amount,
+        )
+    elif model_series == "zhipu":
+        response = zhipu_completion(
+            question=msg
+        )
+    else:
+        response = {"choices":['message': {'content': "啊哈？"}]}
+
     try:
         choices = response.get("choices", [])
 
@@ -103,7 +102,25 @@ def ask(msg: str, available_models: List[str] = [], default_amount: int = 1, mod
             "total_tokens", -1
         )
 
-        # 假设这里有一些处理response的代码
+        # 使用展平路径的变量名进行日志记录，仅在包含token记录时
+        logger.debug(
+            "[Token Usage]\n"
+            + json.dumps(
+                {
+                    "response_usage_completion_tokens": response_usage_completion_tokens,
+                    "response_usage_prompt_tokens": response_usage_prompt_tokens,
+                    "response_usage_total_tokens": response_usage_total_tokens,
+                    # 计算验证
+                    "verify": f"{response_usage_completion_tokens} + {response_usage_prompt_tokens} = {response_usage_completion_tokens + response_usage_prompt_tokens}",
+                },
+                indent=2,
+                ensure_ascii=False,
+                sort_keys=False,
+            )
+        )
+
+
+
 
     except Exception as e:
         # 记录关键错误信息而不是直接退出程序，提供更好的错误上下文
@@ -112,22 +129,6 @@ def ask(msg: str, available_models: List[str] = [], default_amount: int = 1, mod
         # 最后，可能会根据程序的需要选择是否退出
         # sys.exit()
 
-    # 使用展平路径的变量名进行日志记录
-    logger.debug(
-        "[Token Usage]\n"
-        + json.dumps(
-            {
-                "response_usage_completion_tokens": response_usage_completion_tokens,
-                "response_usage_prompt_tokens": response_usage_prompt_tokens,
-                "response_usage_total_tokens": response_usage_total_tokens,
-                # 计算验证
-                "verify": f"{response_usage_completion_tokens} + {response_usage_prompt_tokens} = {response_usage_completion_tokens + response_usage_prompt_tokens}",
-            },
-            indent=2,
-            ensure_ascii=False,
-            sort_keys=False,
-        )
-    )
 
     # 根据choices的数量来输出
     for i, choice in enumerate(choices):
@@ -163,8 +164,10 @@ def chat(model_series:str = "openai"):
 
     if model_series == "openai":
         available_models = openai_models("gpt")
-    elif model_series == "zhipu" or model_series == "llama":
-        available_models = []
+    elif model_series == "zhipu":
+        available_models = ["glm-4"]
+    elif model_series == "llama":
+        available_models = ["llama3"]
     else:
         available_models = []
 
@@ -202,7 +205,7 @@ def chat(model_series:str = "openai"):
                 " ", ""
             )
             if append_question_judge != "END" and append_question_judge != "":
-                conversation = ask(append_question, available_models)
+                conversation = ask(append_question, available_models, model_series=model_series)
             else:
                 flag_end = True
                 break
