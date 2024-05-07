@@ -195,6 +195,7 @@ if __name__ == "__main__":
         "-series",
         "--series",
         type=str,
+        default="openai",
         help="A string representing a series",
     )
     args = parser.parse_args()
@@ -207,9 +208,4 @@ if __name__ == "__main__":
     if args.config is True:
         actions.append("config")
 
-    if args.series != None and args.series != "":
-        series = args.series
-    else:
-        series = "openai"
-
-    main(recipe=args.recipe, actions=actions, series=series)
+    main(recipe=args.recipe, actions=actions, series=args.series)

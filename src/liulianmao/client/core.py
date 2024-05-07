@@ -163,11 +163,6 @@ def chat(model_series: str = "openai"):
     """
     init()
 
-    logger.warning(model_series)
-
-    # model_series = "llama" # for debug
-    # model_series = "zhipu"  # for debug
-
     if model_series == "openai":
         available_models = openai_models("gpt")
     elif model_series == "zhipu":

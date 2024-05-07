@@ -25,9 +25,10 @@ def zhipu_completion(
     payload = {
         "model": "glm-4",
         "messages": [
-            {"role": "system", "content": prompt_question},
-            {"role": "user", "content": prompt_question},
-        ],
+            {"role": "system", "content": prompt_system},
+        ]
+        + conversation
+        + [{"role": "user", "content": prompt_question}],
     }
     logger.trace("[Headers]\n" + f"{headers}")
     logger.trace("[Payload]\n" + f"{payload}")

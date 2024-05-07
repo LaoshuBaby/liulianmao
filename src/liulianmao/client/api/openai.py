@@ -160,6 +160,7 @@ def openai_chat_completion(
     payload = {
         "messages": (
             [{"role": "system", "content": prompt_system}]
+            + conversation
             + [{"role": "user", "content": prompt_question}]
         ),
         "model": model,
