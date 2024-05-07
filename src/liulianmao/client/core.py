@@ -148,6 +148,101 @@ def ask(
     return [choice["message"]["content"] for choice in choices]
 
 
+def agent_judge(msg, available_models, model_series):
+    func_file_list = list(
+        filter(
+            bool,
+            [
+                i if i != "__init__.py" else ""
+                for i in os.listdir(
+                    os.path.join(
+                        os.path.dirname(os.path.realpath(__file__)),
+                        "pseudo_agent",
+                    )
+                )
+            ],
+        )
+    )
+    logger.debug(f"[func_file_list]: {func_file_list}")
+
+    func_proto_list = []
+
+    def extract_function_prototypes(code):
+        import re
+
+        pattern = r"def\s+(.*?)\((.*?)\)\s*->\s*(.*?):"
+        matches = re.findall(pattern, code)
+
+        function_prototypes = []
+        for match in matches:
+            function_name = match[0]
+            args = match[1]
+            return_annotation = match[2]
+            function_prototypes.append(
+                f"def {function_name}({args}) -> {return_annotation}"
+            )
+
+        return function_prototypes
+
+    for func_file in func_file_list:
+        with open(
+            os.path.join(
+                os.path.dirname(os.path.realpath(__file__)),
+                "pseudo_agent",
+                func_file,
+            ),
+            "r",
+            encoding="utf-8",
+        ) as f:
+            code = f.read()
+            prototypes = extract_function_prototypes(code)
+            for prototype in prototypes:
+                logger.trace(prototype)
+                func_proto_list.append(prototype)
+
+    agent_judge_question = agent_judge_template.replace(
+        "{func_list}", "\n".join(func_proto_list)
+    ).replace("{question}", msg)
+    logger.trace(f"[agent_judge_question]:\n{agent_judge_question}")
+
+    logger.warning("Agent设定为启用，即将判断是否需要调用本地函数")
+    agent_judge_conversation = ask(
+        agent_judge_question,
+        available_models,
+        model_series=model_series,
+        no_history=True,
+    )[0]
+    logger.debug(f"[agent_judge_conversation]:\n{agent_judge_conversation}")
+
+    def extract_pseudo_agent_variables(input_str: str) -> Dict[str, str]:
+        slice_input = input_str.split("\n")
+        valid_tag = list(
+            filter(
+                bool,
+                [i if "PSEUDO_AGENT" in i else "" for i in slice_input],
+            )
+        )
+
+        pseudo_agent_dict = {}
+        for line in valid_tag:
+            parts = line.split(":", 1)  # 限制分割一次，防止冒号在值中出现
+            if len(parts) == 2:
+                key, value = parts
+                pseudo_agent_dict[key] = value.strip()  # 移除值前后的空格
+
+        return pseudo_agent_dict
+
+    try:
+        agent_judge_result = extract_pseudo_agent_variables(
+            agent_judge_conversation
+        )
+    except Exception as e:
+        logger.error(e)
+        agent_judge_result = {"PSEUDO_AGENT": "FALSE"}
+    logger.debug(f"[agent_judge_result]: {agent_judge_result}")
+    return agent_judge_result
+
+
 def chat(model_series: str = "openai"):
     """
     Initiates a chat conversation by reading a question from a file and calling the OpenAI API.
@@ -189,100 +284,14 @@ def chat(model_series: str = "openai"):
     flag_continue = True
     flag_agent = True
 
-    # judge whether should call func if agent set to True
+    # call judge agent
     if flag_agent == True:
-        func_file_list = list(
-            filter(
-                bool,
-                [
-                    i if i != "__init__.py" else ""
-                    for i in os.listdir(
-                        os.path.join(
-                            os.path.dirname(os.path.realpath(__file__)),
-                            "pseudo_agent",
-                        )
-                    )
-                ],
-            )
-        )
-        logger.debug(f"[func_file_list]: {func_file_list}")
+        agent_judge_result = agent_judge(msg, available_models, model_series)
 
-        func_proto_list = []
+    if agent_judge_result.get("PSEUDO_AGENT",False) in ["TRUE", True]:
+        # 找到 PSEUDO_AGENT.ACTION 对应的函数并调用一下
+        pass
 
-        def extract_function_prototypes(code):
-            import re
-
-            pattern = r"def\s+(.*?)\((.*?)\)\s*->\s*(.*?):"
-            matches = re.findall(pattern, code)
-
-            function_prototypes = []
-            for match in matches:
-                function_name = match[0]
-                args = match[1]
-                return_annotation = match[2]
-                function_prototypes.append(
-                    f"def {function_name}({args}) -> {return_annotation}"
-                )
-
-            return function_prototypes
-
-        for func_file in func_file_list:
-            with open(
-                os.path.join(
-                    os.path.dirname(os.path.realpath(__file__)),
-                    "pseudo_agent",
-                    func_file,
-                ),
-                "r",
-                encoding="utf-8",
-            ) as f:
-                code = f.read()
-                prototypes = extract_function_prototypes(code)
-                for prototype in prototypes:
-                    logger.trace(prototype)
-                    func_proto_list.append(prototype)
-
-        agent_judge_question = agent_judge_template.replace(
-            "{func_list}", "\n".join(func_proto_list)
-        ).replace("{question}", msg)
-        logger.trace(f"[agent_judge_question]:\n{agent_judge_question}")
-
-        agent_judge_conversation = ask(
-            agent_judge_question,
-            available_models,
-            model_series=model_series,
-            no_history=True,
-        )[0]
-        logger.debug(
-            f"[agent_judge_conversation]:\n{agent_judge_conversation}"
-        )
-
-        def extract_pseudo_agent_variables(input_str: str) -> Dict[str, str]:
-            slice_input = input_str.split("\n")
-            valid_tag = list(
-                filter(
-                    bool,
-                    [i if "PSEUDO_AGENT" in i else "" for i in slice_input],
-                )
-            )
-
-            pseudo_agent_dict = {}
-            for line in valid_tag:
-                parts = line.split(":", 1)  # 限制分割一次，防止冒号在值中出现
-                if len(parts) == 2:
-                    key, value = parts
-                    pseudo_agent_dict[key] = value.strip()  # 移除值前后的空格
-
-            return pseudo_agent_dict
-
-        try:
-            agent_judge_result = extract_pseudo_agent_variables(
-                agent_judge_conversation
-            )
-        except Exception as e:
-            logger.error(e)
-            agent_judge_result = {"PSEUDO_AGENT": "FALSE"}
-        logger.debug(f"[agent_judge_result]: {agent_judge_result}")
 
     # conduct conversation
     conversation = ask(msg, available_models, model_series=model_series)
