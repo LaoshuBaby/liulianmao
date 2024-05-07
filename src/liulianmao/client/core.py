@@ -288,10 +288,65 @@ def chat(model_series: str = "openai"):
     if flag_agent == True:
         agent_judge_result = agent_judge(msg, available_models, model_series)
 
-    if agent_judge_result.get("PSEUDO_AGENT",False) in ["TRUE", True]:
-        # 找到 PSEUDO_AGENT.ACTION 对应的函数并调用一下
-        pass
+        if agent_judge_result.get("PSEUDO_AGENT", False) in ["TRUE", True]:
+            # 找到 PSEUDO_AGENT.ACTION.NAME 对应的函数并调用一下
+            func_file_list = list(
+                filter(
+                bool,
+                [
+                    i if i != "__init__.py" else ""
+                    for i in os.listdir(
+                        os.path.join(
+                            os.path.dirname(os.path.realpath(__file__)),
+                            "pseudo_agent",
+                        )
+                    )
+                ],
+                )
+            )
 
+            target_file_name=""
+            for func_file in func_file_list:
+                with open(
+                    os.path.join(
+                        os.path.dirname(os.path.realpath(__file__)),
+                        "pseudo_agent",
+                        func_file,
+                    ),
+                    "r",
+                    encoding="utf-8",
+                ) as f:
+                    code = f.read()
+                    if PSEUDO_AGENT.ACTION.NAME in code:
+                        target_file_name=PSEUDO_AGENT.ACTION.NAME 
+                        break
+
+
+            import importlib
+            from types import FunctionType
+
+            # 获取模块名称（不带.py）
+            module_name = target_file_name.replace('.py', '')
+
+            # 动态导入模块
+            spec = importlib.util.spec_from_file_location(module_name, target_file_name)
+            module = importlib.util.module_from_spec(spec)
+            spec.loader.exec_module(module)
+
+            # 获取函数并执行
+            try:
+                # 假设 PSEUDO_AGENT 是一个类，ACTION 是它的一个属性，NAME 是一个方法
+                # 如果 PSEUDO_AGENT.ACTION 是一个函数或方法的直接引用，下面这行代码需要适当修改
+                function_to_call = getattr(getattr(module.PSEUDO_AGENT, 'ACTION'), 'NAME')
+                
+                if isinstance(function_to_call, FunctionType):
+                    function_to_call()  # 调用函数
+                else:
+                    print(f"Error: {function_to_call} is not a function.")
+            except AttributeError as e:
+                print(f"Error: {e}")
+            except Exception as e:
+                print(f"An error occurred while running the function: {e}")
 
     # conduct conversation
     conversation = ask(msg, available_models, model_series=model_series)
@@ -318,6 +373,10 @@ def chat(model_series: str = "openai"):
                 " ", ""
             )
             if append_question_judge != "END" and append_question_judge != "":
+                # if flag_agent == True:
+                #     agent_judge_result = agent_judge(
+                #         msg, available_models, model_series
+                #     )
                 conversation = ask(
                     append_question,
                     available_models,
