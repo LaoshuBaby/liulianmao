@@ -284,12 +284,15 @@ def chat(model_series: str = "openai"):
     flag_continue = True
     flag_agent = True
 
-    # call judge agent
-    if flag_agent == True:
-        agent_judge_result = agent_judge(msg, available_models, model_series)
-
-    def run_agent(msg, agent_judge_result):
+    def agent_run(msg, agent_judge_result):
         # 找到 PSEUDO_AGENT.ACTION.NAME 对应的函数并调用一下
+
+        logger.trace(
+            "\n"
+            + f"[run_agent.msg]:\n{msg}"
+            + "\n"
+            + f"[run_agent.agent_judge_result]:\n{agent_judge_result}"
+        )
 
         ## 构建函数文件库
 
@@ -364,39 +367,49 @@ def chat(model_series: str = "openai"):
                 # 打印或返回结果
                 logger.info(result)
             else:
-                logger.info(
+                logger.error(
                     f"Error: {action_name} is not a callable function."
                 )
         except AttributeError as e:
-            logger.info(f"Error: Function {action_name} not found in module.")
+            logger.error(f"Error: Function {action_name} not found in module.")
         except Exception as e:
-            logger.info(f"An error occurred while running the function: {e}")
+            logger.error(f"An error occurred while running the function: {e}")
 
         ## 在msg前面添加内容
+        logger.debug(f"[run_agent.msg.original]:\n{msg}")
 
-        msg = (
-            json.dumps(
-                {
-                    "AGENT.ACTION.NAME": agent_judge_result[
-                        "PSEUDO_AGENT.ACTION.NAME"
-                    ],
-                    "AGENT.ACTION.PARA": agent_judge_result[
-                        "PSEUDO_AGENT.ACTION.PARA"
-                    ],
-                    "AGENT.EXEC.RESULT": result,
-                },
-                indent=2,
-                ensure_ascii=False,
-                sort_keys=False,
+        try:
+            msg = (
+                json.dumps(
+                    {
+                        "AGENT.ACTION.NAME": agent_judge_result[
+                            "PSEUDO_AGENT.ACTION.NAME"
+                        ],
+                        "AGENT.ACTION.PARA": agent_judge_result[
+                            "PSEUDO_AGENT.ACTION.PARA"
+                        ],
+                        "AGENT.EXEC.RESULT": result,
+                    },
+                    indent=2,
+                    ensure_ascii=False,
+                    sort_keys=False,
+                )
+                + msg
             )
-            + msg
-        )
+        except Exception as e:
+            logger.error(f"An error occurred while modify msg: {e}")
 
+        return msg
+
+    # call judge agent
+    if flag_agent == True:
+        agent_judge_result = agent_judge(msg, available_models, model_series)
     # conduct conversation
     if flag_agent == True and agent_judge_result.get(
         "PSEUDO_AGENT", False
     ) in ["TRUE", True]:
-        msg = run_agent(msg, agent_judge_result)
+        msg = agent_run(msg, agent_judge_result)
+        logger.trace(f"[modified_msg]:{msg}")
     conversation = ask(msg, available_models, model_series=model_series)
 
     if not flag_continue:
@@ -417,10 +430,16 @@ def chat(model_series: str = "openai"):
             time.sleep(0.05)
             logger.info("[Interaction] 请输入追问")
             append_question = input()
-            append_question_judge = append_question.replace("\n", "").replace(
-                " ", ""
+            append_question_normalized = (
+                append_question.replace("\n", "")
+                .replace(" ", "")
+                .replace(" ", "")
             )
-            if append_question_judge != "END" and append_question_judge != "":
+            if (
+                append_question_normalized != "END"
+                and append_question_normalized != ""
+            ):
+                msg = append_question
                 if flag_agent == True:
                     agent_judge_result = agent_judge(
                         msg, available_models, model_series
@@ -428,9 +447,10 @@ def chat(model_series: str = "openai"):
                 if flag_agent == True and agent_judge_result.get(
                     "PSEUDO_AGENT", False
                 ) in ["TRUE", True]:
-                    append_question = run_agent(append_question, agent_judge_result)
+                    msg = agent_run(msg, agent_judge_result)
+                    logger.trace(f"[modified_msg]:{msg}")
                 conversation = ask(
-                    append_question,
+                    msg,
                     available_models,
                     model_series=model_series,
                 )
