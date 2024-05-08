@@ -212,7 +212,7 @@ def agent_judge(msg, available_models, model_series):
         model_series=model_series,
         no_history=True,
     )[0]
-    logger.debug(f"[agent_judge_conversation]:\n{agent_judge_conversation}")
+    logger.trace(f"[agent_judge_conversation]:\n{agent_judge_conversation}")
 
     def extract_pseudo_agent_variables(input_str: str) -> Dict[str, str]:
         slice_input = input_str.split("\n")
@@ -376,8 +376,6 @@ def chat(model_series: str = "openai"):
             logger.error(f"An error occurred while running the function: {e}")
 
         ## 在msg前面添加内容
-        logger.debug(f"[run_agent.msg.original]:\n{msg}")
-
         try:
             msg = (
                 json.dumps(
