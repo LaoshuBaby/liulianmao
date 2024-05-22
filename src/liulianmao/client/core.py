@@ -10,7 +10,7 @@ from .api.openai import (
     openai_models,
 )
 from .api.zhipu import zhipu_completion
-from .utils.agent import agent_judge_template_raw
+from .utils.agent import get_agent_judge_template
 
 current_dir = os.path.dirname(os.path.realpath(__file__))
 sys.path.append(os.path.join(current_dir, ".."))
@@ -200,9 +200,11 @@ def agent_judge(msg, available_models, model_series):
                 logger.trace(prototype)
                 func_proto_list.append(prototype)
 
-    agent_judge_question = agent_judge_template_raw.replace(
-        "{func_list}", "\n".join(func_proto_list)
-    ).replace("{question}", msg)
+    agent_judge_question = (
+        get_agent_judge_template()
+        .replace("{func_list}", "\n".join(func_proto_list))
+        .replace("{question}", msg)
+    )
     logger.trace(f"[agent_judge_question]:\n{agent_judge_question}")
 
     logger.warning("Agent设定为启用，即将判断是否需要调用本地函数")
@@ -392,6 +394,7 @@ def chat(model_series: str = "openai"):
                     ensure_ascii=False,
                     sort_keys=False,
                 )
+                + "\n"
                 + msg
             )
         except Exception as e:
@@ -407,7 +410,7 @@ def chat(model_series: str = "openai"):
         "PSEUDO_AGENT", False
     ) in ["TRUE", True]:
         msg = agent_run(msg, agent_judge_result)
-        logger.trace(f"[modified_msg]:{msg}")
+        logger.trace(f"[modified_msg]:\n{msg}")
     conversation = ask(msg, available_models, model_series=model_series)
 
     if not flag_continue:
