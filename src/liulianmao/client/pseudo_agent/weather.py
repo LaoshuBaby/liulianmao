@@ -10,14 +10,49 @@ from module.log import logger
 
 def get_weather(city: str) -> str:
     answer = ""
-    if city == "Beijing" or city == "Tokyo":
+    if city == "Gensokyo":
         answer = "Everlastring rainy"
-    elif city == "北京" or city == "東京":
+    elif city == "幻想乡":
         answer = "永恒之夏"
-    elif city[0] in ["A", "N", "L"]:
-        answer = "大雨"
     else:
-        answer = "晴"
+        template = (
+            "| 温度 {tempature} | 湿度 {humidity} | 风力等级 {wind} | 天气状况 {weather} |"
+        )
+
+        import random
+
+        weather_list = [
+            "晴",
+            "多云",
+            "阴",
+            "小雨",
+            "大雨",
+            "暴雨",
+            "大暴雨",
+            "小雪",
+            "中雪",
+            "大雪",
+            "暴雪",
+            "沙尘暴",
+            "雾",
+            "霾",
+            "雨夹雪",
+            "雷阵雨",
+            "雷暴",
+            "冰雹",
+            "冻雨",
+        ]
+
+        answer = (
+            template.replace(
+                "{tempature}", f"{round(random.uniform(-25, 45), 1):.1f}"
+            )
+            .replace("{humidity}", f"{random.randint(0, 100)}%")
+            .replace(
+                "{wind}", f"{round(random.uniform(0.0, 40.0), 1):.1f} m/s"
+            )
+            .replace("{weather}", weather_list[random.randint(0, 18)])
+        )
 
     logger.trace(f"[get_weather().city]: {city}")
     logger.trace(f"[get_weather().answer]: {answer}")
