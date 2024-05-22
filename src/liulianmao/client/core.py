@@ -364,8 +364,11 @@ def chat(model_series: str = "openai"):
 
             if callable(function_to_call):
                 # 调用函数并传入参数
-                # result = function_to_call(**params)
-                result = function_to_call(city=params["city"])
+
+                for k, v in params.items():
+                    logger.trace(f"[params.{k}]: {v}")
+                result = function_to_call(**params)
+                # result = function_to_call(city=params["city"])
                 # 打印或返回结果
                 logger.info(result)
             else:
