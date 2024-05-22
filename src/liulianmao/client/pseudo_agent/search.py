@@ -93,5 +93,4 @@ def get_search_result(keyword, engine='baidu') -> str:
         )
         answer = str(e)
 
-    logger.trace(f"[url_reader().answer]: {answer}")
     return answer

@@ -184,6 +184,8 @@ def agent_judge(msg, available_models, model_series):
 
         return function_prototypes
 
+    func_do_not_use_this_prototype=["get_search_result"]
+
     for func_file in func_file_list:
         with open(
             os.path.join(
@@ -198,7 +200,16 @@ def agent_judge(msg, available_models, model_series):
             prototypes = extract_function_prototypes(code)
             for prototype in prototypes:
                 logger.trace(prototype)
-                func_proto_list.append(prototype)
+                def extract_function_name(proto_string):
+                    import re
+                    pattern = r'^def\s+(\w+)'
+                    match = re.search(pattern, proto_string, re.MULTILINE)
+                    if match:
+                        return match.group(1)
+                    return None
+                # logger.trace(f"[extract_function_name(prototype)]:`{extract_function_name(prototype)}`")
+                if extract_function_name(prototype) not in func_do_not_use_this_prototype:
+                    func_proto_list.append(prototype)
 
     agent_judge_question = (
         get_agent_judge_template()
