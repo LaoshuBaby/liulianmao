@@ -10,7 +10,7 @@ from .api.openai import (
     openai_models,
 )
 from .api.zhipu import zhipu_completion
-from .utils.agent import agent_judge_template
+from .utils.agent import agent_judge_template_raw
 
 current_dir = os.path.dirname(os.path.realpath(__file__))
 sys.path.append(os.path.join(current_dir, ".."))
@@ -200,7 +200,7 @@ def agent_judge(msg, available_models, model_series):
                 logger.trace(prototype)
                 func_proto_list.append(prototype)
 
-    agent_judge_question = agent_judge_template.replace(
+    agent_judge_question = agent_judge_template_raw.replace(
         "{func_list}", "\n".join(func_proto_list)
     ).replace("{question}", msg)
     logger.trace(f"[agent_judge_question]:\n{agent_judge_question}")
