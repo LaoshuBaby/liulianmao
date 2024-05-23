@@ -85,7 +85,9 @@ def ask(
             prompt_question=msg,
             prompt_system=config["system_message"]["content"],
             model=select_model(
-                config["model_type"], available_models, direct_debug=True
+                config["model_type"]["openai"],
+                available_models,
+                direct_debug=True,
             ),
             temperature=float(config["settings"]["temperature"]),
             amount=default_amount,
@@ -95,6 +97,7 @@ def ask(
         response = zhipu_completion(
             prompt_question=msg,
             prompt_system=config["system_message"]["content"],
+            model=config["model_type"]["zhipu"],
             no_history=no_history,
         )
     else:
@@ -284,7 +287,7 @@ def chat(model_series: str = "openai"):
     if model_series == "openai":
         available_models = openai_models("gpt")
     elif model_series == "zhipu":
-        available_models = ["glm-4"]
+        available_models = ["glm-4", "glm-3-turbo", "glm-4v"]
     elif model_series == "llama":
         available_models = ["llama3"]
     else:
@@ -414,8 +417,8 @@ def chat(model_series: str = "openai"):
                     ensure_ascii=False,
                     sort_keys=False,
                 )
-                + "\n"
-                + msg
+                + ("-" * 30 + "\n" + "上述为执行函数调用的结果，请根据结果回答如下的输入")
+                + ("-" * 30 + "\n" + msg)
             )
         except Exception as e:
             logger.error(f"An error occurred while modify msg: {e}")
@@ -509,7 +512,7 @@ def talk():
     openai_audio_speech(msg)
 
 
-def draw():
+def draw(model_series: str = "openai"):
     """
     Generates image content from a text prompt using the OpenAI API.
 
@@ -525,7 +528,14 @@ def draw():
     此函数没有参数或返回值。此函数通过文件IO和API通信等副作用进行操作。
     """
     init()
-    available_models = openai_models("dall-e")
+
+    if model_series == "openai":
+        available_models = openai_models("dall-e")
+    elif model_series == "zhipu":
+        available_models = ["cogview-3"]
+    else:
+        available_models = []
+    
     with open(
         os.path.join(
             get_user_folder(), PROJECT_FOLDER, "terminal", "question.txt"

@@ -15,7 +15,10 @@ def init():
             ["assets", "config.json"],
             json.dumps(
                 {
-                    "model_type": "gpt-4-turbo-preview",
+                    "model_type": {
+                        "openai": "gpt-4-turbo-preview",
+                        "zhipu": "glm-4",
+                    },
                     "system_message": {
                         "content": "You are a helpful assistant."
                     },
