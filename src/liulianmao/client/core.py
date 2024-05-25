@@ -288,6 +288,9 @@ def chat(
     """
     init()
 
+    logger.info(f"[flag_continue]: {flag_continue}")
+    logger.info(f"[flag_agent]: {flag_agent}")
+
     if model_series == "openai":
         available_models = openai_models("gpt")
     elif model_series == "zhipu":

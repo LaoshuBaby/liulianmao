@@ -66,6 +66,9 @@ def main(
         f_c: A boolean flag to enable continuous dialogue.
         f_a: A boolean flag to enable the use of an agent.
     """
+    logger.trace(f"[f_c]: {f_c}")
+    logger.trace(f"[f_a]: {f_a}")
+
     if "question" in actions:
         from module.const import PROJECT_FOLDER, get_user_folder
 
@@ -218,7 +221,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "-f_a",
         "--f_a",
-        action="store_false",
+        action="store_true",
         default=False,
         help="Enable the use of an agent",
     )
