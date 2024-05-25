@@ -17,6 +17,15 @@ conversation = []
 
 
 def openai_models(model_series: str = "") -> List[str]:
+    """
+    Fetches a list of available models from the OpenAI API.
+
+    Args:
+        model_series: A string to filter models by series.
+
+    Returns:
+        A list of strings representing the available models.
+    """
     logger.debug(f"[model_series]: {model_series}")
     headers = {
         "Authorization": f"Bearer {API_KEY}",
@@ -65,6 +74,19 @@ def openai_audio_speech(
     response_format: str = "mp3",
     speed: float = 1.0,
 ):
+    """
+    Generates audio speech from text using the specified OpenAI model.
+
+    Args:
+        msg: The text message to convert to speech.
+        model: The model to use for speech generation.
+        voice: The voice to use for speech generation.
+        response_format: The format of the generated audio file.
+        speed: The speed of the speech.
+
+    Returns:
+        None. The generated audio file is saved locally.
+    """
     def validate_voice(voice: str) -> str:
         voice_list = ["alloy", "echo", "fable", "onyx", "nova", "shimmer"]
         if voice not in voice_list:
@@ -143,6 +165,26 @@ def openai_chat_completion(
     use_plugin: bool = False,  # 新增参数来控制是否使用插件
     no_history: bool = False,
 ) -> Optional[dict]:
+    """
+    Generates a chat completion using the specified OpenAI model.
+
+    Args:
+        prompt_question: The user's question.
+        prompt_system: System-level information or context.
+        model: The model to use for generating the completion.
+        temperature: Controls randomness in the generation.
+        max_tokens: The maximum number of tokens to generate.
+        top_p: Controls diversity via nucleus sampling.
+        frequency_penalty: Decreases the likelihood of repeating tokens.
+        presence_penalty: Increases the likelihood of introducing new tokens.
+        stop: Sequence where the API will stop generating further tokens.
+        amount: The number of completions to generate.
+        use_plugin: Whether to use a plugin for additional functionality.
+        no_history: Whether to ignore previous conversation history.
+
+    Returns:
+        A dictionary containing the generated completion(s).
+    """
     def validate_temperature(temperature: float) -> float:
         min_temperature = 0.0
         max_temperature = 1.0
@@ -262,6 +304,19 @@ def openai_images_generations(
     quality: str = "standard",
     amount: int = 1,
 ):
+    """
+    Generates images based on the given prompt using the specified OpenAI model.
+
+    Args:
+        prompt: The text prompt to generate images from.
+        model: The model to use for image generation.
+        size: The size of the generated images.
+        quality: The quality of the generated images.
+        amount: The number of images to generate.
+
+    Returns:
+        None. The generated images are saved locally.
+    """
     headers = {
         "Authorization": f"Bearer {API_KEY}",
         "Content-Type": "application/json",
