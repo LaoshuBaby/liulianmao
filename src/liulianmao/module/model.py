@@ -55,6 +55,7 @@ def select_model(
 
     if direct_debug:
         # 直接调试模式下，不查找MODEL_INFO，直接记录日志并返回模型名称
+        logger.trace("[Model] directly log_and_return")
         return log_and_return(input_model_name)
 
     input_model_name = input_model_name.lower()
