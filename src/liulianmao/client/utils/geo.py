@@ -2,7 +2,7 @@ import os
 import sys
 from typing import Union
 
-from pyproj import Geod, CRS
+from pyproj import CRS, Geod
 
 current_dir = os.path.dirname(os.path.realpath(__file__))
 sys.path.append(os.path.join(current_dir, ".."))
@@ -40,7 +40,7 @@ def calculate_distance(
     logger.trace(f"[calculate_distance().answer]: {answer}")
     return answer
 
+
 if __name__ == "__main__":
     distance = calculate_distance(116.4074, 39.9042, 121.4737, 31.2304, 4326)
     print(distance)
-

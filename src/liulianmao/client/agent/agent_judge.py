@@ -20,20 +20,20 @@ def get_agent_judge_template():
 {func_list}
     ```
 
-    如果你认为需要，则请输出{{{no_debug_only_return}}}如下pagentcommand代码段中内容:
+    如果你认为需要，则请输出{{{no_debug_only_return}}}如下agentcommand代码段中内容:
 
-    ```pagentcommand
-    PSEUDO_AGENT:TRUE
-    PSEUDO_AGENT.ACTION:{{Prototype of function you think need to call, including parameters and typing}}
-    PSEUDO_AGENT.ACTION.NAME:{{The function's name}}
-    PSEUDO_AGENT.ACTION.PARA:{{The function's parameters in json}}
+    ```agentcommand
+    AGENT:TRUE
+    AGENT.ACTION:{{Prototype of function you think need to call, including parameters and typing}}
+    AGENT.ACTION.NAME:{{The function's name}}
+    AGENT.ACTION.PARA:{{The function's parameters in json}}
     =+=+=
     ```
 
-    如果你认为不需要调用外部程序，则请输出{{{no_debug_only_return}}}如下pagentcommand代码段中内容：
+    如果你认为不需要调用外部程序，则请输出{{{no_debug_only_return}}}如下agentcommand代码段中内容：
 
-    ```pagentcommand
-    PSEUDO_AGENT:FALSE
+    ```agentcommand
+    AGENT:FALSE
     =+=+=
     ```
 

@@ -9,6 +9,7 @@ sys.path.append(os.path.join(current_dir, ".."))
 from module.authentication import API_KEY, API_URL
 from module.log import logger
 
+
 def llama_completion(question: str, model: str, amount: int = 1):
     """
     Sends a completion request to the llama API.

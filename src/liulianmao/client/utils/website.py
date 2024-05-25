@@ -36,9 +36,9 @@ def url_reader(url: str) -> str:
 
         LONG_PAGE_THERSHOLD = 1024
         CONTINUE_SPACE_THERSHOLD = 2
-        NOT_CODE = True # shouldn't reduce space in a code file
+        NOT_CODE = True  # shouldn't reduce space in a code file
 
-        if len(response.text) > LONG_PAGE_THERSHOLD and NOT_CODE :
+        if len(response.text) > LONG_PAGE_THERSHOLD and NOT_CODE:
             import re
 
             def get_text_from_url(url_raw_text):

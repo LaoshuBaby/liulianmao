@@ -3,6 +3,7 @@ import os
 import sys
 from typing import Dict, List
 
+from .agent import get_agent_judge_template
 from .api.openai import (
     openai_audio_speech,
     openai_chat_completion,
@@ -10,7 +11,6 @@ from .api.openai import (
     openai_models,
 )
 from .api.zhipu import zhipu_completion
-from .agent import get_agent_judge_template
 
 current_dir = os.path.dirname(os.path.realpath(__file__))
 sys.path.append(os.path.join(current_dir, ".."))
@@ -236,31 +236,29 @@ def agent_judge(msg, available_models, model_series):
     )[0]
     logger.trace(f"[agent_judge_conversation]:\n{agent_judge_conversation}")
 
-    def extract_pseudo_agent_variables(input_str: str) -> Dict[str, str]:
+    def extract_agent_variables(input_str: str) -> Dict[str, str]:
         slice_input = input_str.split("\n")
         valid_tag = list(
             filter(
                 bool,
-                [i if "PSEUDO_AGENT" in i else "" for i in slice_input],
+                [i if "AGENT" in i else "" for i in slice_input],
             )
         )
 
-        pseudo_agent_dict = {}
+        agent_dict = {}
         for line in valid_tag:
             parts = line.split(":", 1)  # 限制分割一次，防止冒号在值中出现
             if len(parts) == 2:
                 key, value = parts
-                pseudo_agent_dict[key] = value.strip()  # 移除值前后的空格
+                agent_dict[key] = value.strip()  # 移除值前后的空格
 
-        return pseudo_agent_dict
+        return agent_dict
 
     try:
-        agent_judge_result = extract_pseudo_agent_variables(
-            agent_judge_conversation
-        )
+        agent_judge_result = extract_agent_variables(agent_judge_conversation)
     except Exception as e:
         logger.error(e)
-        agent_judge_result = {"PSEUDO_AGENT": "FALSE"}
+        agent_judge_result = {"AGENT": "FALSE"}
     logger.debug(f"[agent_judge_result]: {agent_judge_result}")
     return agent_judge_result
 
@@ -310,14 +308,14 @@ def chat(
         msg = file.read()
 
     def agent_run(msg, agent_judge_result):
-        # 找到 PSEUDO_AGENT.ACTION.NAME 对应的函数并调用一下
+        # 找到 AGENT.ACTION.NAME 对应的函数并调用一下
 
         logger.trace(
             "\n"
             + f"[run_agent.msg]:\n{msg}"
             + "\n"
             + f"[run_agent.agent_judge_result]:\n{agent_judge_result}"
-        )   
+        )
 
         ## 构建函数文件库
 
@@ -350,7 +348,7 @@ def chat(
                 encoding="utf-8",
             ) as f:
                 code = f.read()
-                if agent_judge_result["PSEUDO_AGENT.ACTION.NAME"] in code:
+                if agent_judge_result["AGENT.ACTION.NAME"] in code:
                     target_file_name = os.path.join(
                         os.path.dirname(os.path.realpath(__file__)),
                         "utils",
@@ -374,8 +372,8 @@ def chat(
 
         logger.success("[Agent] dynamical load called file")
 
-        action_name = agent_judge_result["PSEUDO_AGENT.ACTION.NAME"]
-        params = json.loads(agent_judge_result["PSEUDO_AGENT.ACTION.PARA"])
+        action_name = agent_judge_result["AGENT.ACTION.NAME"]
+        params = json.loads(agent_judge_result["AGENT.ACTION.PARA"])
 
         logger.debug(f"[action_name]: {action_name}")
         logger.debug(f"[params]: {params}")
@@ -409,10 +407,10 @@ def chat(
                 json.dumps(
                     {
                         "AGENT.ACTION.NAME": agent_judge_result[
-                            "PSEUDO_AGENT.ACTION.NAME"
+                            "AGENT.ACTION.NAME"
                         ],
                         "AGENT.ACTION.PARA": agent_judge_result[
-                            "PSEUDO_AGENT.ACTION.PARA"
+                            "AGENT.ACTION.PARA"
                         ],
                         "AGENT.EXEC.RESULT": result,
                     },
@@ -432,9 +430,10 @@ def chat(
     if flag_agent == True:
         agent_judge_result = agent_judge(msg, available_models, model_series)
     # conduct conversation
-    if flag_agent == True and agent_judge_result.get(
-        "PSEUDO_AGENT", False
-    ) in ["TRUE", True]:
+    if flag_agent == True and agent_judge_result.get("AGENT", False) in [
+        "TRUE",
+        True,
+    ]:
         msg = agent_run(msg, agent_judge_result)
         logger.trace(f"[modified_msg]:\n{msg}")
     conversation = ask(msg, available_models, model_series=model_series)
@@ -472,7 +471,7 @@ def chat(
                         msg, available_models, model_series
                     )
                 if flag_agent == True and agent_judge_result.get(
-                    "PSEUDO_AGENT", False
+                    "AGENT", False
                 ) in ["TRUE", True]:
                     msg = agent_run(msg, agent_judge_result)
                     logger.trace(f"[modified_msg]:{msg}")

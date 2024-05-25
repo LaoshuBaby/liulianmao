@@ -87,6 +87,7 @@ def openai_audio_speech(
     Returns:
         None. The generated audio file is saved locally.
     """
+
     def validate_voice(voice: str) -> str:
         voice_list = ["alloy", "echo", "fable", "onyx", "nova", "shimmer"]
         if voice not in voice_list:
@@ -185,6 +186,7 @@ def openai_chat_completion(
     Returns:
         A dictionary containing the generated completion(s).
     """
+
     def validate_temperature(temperature: float) -> float:
         min_temperature = 0.0
         max_temperature = 1.0
