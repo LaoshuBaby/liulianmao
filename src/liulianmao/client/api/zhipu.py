@@ -19,6 +19,31 @@ def zhipu_completion(
     amount: int = 1,
     no_history: bool = False,
 ):
+    """
+    Sends a completion request to the Zhipu API.
+
+    Args:
+        prompt_question (str): The question to be sent to the Zhipu API.
+        prompt_system (str): System-level information or context.
+        model (str): The model to use for the completion.
+        amount (int): The number of completions to request.
+        no_history (bool): Whether to ignore previous conversation history.
+
+    Returns:
+        dict: The response from the Zhipu API.
+
+    向智谱 API发送一个完成请求。
+
+    参数：
+        prompt_question (str): 发送到Zhipu API的问题。
+        prompt_system (str): 系统级信息或上下文。
+        model (str): 用于完成的模型。
+        amount (int): 请求的完成数量。
+        no_history (bool): 是否忽略之前的对话历史。
+
+    返回：
+        dict: 来自智谱 API的响应。
+    """
     if no_history:
         append_conversation = []
     else:
