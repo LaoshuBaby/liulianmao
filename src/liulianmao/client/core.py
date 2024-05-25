@@ -10,7 +10,7 @@ from .api.openai import (
     openai_models,
 )
 from .api.zhipu import zhipu_completion
-from .utils.agent import get_agent_judge_template
+from .agent import get_agent_judge_template
 
 current_dir = os.path.dirname(os.path.realpath(__file__))
 sys.path.append(os.path.join(current_dir, ".."))
