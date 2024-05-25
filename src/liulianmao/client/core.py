@@ -15,7 +15,7 @@ from .agent import get_agent_judge_template
 current_dir = os.path.dirname(os.path.realpath(__file__))
 sys.path.append(os.path.join(current_dir, ".."))
 
-from client.utils.config import load_conf
+from module.config import load_conf
 from module.log import logger
 from module.model import select_model
 from module.storage import PROJECT_FOLDER, get_user_folder, init
@@ -160,7 +160,7 @@ def agent_judge(msg, available_models, model_series):
                 for i in os.listdir(
                     os.path.join(
                         os.path.dirname(os.path.realpath(__file__)),
-                        "pseudo_agent",
+                        "agent",
                     )
                 )
             ],
@@ -193,7 +193,7 @@ def agent_judge(msg, available_models, model_series):
         with open(
             os.path.join(
                 os.path.dirname(os.path.realpath(__file__)),
-                "pseudo_agent",
+                "agent",
                 func_file,
             ),
             "r",
@@ -317,7 +317,7 @@ def chat(
             + f"[run_agent.msg]:\n{msg}"
             + "\n"
             + f"[run_agent.agent_judge_result]:\n{agent_judge_result}"
-        )
+        )   
 
         ## 构建函数文件库
 
@@ -329,7 +329,7 @@ def chat(
                     for i in os.listdir(
                         os.path.join(
                             os.path.dirname(os.path.realpath(__file__)),
-                            "pseudo_agent",
+                            "agent",
                         )
                     )
                 ],
@@ -343,7 +343,7 @@ def chat(
             with open(
                 os.path.join(
                     os.path.dirname(os.path.realpath(__file__)),
-                    "pseudo_agent",
+                    "agent",
                     func_file,
                 ),
                 "r",
@@ -353,7 +353,7 @@ def chat(
                 if agent_judge_result["PSEUDO_AGENT.ACTION.NAME"] in code:
                     target_file_name = os.path.join(
                         os.path.dirname(os.path.realpath(__file__)),
-                        "pseudo_agent",
+                        "agent",
                         func_file,
                     )
                     break
