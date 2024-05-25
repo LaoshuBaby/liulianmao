@@ -15,7 +15,7 @@ packages = [{ include = "liulianmao", from = "src" }]
 
 
 [tool.poetry.dependencies]
-python = "^3.6"
+python = ">=3.11,<4.0"
 requests = ">=2.26.0"
 loguru = ">=0.5.3"
 hellologger = "*"
