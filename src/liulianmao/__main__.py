@@ -53,7 +53,9 @@ def init_env():
 
 
 @logger.catch(level="CRITICAL")
-def main(recipe: List[str], actions: List[str], **kwargs):
+def main(
+    recipe: List[str], actions: List[str], f_c: bool, f_a: bool, **kwargs
+):
     """Execute the operations specified in the recipe list.
 
     根据提供的recipe列表和actions列表执行一系列操作。
@@ -61,6 +63,8 @@ def main(recipe: List[str], actions: List[str], **kwargs):
     Args:
         recipe: A list of strings representing the operations to be processed.默认为["init", "chat"]。
         actions: A list of strings representing additional actions to be taken.
+        f_c: A boolean flag to enable continuous dialogue.
+        f_a: A boolean flag to enable the use of an agent.
     """
     if "question" in actions:
         from module.const import PROJECT_FOLDER, get_user_folder
@@ -123,7 +127,11 @@ def main(recipe: List[str], actions: List[str], **kwargs):
             if operation_name == "ask":
                 operation("this is a question")
             if operation_name == "chat" or operation_name == "default":
-                operation(model_series=kwargs.get("series", "").lower())
+                operation(
+                    model_series=kwargs.get("series", "").lower(),
+                    flag_continue=f_c,
+                    flag_agent=f_a,
+                )
             else:
                 operation()
         else:
@@ -200,6 +208,20 @@ if __name__ == "__main__":
         default="openai",
         help="A string representing a series",
     )
+    parser.add_argument(
+        "-f_c",
+        "--f_c",
+        action="store_true",
+        default=True,
+        help="Enable continuous dialogue",
+    )
+    parser.add_argument(
+        "-f_a",
+        "--f_a",
+        action="store_false",
+        default=False,
+        help="Enable the use of an agent",
+    )
     args = parser.parse_args()
 
     actions = []
@@ -210,4 +232,10 @@ if __name__ == "__main__":
     if args.config is True:
         actions.append("config")
 
-    main(recipe=args.recipe, actions=actions, series=args.series)
+    main(
+        recipe=args.recipe,
+        actions=actions,
+        f_c=args.f_c,
+        f_a=args.f_a,
+        series=args.series,
+    )
