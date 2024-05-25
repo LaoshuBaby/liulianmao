@@ -34,25 +34,53 @@ pip install langchain langchain_openai
 
 如果您不懂什么是环境变量，也可以在同目录下放置同名文件，亦可在代码中硬编码，但鼠宝宝不推荐这么做。
 
+## Agent使用
+
+目前能提供支持的Agent很有限。
+
+使用方法如，提问：
+
+```
+您好，我看到一个维基百科页面 https://zh.wikipedia.org/wiki/%E7%B1%B3%E5%93%88%E6%B8%B8
+我想请你帮我总结一下它分别有哪些游戏，分别是哪些下属公司运营的，什么年代使用什么技术创作的，整理一个markdown表格给我。
+```
+
+然后你可能得到这样的回答：
+```
+2024-05-26 00:20:14.050 | SUCCESS  | client.core:ask:146 - [Answer] (1/1)
+当然可以，下面是米哈游公司游戏作品的Markdown表格总结：
+
+| 游戏名称       | 运营子公司             | 创作年代 | 主要技术/引擎       |
+|---------------|----------------------|----------|----------------------|
+| FlyMe2theMoon | -                     | 2011年   | Cocos2D、Box2D        |
+| 崩坏学园      | 上海米哈游影铁科技有限公司 | 2012年   | Unity、Maya           |
+| 崩坏学园2     | 上海米哈游影铁科技有限公司 | 2014年   | Unity                 |
+| 崩坏3         | 上海米哈游影铁科技有限公司 | 2016年   | Unity                 |
+| 未定事件簿    | 上海米哈游天命科技有限公司 | 2019年   | Unity                 |
+| 原神         | 上海米哈游影铁科技有限公司 | 2020年   | Unity、Unreal Engine 4 |
+| 崩坏：星穹铁道 | 上海米哈游影铁科技有限公司 | 2023年   | Unity                 |
+| 绝区零        | -                     | 未发布   | -                     |
+
+以上表格总结了米哈游公司的主要游戏作品，以及对应的运营子公司、创作年代和主要使用的开发技术或引擎。
+```
+
+请注意，能够访问什么网站可能取决于您所处地区的网络环境有所不同。
+
+网络请求是在您本机完成而非在LLM提供商完成。您需要确保您能够在本地执行对应的代码，才能正常使用Agent。
+
+后续我们可能会推出非常多的Agent可选函数，部分函数若面向特定专业领域，可能会依赖于其他包。
+
+此外，读取本地或网络资源，或通过其他方式产生非常长的输出结果，可能会花费您非常多的token，请保证在您的账单允许的情况下使用。
+
+每次进行是否适用于Agent的判断普遍需要消耗280-320个token。
+
 ## 示例
 
-- `python your_script.py` 将使用默认的recipe（即["init", "chat"]）。
-- `python your_script.py --recipe init other_operation` 将使用自定义的recipe（即["init", "other_operation"]）。
-- `python your_script.py --question` 将打开并打印`question.txt`文件的内容，并使用默认的recipe。
-- `python your_script.py --question --recipe init other_operation` 将打开并打印`question.txt`文件的内容，并使用自定义的recipe。
-
-## GitHub Actions 和 Sphinx 文档生成
-
-本项目使用 GitHub Actions 自动构建和部署 Sphinx 文档到 GitHub Pages。以下是相关配置和步骤的说明：
-
-- GitHub Actions 工作流配置文件位于 `.github/workflows/sphinx.yml`。
-- 文档源文件位于 `docs/` 目录下。
-- Sphinx 配置文件为 `docs/conf.py`，其中定义了项目名称、作者等信息。
-- 依赖项（包括 Sphinx 和主题）列在 `docs/requirements.txt` 中，GitHub Actions 会自动安装这些依赖。
-- 文档构建命令为 `sphinx-build -b html docs/ _build/html`，该命令会在 `docs/` 目录下生成 HTML 格式的文档。
-- 构建完成的文档通过 `peaceiris/actions-gh-pages@v3` 部署到 GitHub Pages。
-
-这样配置后，每次向 `main` 分支推送更新时，GitHub Actions 会自动构建和部署最新的文档，无需手动干预。
+- `py -m liulianmao` 将使用默认的recipe（即["chat"]）。
+- `py -m liulianmao -r draw talk` 将使用自定义的recipe（如["draw", "talk"]）。
+- `py -m liulianmao -q` 将打开并打印`question.txt`文件的内容，并使用默认的recipe。
+- `py -m liulianmao -s openai` 将指定使用`openai`系列的模型。
+- `py -m liulianmao -f_a` 将允许使用Agent。
 
 ## TODO
 
