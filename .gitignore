@@ -185,3 +185,4 @@ fabric.properties
 .idea
 src/terminal/answer.txt
 src/terminal/question.txt
+/_build
