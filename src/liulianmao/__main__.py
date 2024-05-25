@@ -3,9 +3,8 @@ import os
 import sys
 from typing import List
 
-from module.log import logger
-
 from const import LIULIANMAO_VERSION
+from module.log import logger
 
 
 @logger.catch(level="CRITICAL")
