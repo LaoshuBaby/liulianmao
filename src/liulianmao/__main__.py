@@ -3,9 +3,8 @@ import os
 import sys
 from typing import List
 
-from module.log import logger
-
 from const import LIULIANMAO_VERSION
+from module.log import logger
 
 
 @logger.catch(level="CRITICAL")
@@ -54,7 +53,9 @@ def init_env():
 
 
 @logger.catch(level="CRITICAL")
-def main(recipe: List[str], actions: List[str], f_c: bool, f_a: bool, **kwargs):
+def main(
+    recipe: List[str], actions: List[str], f_c: bool, f_a: bool, **kwargs
+):
     """Execute the operations specified in the recipe list.
 
     根据提供的recipe列表和actions列表执行一系列操作。
@@ -111,10 +112,10 @@ def main(recipe: List[str], actions: List[str], f_c: bool, f_a: bool, **kwargs):
         from client.langchain import main as langchain
 
     operations = {
-        "default": lambda: core.chat(flag_continue=f_c, flag_agent=f_a),
+        "default": core.chat,
         "models": api_openai.openai_models,
         "ask": core.ask,
-        "chat": lambda: core.chat(flag_continue=f_c, flag_agent=f_a),
+        "chat": core.chat,
         "talk": core.talk,
         "draw": core.draw,
     }
@@ -126,7 +127,11 @@ def main(recipe: List[str], actions: List[str], f_c: bool, f_a: bool, **kwargs):
             if operation_name == "ask":
                 operation("this is a question")
             if operation_name == "chat" or operation_name == "default":
-                operation(model_series=kwargs.get("series", "").lower())
+                operation(
+                    model_series=kwargs.get("series", "").lower(),
+                    flag_continue=f_c,
+                    flag_agent=f_a,
+                )
             else:
                 operation()
         else:
@@ -227,4 +232,10 @@ if __name__ == "__main__":
     if args.config is True:
         actions.append("config")
 
-    main(recipe=args.recipe, actions=actions, f_c=args.f_c, f_a=args.f_a, series=args.series)
+    main(
+        recipe=args.recipe,
+        actions=actions,
+        f_c=args.f_c,
+        f_a=args.f_a,
+        series=args.series,
+    )

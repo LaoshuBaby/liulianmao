@@ -265,7 +265,11 @@ def agent_judge(msg, available_models, model_series):
     return agent_judge_result
 
 
-def chat(model_series: str = "openai", flag_continue: bool = True, flag_agent: bool = False):
+def chat(
+    model_series: str = "openai",
+    flag_continue: bool = True,
+    flag_agent: bool = False,
+):
     """
     Initiates a chat conversation by reading a question from a file and calling the OpenAI API.
 
@@ -301,7 +305,6 @@ def chat(model_series: str = "openai", flag_continue: bool = True, flag_agent: b
         encoding="utf-8",
     ) as file:
         msg = file.read()
-
 
     def agent_run(msg, agent_judge_result):
         # 找到 PSEUDO_AGENT.ACTION.NAME 对应的函数并调用一下
@@ -532,7 +535,7 @@ def draw(model_series: str = "openai"):
         available_models = ["cogview-3"]
     else:
         available_models = []
-    
+
     with open(
         os.path.join(
             get_user_folder(), PROJECT_FOLDER, "terminal", "question.txt"
