@@ -41,6 +41,19 @@ pip install langchain langchain_openai
 - `python your_script.py --question` 将打开并打印`question.txt`文件的内容，并使用默认的recipe。
 - `python your_script.py --question --recipe init other_operation` 将打开并打印`question.txt`文件的内容，并使用自定义的recipe。
 
+## GitHub Actions 和 Sphinx 文档生成
+
+本项目使用 GitHub Actions 自动构建和部署 Sphinx 文档到 GitHub Pages。以下是相关配置和步骤的说明：
+
+- GitHub Actions 工作流配置文件位于 `.github/workflows/sphinx.yml`。
+- 文档源文件位于 `docs/` 目录下。
+- Sphinx 配置文件为 `docs/conf.py`，其中定义了项目名称、作者等信息。
+- 依赖项（包括 Sphinx 和主题）列在 `docs/requirements.txt` 中，GitHub Actions 会自动安装这些依赖。
+- 文档构建命令为 `sphinx-build -b html docs/ _build/html`，该命令会在 `docs/` 目录下生成 HTML 格式的文档。
+- 构建完成的文档通过 `peaceiris/actions-gh-pages@v3` 部署到 GitHub Pages。
+
+这样配置后，每次向 `main` 分支推送更新时，GitHub Actions 会自动构建和部署最新的文档，无需手动干预。
+
 ## TODO
 
 目前有如下亟待解决的主要问题
