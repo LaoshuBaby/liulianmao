@@ -160,7 +160,7 @@ def agent_judge(msg, available_models, model_series):
                 for i in os.listdir(
                     os.path.join(
                         os.path.dirname(os.path.realpath(__file__)),
-                        "agent",
+                        "utils",
                     )
                 )
             ],
@@ -193,7 +193,7 @@ def agent_judge(msg, available_models, model_series):
         with open(
             os.path.join(
                 os.path.dirname(os.path.realpath(__file__)),
-                "agent",
+                "utils",
                 func_file,
             ),
             "r",
@@ -329,7 +329,7 @@ def chat(
                     for i in os.listdir(
                         os.path.join(
                             os.path.dirname(os.path.realpath(__file__)),
-                            "agent",
+                            "utils",
                         )
                     )
                 ],
@@ -343,7 +343,7 @@ def chat(
             with open(
                 os.path.join(
                     os.path.dirname(os.path.realpath(__file__)),
-                    "agent",
+                    "utils",
                     func_file,
                 ),
                 "r",
@@ -353,7 +353,7 @@ def chat(
                 if agent_judge_result["PSEUDO_AGENT.ACTION.NAME"] in code:
                     target_file_name = os.path.join(
                         os.path.dirname(os.path.realpath(__file__)),
-                        "agent",
+                        "utils",
                         func_file,
                     )
                     break
