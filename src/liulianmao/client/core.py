@@ -387,7 +387,7 @@ def chat(
                 # 调用函数并传入参数
 
                 for k, v in params.items():
-                    logger.trace(f"[params.{k}]: {v}")
+                    logger.trace(f"[params.{k}({type(k)},{type(v)})]: {v}")
                 result = function_to_call(**params)
                 # result = function_to_call(city=params["city"])
                 # 打印或返回结果
