@@ -391,15 +391,16 @@ def chat(
                 result = function_to_call(**params)
                 # result = function_to_call(city=params["city"])
                 # 打印或返回结果
-                logger.info(result)
+                if "\n" in result:
+                    logger.info(f"\n{result}")
+                else:
+                    logger.info(result)
             else:
                 logger.error(
                     f"Error: {action_name} is not a callable function."
                 )
-        except AttributeError as e:
-            logger.error(f"Error: Function {action_name} not found in module.")
         except Exception as e:
-            logger.error(f"An error occurred while running the function: {e}")
+            logger.error(f"[Error]: {e}")
 
         ## 在msg前面添加内容
         try:
@@ -418,7 +419,11 @@ def chat(
                     ensure_ascii=False,
                     sort_keys=False,
                 )
-                + ("-" * 30 + "\n" + "上述为执行函数调用的结果，请根据结果回答如下的输入")
+                + (
+                    "-" * 30
+                    + "\n"
+                    + "上述为执行函数调用的结果，请根据结果回答如下的输入"
+                )
                 + ("-" * 30 + "\n" + msg)
             )
         except Exception as e:

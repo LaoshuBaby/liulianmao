@@ -10,11 +10,11 @@ from module.log import logger
 
 
 def local_file_reader(path_list: List[str]) -> str:
-    import requests
 
-    logger.trace(f"[local_file_reader().path]: {path}")
+    logger.trace(f"[local_file_reader().path_list]: {path_list}")
 
     file_content = []
+
     for path in path_list:
         try:
             with open(path, "r", encoding="utf-8") as f:
