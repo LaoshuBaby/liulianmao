@@ -1,32 +1,73 @@
 import os
 import sys
-from typing import List
+from typing import List, Optional
 
 current_dir = os.path.dirname(os.path.realpath(__file__))
 sys.path.append(os.path.join(current_dir, "..", ".."))
 
-
 from module.log import logger
 
 
-def local_file_reader(path_list: List[str]) -> str:
+def local_file_reader(path_list: List[str], flag_recursive=False) -> str:
+    """读取并处理指定路径列表中的文件内容，返回拼接后的结果。
+
+    Args:
+        path_list (List[str]): 文件路径列表。
+        flag_recursive (bool, optional): 是否递归处理文件夹。 Defaults to False.
+
+    Returns:
+        str: 处理后的文件内容。
+    """
 
     logger.trace(f"[local_file_reader().path_list]: {path_list}")
 
-    file_content = []
+    def read_single_file(file_path: str) -> Optional[str]:
+        """读取单个文件内容。
 
-    for path in path_list:
+        Args:
+            file_path (str): 文件路径。
+
+        Returns:
+            Optional[str]: 文件内容或None（如果文件不存在）。
+        """
         try:
-            with open(path, "r", encoding="utf-8") as f:
-                file_content.append(f.read())
-
+            with open(file_path, "r", encoding="utf-8") as file:
+                return file.read()
         except Exception as e:
             logger.error(e)
             logger.warning(
-                f"Failed to load file {path} from your local."
-                + f"无法访问您本地的文件{path}。"
+                f"Failed to load file {file_path} from your local."
+                + f"无法访问您本地的文件{file_path}。"
             )
-            file_content.append(str(e))
+            return None
+
+    def process_files_in_path_list(path_list: List[str]) -> str:
+        """
+        处理路径列表中的所有文件。
+
+        Args:
+            path_list (List[str]): 文件路径列表。
+
+        Returns:
+            str: 处理后的文件内容。
+        """
+        file_content = []
+        for path in path_list:
+            if os.path.isfile(path):
+                # path是文件
+                file_content.append(read_single_file(path))
+            else:
+                # path是文件夹
+                for file in os.listdir(path):
+                    file_path = os.path.join(path, file)
+                    if os.path.isfile(file_path):
+                        file_content.append(read_single_file(file_path))
+
+        return file_content
+
+    file_content = process_files_in_path_list(path_list)
+
+    logger.trace(file_content)
 
     if len(file_content) == 1:
         answer = file_content[0]

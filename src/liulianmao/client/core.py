@@ -173,8 +173,8 @@ def agent_judge(msg, available_models, model_series):
     def extract_function_prototypes(code):
         import re
 
-        pattern = r"def\s+(.*?)\((.*?)\)\s*->\s*(.*?):"
-        matches = re.findall(pattern, code)
+        pattern = r"^def\s+(.*?)\((.*?)\)\s*->\s*(.*?)\s*:"
+        matches = re.findall(pattern, code, re.MULTILINE)
 
         function_prototypes = []
         for match in matches:
