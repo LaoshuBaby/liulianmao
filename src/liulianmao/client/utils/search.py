@@ -69,12 +69,15 @@ def get_search_result(keyword, engine="baidu") -> str:
                 filter(
                     bool,
                     [
-                        reduce_spaces(i, CONTINUE_SPACE_THERSHOLD)
-                        if (
-                            i != ""
-                            and bool(re.fullmatch(r"^[\s\n\t]*$", i)) == False
+                        (
+                            reduce_spaces(i, CONTINUE_SPACE_THERSHOLD)
+                            if (
+                                i != ""
+                                and bool(re.fullmatch(r"^[\s\n\t]*$", i))
+                                == False
+                            )
+                            else ""
                         )
-                        else ""
                         for i in souped_text.split("\n")
                     ],
                 )
