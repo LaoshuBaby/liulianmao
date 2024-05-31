@@ -44,6 +44,116 @@ def local_file_reader(path_list: List[str], flag_recursive=False) -> str:
 
         return "\n".join(text_content)
 
+    def read_single_image(file_path):
+        import easyocr
+
+        all_available_languages = [
+            "abq",
+            "ady",
+            "af",
+            "ang",
+            "ar",
+            "as",
+            "ava",
+            "az",
+            "be",
+            "bg",
+            "bh",
+            "bho",
+            "bn",
+            "bs",
+            "ch_sim",
+            "ch_tra",
+            "che",
+            "cs",
+            "cy",
+            "da",
+            "dar",
+            "de",
+            "en",
+            "es",
+            "et",
+            "fa",
+            "fr",
+            "ga",
+            "gom",
+            "hi",
+            "hr",
+            "hu",
+            "id",
+            "inh",
+            "is",
+            "it",
+            "ja",
+            "kbd",
+            "kn",
+            "ko",
+            "ku",
+            "la",
+            "lbe",
+            "lez",
+            "lt",
+            "lv",
+            "mah",
+            "mai",
+            "mi",
+            "mn",
+            "mr",
+            "ms",
+            "mt",
+            "ne",
+            "new",
+            "nl",
+            "no",
+            "oc",
+            "pi",
+            "pl",
+            "pt",
+            "ro",
+            "ru",
+            "rs_cyrillic",
+            "rs_latin",
+            "sck",
+            "sk",
+            "sl",
+            "sq",
+            "sv",
+            "sw",
+            "ta",
+            "tab",
+            "te",
+            "th",
+            "tjk",
+            "tl",
+            "tr",
+            "ug",
+            "uk",
+            "ur",
+            "uz",
+            "vi",
+        ]
+        common_used_languages = [
+            "en",
+            "ch_sim",
+            "ch_tra",
+            "ru",
+            "fr",
+            "de",
+            "es",
+            "it",
+            "pt",
+            "nl",
+            "ar",
+            "ja",
+            "ko",
+            "fa",
+            "tr",
+        ]
+        greater_china_common = ["en", "ch_sim"]
+        reader = easyocr.Reader(greater_china_common, gpu=False)
+        result = reader.readtext(file_path, detail=1)
+        return str(result)
+
     def read_single_file(file_path: str) -> Optional[str]:
         """读取单个文件内容。
 
@@ -53,14 +163,16 @@ def local_file_reader(path_list: List[str], flag_recursive=False) -> str:
         Returns:
             Optional[str]: 文件内容或None（如果文件不存在）。
         """
+        extension_image = [".jpg", ".png", ".gif", ".bmp", ".jpeg"]
         try:
             with open(file_path, "r", encoding="utf-8") as file:
-                if file_path.lower().endswith(".pdf"):
-                    # 如果是PDF，调用read_single_file_pdf来处理
+                file_extension = os.path.splitext(file_path)[1].lower()
+                if file_extension == ".pdf":
                     logger.info("[file_type]: PDF")
                     return read_single_file_pdf(file_path)
-                elif file_path.lower().endswith(".jpg"):
-                    logger.info("[file_type]: IMG")
+                elif file_extension in extension_image:
+                    logger.info(f"[file_type]: IMG ({file_extension})")
+                    return read_single_image(file_path)
                 else:
                     return file.read()
         except Exception as e:

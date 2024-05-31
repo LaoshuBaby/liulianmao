@@ -419,12 +419,10 @@ def chat(
                     ensure_ascii=False,
                     sort_keys=False,
                 )
-                + (
-                    "-" * 30
-                    + "\n"
-                    + "上述为执行函数调用的结果，请根据结果回答如下的输入"
-                )
-                + ("-" * 30 + "\n" + msg)
+                + ("\n" + "-" * 30 + "\n")
+                + "上述为执行函数调用的结果，请根据结果回答如下的输入"
+                + ("\n" + "-" * 30 + "\n")
+                + msg
             )
         except Exception as e:
             logger.error(f"An error occurred while modify msg: {e}")
