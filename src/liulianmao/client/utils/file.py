@@ -197,13 +197,13 @@ def local_file_reader(path_list: List[str], flag_recursive=False) -> str:
         for path in path_list:
             if os.path.isfile(path):
                 # path是文件
-                file_content.append(read_single_file(path))
+                file_content.append((path,read_single_file(path)))
             else:
                 # path是文件夹
                 for file in os.listdir(path):
                     file_path = os.path.join(path, file)
                     if os.path.isfile(file_path):
-                        file_content.append(read_single_file(file_path))
+                        file_content.append((file_path,read_single_file(file_path)))
 
         return file_content
 
@@ -212,13 +212,13 @@ def local_file_reader(path_list: List[str], flag_recursive=False) -> str:
     logger.trace(file_content)
 
     if len(file_content) == 1:
-        answer = file_content[0]
+        answer = file_content[0][1]
     else:
         answer = ""
         for i in range(len(file_content)):
-            answer += f"File ({i+1}/{len(file_content)})\n"
+            answer += f"File ({i+1}/{len(file_content)}): {file_content[i][0]}\n"
             answer += ">" * 20 + "\n"
-            answer += file_content[i] + "\n"
+            answer += file_content[i][1] + "\n"
 
     logger.trace(f"[local_file_reader().answer]: {answer}")
     return answer
