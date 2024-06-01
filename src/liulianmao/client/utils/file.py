@@ -197,13 +197,15 @@ def local_file_reader(path_list: List[str], flag_recursive=False) -> str:
         for path in path_list:
             if os.path.isfile(path):
                 # path是文件
-                file_content.append((path,read_single_file(path)))
+                file_content.append((path, read_single_file(path)))
             else:
                 # path是文件夹
                 for file in os.listdir(path):
                     file_path = os.path.join(path, file)
                     if os.path.isfile(file_path):
-                        file_content.append((file_path,read_single_file(file_path)))
+                        file_content.append(
+                            (file_path, read_single_file(file_path))
+                        )
 
         return file_content
 
@@ -216,9 +218,104 @@ def local_file_reader(path_list: List[str], flag_recursive=False) -> str:
     else:
         answer = ""
         for i in range(len(file_content)):
-            answer += f"File ({i+1}/{len(file_content)}): {file_content[i][0]}\n"
+            answer += (
+                f"File ({i+1}/{len(file_content)}): {file_content[i][0]}\n"
+            )
             answer += ">" * 20 + "\n"
             answer += file_content[i][1] + "\n"
 
     logger.trace(f"[local_file_reader().answer]: {answer}")
     return answer
+
+
+def combine_dir_to_string(
+    dictionary,
+    ignore_rules: List[Tuple[str, bool]] = [
+        ("__pycache__", False),
+        (".git", True),
+    ],
+):
+
+    def should_ignore(dictionary, root, ignore_rules):
+        """
+        根据忽略规则判断目录是否应该被忽略。
+        :param dictionary: 当前目录路径
+        :param root: 根目录路径
+        :param ignore_rules: 忽略规则列表，每个规则是一个二元组，包含目录名和是否只在根目录下忽略
+        :return: 如果应该忽略，返回True；否则返回False。
+        # 如果只在根目录下忽略，检查当前目录是否为根目录下的直接子目录
+        # 如果在任意位置都忽略，检查当前目录名是否匹配
+        """
+        for ignore_dir, only_root in ignore_rules:
+            if only_root:
+                if (
+                    os.path.basename(dictionary) == ignore_dir
+                    and os.path.dirname(dictionary) == root
+                ):
+                    return True
+            else:
+                if os.path.basename(dictionary) == ignore_dir:
+                    return True
+        return False
+
+    def print_tree(dictionary, prefix="", ignore_rules=None, root=""):
+        if ignore_rules is None:
+            ignore_rules = []
+        if root == "":
+            root = dictionary
+        files = []
+        if prefix == "":
+            print(dictionary)
+        else:
+            print(prefix + os.path.basename(dictionary))
+        prefix = prefix.replace("├──", "│  ").replace("└──", "   ")
+
+        try:
+            files = os.listdir(dictionary)
+        except PermissionError as e:
+            print(f"PermissionError: {e}")
+            return
+        except FileNotFoundError as e:
+            print(f"FileNotFoundError: {e}")
+            return
+
+        files.sort()
+        entries = [os.path.join(dictionary, f) for f in files]
+
+        for i, entry in enumerate(entries):
+            if os.path.isdir(entry) and should_ignore(
+                entry, root, ignore_rules
+            ):
+                continue
+            connector = "├──" if i < len(entries) - 1 else "└──"
+            if os.path.isdir(entry):
+                print_tree(
+                    entry,
+                    prefix=prefix + connector,
+                    ignore_rules=ignore_rules,
+                    root=root,
+                )
+            else:
+                print(prefix + connector + os.path.basename(entry))
+
+    if ignore_rules is None:
+        ignore_rules = []
+    if root == "":
+        root = dictionary
+    if extensions is None:
+        extensions = [".py", ".rs", ".json"]
+    all_files_content = ""
+    for root, dirs, files in os.walk(dictionary):
+        dirs[:] = [
+            d
+            for d in dirs
+            if not should_ignore(os.path.join(root, d), root, ignore_rules)
+        ]
+        for file in files:
+            if any(file.endswith(ext) for ext in extensions):
+                file_path = os.path.join(root, file)
+                all_files_content += f"File: {file_path}\n```\n"
+                with open(file_path, "r", encoding="utf-8") as f:
+                    all_files_content += f.read()
+                all_files_content += "\n```\n\n"
+    return all_files_content
