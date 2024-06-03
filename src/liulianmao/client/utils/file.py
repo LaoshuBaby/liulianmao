@@ -1,6 +1,6 @@
 import os
 import sys
-from typing import List, Optional
+from typing import List, Optional, Tuple
 
 current_dir = os.path.dirname(os.path.realpath(__file__))
 sys.path.append(os.path.join(current_dir, "..", ".."))
@@ -234,7 +234,7 @@ def combine_dir_to_string(
         ("__pycache__", False),
         (".git", True),
     ],
-):
+) -> str:
 
     def should_ignore(dictionary, root, ignore_rules):
         """
