@@ -5,8 +5,8 @@ from typing import List, Optional, Tuple
 current_dir = os.path.dirname(os.path.realpath(__file__))
 sys.path.append(os.path.join(current_dir, "..", ".."))
 
-from module.log import logger
 from module.const import all_available_languages
+from module.log import logger
 
 
 def local_file_reader(path_list: List[str], flag_recursive=False) -> str:
@@ -51,7 +51,7 @@ def local_file_reader(path_list: List[str], flag_recursive=False) -> str:
         logger.trace(f"Begin scan {file_path}")
 
         greater_china_common = ["en", "ch_sim"]
-        lang_code=greater_china_common
+        lang_code = greater_china_common
         logger.trace(f"[lang_code]: {lang_code}")
         reader = easyocr.Reader(lang_code, gpu=False)
         result = reader.readtext(file_path, detail=1)
