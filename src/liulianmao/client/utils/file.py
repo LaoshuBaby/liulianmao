@@ -47,6 +47,7 @@ def local_file_reader(path_list: List[str], flag_recursive=False) -> str:
     def read_single_image(file_path):
         import easyocr
 
+        logger.trace(f"Begin scan {file_path}")
         all_available_languages = [
             "abq",
             "ady",
@@ -150,7 +151,9 @@ def local_file_reader(path_list: List[str], flag_recursive=False) -> str:
             "tr",
         ]
         greater_china_common = ["en", "ch_sim"]
-        reader = easyocr.Reader(greater_china_common, gpu=False)
+        lang_code=greater_china_common
+        logger.trace(f"[lang_code]: {lang_code}")
+        reader = easyocr.Reader(lang_code, gpu=False)
         result = reader.readtext(file_path, detail=1)
         return str(result)
 
