@@ -26,9 +26,12 @@ Ollama 提供了两种文档：
 
 WIP
 
-## 零一万物
+## 智谱清言
 
-他们说他们完全兼容OpenAI的
+### API文档
+
+* [`/paas/v4/chat/completions`](https://open.bigmodel.cn/dev/api#glm-4)
+* [`/paas/v4/batches`](https://open.bigmodel.cn/dev/api#batch-api)
 
 ## 通义千问/文心一言
 

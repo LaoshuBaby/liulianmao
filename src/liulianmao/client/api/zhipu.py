@@ -107,14 +107,13 @@ def zhipu_batch(
     completion_window="24h",
     metadata={"description": "sentiment classification"},
 ):
-    def zhipu_batch_create():
+    def zhipu_batch_create(prompt_system: str, prompt_question: str):
 
         payload = {
             "model": "glm-4",
             "messages": [
                 {"role": "system", "content": prompt_system},
             ]
-            + append_conversation
             + [{"role": "user", "content": prompt_question}],
         }
         logger.trace("[Headers]\n" + f"{headers}")
@@ -122,6 +121,7 @@ def zhipu_batch(
         response = requests.post(
             API_URL + "/paas/v4/batches", headers=headers, json=payload
         )
+        return response
 
     def zhipu_batch_retrieve():
         pass
@@ -137,6 +137,7 @@ def zhipu_batch(
         "Authorization": f"Bearer {API_KEY}",
     }
 
+    response = zhipu_batch_create()
 
     if response.status_code == 200:
         logger.trace("[Debug] response.status_code == 200")
