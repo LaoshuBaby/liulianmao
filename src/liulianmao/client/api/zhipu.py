@@ -12,6 +12,28 @@ from module.log import logger
 conversation = []
 
 
+def get_user_id() -> str:
+    import platform
+    import uuid
+
+    def get_mac_address():
+
+        try:
+            mac_hex = hex(uuid.getnode()).upper()
+            mac = ":".join(
+                mac_hex[i : i + 2] for i in range(2, len(mac_hex), 2)
+            )
+            return mac
+        except:
+            return None
+
+    return (
+        f"{platform.node()} ({get_mac_address()})"
+        + " | "
+        + f"{platform.python_implementation()} ({platform.python_build()[0]})"
+    )
+
+
 def zhipu_completion(
     prompt_question: str,
     prompt_system: str,
@@ -59,6 +81,7 @@ def zhipu_completion(
         ]
         + append_conversation
         + [{"role": "user", "content": prompt_question}],
+        "user_id": get_user_id(),
     }
     logger.trace("[Headers]\n" + f"{headers}")
     logger.trace("[Payload]\n" + f"{payload}")
