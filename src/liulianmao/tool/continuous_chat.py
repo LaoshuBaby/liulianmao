@@ -1,23 +1,42 @@
-from typing import List
+import json
+import os
+import sys
 import time
 from queue import Queue
+from typing import List
 
+current_dir = os.path.dirname(os.path.realpath(__file__))
+sys.path.append(os.path.join(current_dir, ".."))
 
-available_models = ["AI1", "AI2"]
+from module.config import load_conf
+from module.log import logger
+from module.model import select_model
+from module.storage import PROJECT_FOLDER, get_user_folder, init
+from module.client.core import ask
+
+models_room = ["AI1", "AI2"]
 max_rounds = 10
+
+config = load_conf()
 
 
 model_queue = Queue()
-for model in available_models:
+for model in models_room:
     model_queue.put(model)
 
 
 response_buffer = None
 
 
-def ask(msg: str, current_model: str, **kwargs) -> str:
-    print(f"Model {current_model} is processing the message: {msg}")
-    return f"Response from {current_model}"
+def completion(
+    prompt_question: str,
+    prompt_system: str = config["system_message"]["content"],
+    model: str = "glm-4",
+    amount: int = 1,
+    no_history: bool = False,
+):
+    print(f"Model {model} is processing the message: {prompt_question}")
+    return f"Response from {model}"
 
 
 def communicate():
