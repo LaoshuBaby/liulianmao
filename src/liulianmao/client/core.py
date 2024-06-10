@@ -11,6 +11,7 @@ from .api.openai import (
     openai_models,
 )
 from .api.zhipu import zhipu_completion
+from .api.llama import llama_completion
 
 current_dir = os.path.dirname(os.path.realpath(__file__))
 sys.path.append(os.path.join(current_dir, ".."))
@@ -101,10 +102,18 @@ def ask(
             model=config["model_type"]["zhipu"],
             no_history=no_history,
         )
+    elif model_series == "llama":
+        response = llama_completion(
+            prompt_question=msg,
+            prompt_system=config["system_message"]["content"],
+            model=config["model_type"].get("llama","llama3"),
+            no_history=no_history,
+        )
     else:
         response = {"choices": [{"message": {"content": "啊哈？"}}]}
 
     try:
+        # response = json.loads(response.text)
         choices = response.get("choices", [])
 
         # 使用.get()方法更安全地访问字典键值，以避免KeyError异常
@@ -137,7 +146,8 @@ def ask(
 
     except Exception as e:
         # 记录关键错误信息而不是直接退出程序，提供更好的错误上下文
-        logger.error(response)
+        # logger.error(response)
+        # logger.error(response.text)
         logger.exception(f"An error occurred: {e}", exc_info=True)
         # 可以在这里处理特定的清理工作，如果有必要的话
         # 最后，可能会根据程序的需要选择是否退出
