@@ -9,8 +9,9 @@ sys.path.append(os.path.join(current_dir, ".."))
 from module.authentication import API_KEY, API_URL
 from module.log import logger
 
+conversation = []
 
-def llama_completion(question: str, model: str, amount: int = 1):
+def llama_completion(prompt_system: str,prompt_question: str, model: str="llama3", temperature: float = 0.5, hoster: str="ollama",no_history:bool=False):
     """
     Sends a completion request to the llama API.
 
@@ -32,17 +33,27 @@ def llama_completion(question: str, model: str, amount: int = 1):
     返回：
         来自llama API的响应。
     """
+    if no_history:
+        append_conversation = []
+    else:
+        append_conversation = conversation
     headers = {
         "Content-Type": "application/json",
     }
     payload = {
         "model": model,
-        "messages": question,
+        "messages": [
+            {"role": "system", "content": prompt_system},
+        ]
+        + append_conversation
+        + [{"role": "user", "content": prompt_question}],
         "temperature": temperature,
-        "n": amount,
     }
     logger.trace("[Headers]\n" + f"{headers}")
     logger.trace("[Payload]\n" + f"{payload}")
+
+    DEFAULT_API_URL="http://localhost:11434"
+    API_URL=DEFAULT_API_URL
     response = requests.post(
         API_URL + "/completions", headers=headers, json=payload
     )
