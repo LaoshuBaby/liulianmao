@@ -1,7 +1,7 @@
 import json
 import os
 import sys
-from typing import Dict, List
+from typing import Dict, List, Union
 
 from .agent import get_agent_judge_template
 from .api.openai import (
@@ -312,8 +312,8 @@ def agent_judge(msg, available_models, model_series):
 
 def chat(
     model_series: str = "openai",
-    feature_continue: bool = True,
     feature_agent: bool = False,
+    feature_continue: Union[bool, int] = True,
 ):
     """
     Initiates a chat conversation by reading a question from a file and calling the OpenAI API.
@@ -476,6 +476,11 @@ def chat(
 
         return msg
 
+    if type(feature_continue) == type(0):
+        logger.warning(f"本次对话最大限制轮数: {feature_continue}")
+        max_count_round = feature_continue
+    count_round = 0
+
     # call judge agent
     if feature_agent == True:
         agent_judge_result = agent_judge(msg, available_models, model_series)
@@ -486,6 +491,7 @@ def chat(
     ]:
         msg = agent_run(msg, agent_judge_result)
         logger.trace(f"[modified_msg]:\n{msg}")
+    count_round += 1
     conversation = ask(msg, available_models, model_series=model_series)
 
     if not feature_continue:
@@ -500,6 +506,12 @@ def chat(
     else:
         flag_end = False
         while not flag_end:
+            if type(feature_continue) == type(0):
+                logger.warning(f"当前已进行对话轮数：{count_round}")
+                if count_round >= max_count_round:
+                    logger.error(f"对话轮数达到上限")
+                    break
+
             import time
 
             # 部分控制台输入是异步的，给足够的时间以保证不会打断输出
@@ -511,10 +523,7 @@ def chat(
                 .replace(" ", "")
                 .replace(" ", "")
             )
-            if (
-                append_question_normalized != "END"
-                and append_question_normalized != ""
-            ):
+            if append_question_normalized not in ["END", "", "/bye"]:
                 msg = append_question
                 if feature_agent == True:
                     agent_judge_result = agent_judge(
@@ -530,8 +539,11 @@ def chat(
                     available_models,
                     model_series=model_series,
                 )
+
+                count_round += 1
             else:
                 flag_end = True
+                logger.success("再见！")
                 break
 
 

@@ -212,18 +212,23 @@ if __name__ == "__main__":
         help="A string representing a series",
     )
     parser.add_argument(
-        "-f_c",
-        "--f_c",
-        action="store_true",
-        default=True,
-        help="Enable continuous dialogue",
-    )
-    parser.add_argument(
-        "-f_a",
+        "-fa" "-f_a",
         "--f_a",
         action="store_true",
         default=False,
         help="Enable the use of an agent",
+    )
+    parser.add_argument(
+        "-fc",
+        "-f_c",
+        "--f_c",
+        # action="store",
+        nargs="?",
+        type=int,
+        const=True,
+        default=True,
+        help="""Enable continuous dialogue with a specified integer value, or True by default.
+        默认值为 True，但如果用户提供了具体的轮数，这个数字将被使用""",
     )
     args = parser.parse_args()
 
