@@ -85,6 +85,13 @@ def zhipu_completion(
     }
     logger.trace("[Headers]\n" + f"{headers}")
     logger.trace("[Payload]\n" + f"{payload}")
+
+    flag_echo_input = False
+    if flag_echo_input:
+        logger.debug("[Question]\n" + f"{prompt_question}")
+    else:
+        logger.trace("[Question]\n" + f"{prompt_question}")
+
     response = requests.post(
         API_URL + "/paas/v4/chat/completions", headers=headers, json=payload
     )

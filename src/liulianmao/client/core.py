@@ -222,7 +222,7 @@ def agent_judge(msg, available_models, model_series):
                 ):
                     func_proto_list.append(prototype)
 
-    feature_use_native_functioncall = True
+    feature_use_native_functioncall = False
     logger.warning(
         f"Agent设定为启用，即将判断是否需要调用本地函数 (method={'model_native'+'.'+model_series if feature_use_native_functioncall==True else 'liulianmao_agent'})"
     )
@@ -312,8 +312,8 @@ def agent_judge(msg, available_models, model_series):
 
 def chat(
     model_series: str = "openai",
-    flag_continue: bool = True,
-    flag_agent: bool = False,
+    feature_continue: bool = True,
+    feature_agent: bool = False,
 ):
     """
     Initiates a chat conversation by reading a question from a file and calling the OpenAI API.
@@ -333,8 +333,8 @@ def chat(
     """
     init()
 
-    logger.info(f"[flag_continue]: {flag_continue}")
-    logger.info(f"[flag_agent]: {flag_agent}")
+    logger.info(f"[feature_continue]: {feature_continue}")
+    logger.info(f"[feature_agent]: {feature_agent}")
 
     if model_series == "openai":
         available_models = openai_models("gpt")
@@ -477,10 +477,10 @@ def chat(
         return msg
 
     # call judge agent
-    if flag_agent == True:
+    if feature_agent == True:
         agent_judge_result = agent_judge(msg, available_models, model_series)
     # conduct conversation
-    if flag_agent == True and agent_judge_result.get("AGENT", False) in [
+    if feature_agent == True and agent_judge_result.get("AGENT", False) in [
         "TRUE",
         True,
     ]:
@@ -488,7 +488,7 @@ def chat(
         logger.trace(f"[modified_msg]:\n{msg}")
     conversation = ask(msg, available_models, model_series=model_series)
 
-    if not flag_continue:
+    if not feature_continue:
         with open(
             os.path.join(
                 get_user_folder(), PROJECT_FOLDER, "terminal", "answer.txt"
@@ -516,11 +516,11 @@ def chat(
                 and append_question_normalized != ""
             ):
                 msg = append_question
-                if flag_agent == True:
+                if feature_agent == True:
                     agent_judge_result = agent_judge(
                         msg, available_models, model_series
                     )
-                if flag_agent == True and agent_judge_result.get(
+                if feature_agent == True and agent_judge_result.get(
                     "AGENT", False
                 ) in ["TRUE", True]:
                     msg = agent_run(msg, agent_judge_result)

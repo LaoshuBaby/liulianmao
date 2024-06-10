@@ -63,8 +63,8 @@ def main(
     Args:
         recipe: A list of strings representing the operations to be processed.默认为["init", "chat"]。
         actions: A list of strings representing additional actions to be taken.
-        f_c: A boolean flag to enable continuous dialogue.
-        f_a: A boolean flag to enable the use of an agent.
+        f_c: A boolean feature to enable continuous dialogue.
+        f_a: A boolean feature to enable the use of an agent.
     """
     logger.trace(f"[f_c]: {f_c}")
     logger.trace(f"[f_a]: {f_a}")
@@ -132,8 +132,8 @@ def main(
             if operation_name == "chat" or operation_name == "default":
                 operation(
                     model_series=kwargs.get("series", "").lower(),
-                    flag_continue=f_c,
-                    flag_agent=f_a,
+                    feature_continue=f_c,
+                    feature_agent=f_a,
                 )
             else:
                 operation()
