@@ -27,6 +27,7 @@ def ask(
     default_amount: int = 1,
     model_series: str = "openai",
     no_history: bool = False,
+    **kwargs,
 ):
     """
     Sends a message to the OpenAI chat completion API and processes the response.
@@ -136,6 +137,7 @@ def ask(
 
     except Exception as e:
         # 记录关键错误信息而不是直接退出程序，提供更好的错误上下文
+        logger.error(response)
         logger.exception(f"An error occurred: {e}", exc_info=True)
         # 可以在这里处理特定的清理工作，如果有必要的话
         # 最后，可能会根据程序的需要选择是否退出
@@ -220,21 +222,66 @@ def agent_judge(msg, available_models, model_series):
                 ):
                     func_proto_list.append(prototype)
 
-    agent_judge_question = (
-        get_agent_judge_template()
-        .replace("{func_list}", "\n".join(func_proto_list))
-        .replace("{question}", msg)
+    feature_use_native_functioncall = True
+    logger.warning(
+        f"Agent设定为启用，即将判断是否需要调用本地函数 (method={'model_native'+'.'+model_series if feature_use_native_functioncall==True else 'liulianmao_agent'})"
     )
-    logger.trace(f"[agent_judge_question]:\n{agent_judge_question}")
 
-    logger.warning("Agent设定为启用，即将判断是否需要调用本地函数")
-    agent_judge_conversation = ask(
-        agent_judge_question,
-        available_models,
-        model_series=model_series,
-        no_history=True,
-    )[0]
-    logger.trace(f"[agent_judge_conversation]:\n{agent_judge_conversation}")
+    if feature_use_native_functioncall == True and (
+        model_series.lower() == "zhipu" and "glm-4" in available_models
+    ):
+        # 专用schema
+        # tools_list后续应根据func_proto_list生成，此处仅为示意
+        tools_list = [
+            {
+                "type": "function",
+                "function": {
+                    "name": "get_random_shengxiao",
+                    "description": "随机选择一个生肖",
+                    "parameters": {
+                        "type": "object",
+                        "properties": {
+                            "select": {
+                                "description": "强制钦点一个生肖",
+                                "type": "string",
+                            }
+                        },
+                        "required": [],
+                    },
+                },
+            }
+        ]
+
+        # 召唤判定
+        agent_judge_conversation = ask(
+            msg,
+            available_models,
+            model_series=model_series,
+            no_history=True,
+            tools=tools_list,
+        )[0]
+        logger.trace(
+            f"[agent_judge_conversation]:\n{agent_judge_conversation}"
+        )
+    else:
+        # 土法炼钢
+        agent_judge_question = (
+            get_agent_judge_template()
+            .replace("{func_list}", "\n".join(func_proto_list))
+            .replace("{question}", msg)
+        )
+        logger.trace(f"[agent_judge_question]:\n{agent_judge_question}")
+
+        # 召唤判定
+        agent_judge_conversation = ask(
+            agent_judge_question,
+            available_models,
+            model_series=model_series,
+            no_history=True,
+        )[0]
+        logger.trace(
+            f"[agent_judge_conversation]:\n{agent_judge_conversation}"
+        )
 
     def extract_agent_variables(input_str: str) -> Dict[str, str]:
         slice_input = input_str.split("\n")
