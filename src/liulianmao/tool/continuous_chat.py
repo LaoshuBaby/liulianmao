@@ -12,9 +12,12 @@ from module.config import load_conf
 from module.log import logger
 from module.model import select_model
 from module.storage import PROJECT_FOLDER, get_user_folder, init
-from module.client.core import ask
+from client.core import ask
+from client.api.openai import (
+    openai_models,
+)
 
-models_room = ["AI1", "AI2"]
+models_room = ["zhipu", "llama"]
 max_rounds = 10
 
 config = load_conf()
@@ -25,19 +28,28 @@ for model in models_room:
     model_queue.put(model)
 
 
-response_buffer = None
+response_buffer = "你好！"
 
+# def ask(
+#     msg: str,
+#     available_models: List[str] = [],
+#     default_amount: int = 1,
+#     model_series: str = "openai",
+#     no_history: bool = False,
+#     **kwargs,
+# ):
+    
+#     return f"Response from {model}"
 
-def completion(
-    prompt_question: str,
-    prompt_system: str = config["system_message"]["content"],
-    model: str = "glm-4",
-    amount: int = 1,
-    no_history: bool = False,
-):
-    print(f"Model {model} is processing the message: {prompt_question}")
-    return f"Response from {model}"
-
+def get_available_models(model_series:str)->List[str]:
+    if model_series == "openai":
+        available_models = openai_models("gpt")
+    elif model_series == "zhipu":
+        available_models = ["glm-4", "glm-3-turbo", "glm-4v"]
+    elif model_series == "llama":
+        available_models = ["llama3"]
+    else:
+        available_models = []
 
 def communicate():
     global response_buffer
@@ -46,11 +58,14 @@ def communicate():
     while not model_queue.empty() and round_counter < max_rounds:
         current_model = model_queue.get()
 
-        ai_output = ask(response_buffer, current_model)
+        available_models=get_available_models(current_model)
+
+        ai_output = ask(msg=response_buffer, available_models=available_models,model_series=current_model)[0]
+        logger.success(f"Model {current_model} is processing the message: {ai_output}")
 
         response_buffer = ai_output
 
-        print(f"Round {round_counter + 1}: {current_model} says:", ai_output)
+        logger.info(f"Round {round_counter + 1}: {current_model} says:", ai_output)
 
         model_queue.put(current_model)
 
