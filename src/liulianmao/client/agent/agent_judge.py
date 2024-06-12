@@ -4,8 +4,11 @@ import sys
 current_dir = os.path.dirname(os.path.realpath(__file__))
 sys.path.append(os.path.join(current_dir, "..", ".."))
 
-
-from module.log import logger
+# 这样写相对路径不好，pycharm也会报红说找不到module模块，
+# 更好的实践是从项目根模块开始写，原理我忘了，在群里问了等答案
+# ref: https://github.com/pdm-project/pdm/blob/f7787cdda868a8f2d3b0c019964fb141d59cdb26/src/pdm/utils.py#L27
+# from module.log import logger
+from liulianmao.module.log import logger
 
 
 def get_agent_judge_template():
@@ -48,7 +51,11 @@ def get_agent_judge_template():
 
     """
 
-    if flag_agent_debug == True:
+    # if flag_agent_debug == True:
+    # pycharm会报可以简化成这样
+    # 另外如果是false，一般写 is False 而不是 == False，
+    # 更 pythonic 一点
+    if flag_agent_debug:
         agent_judge_template = agent_judge_template.replace(
             "{{{no_debug_only_return}}}", ""
         )
