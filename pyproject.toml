@@ -1,6 +1,10 @@
 [tool.poetry]
 name = "liulianmao"
-version = "__LIULIANMAO_VERSION__"
+# 鼠宝是用啥IDE开发的，git clone后用PyCharm打开，
+# pycharm自动检测并生成 poetry 环境时，会报错：
+# __LIULIANMAO_VERSION__ 啥的
+# 去掉这个替换机制相关的文件后就能自动创建环境了
+version = "2.2.0"
 description = "A LLM client for use from the command line or IDE."
 authors = ["快乐的老鼠宝宝 <laoshubaby@protonmail.com>"]
 license = "MIT"
