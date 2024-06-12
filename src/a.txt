@@ -1,0 +1,18 @@
+技术栈不熟可以抄已经成熟的和你的项目结构类似的项目，我的puntgun抄的pdm，都是命令行工具，你这个也是命令行工具：
+https://boholder.github.io/blogs/what-i-learned-from-putgun/#%E6%8A%80%E6%9C%AF%E6%A0%88%E4%B8%8D%E7%86%9F%E5%8F%AF%E4%BB%A5%E6%8A%84
+
+我看你的项目没上linter（只有black，也算linter，更是formatter）和单测(python一般是用pytest，好用的，我看你加了pytest依赖，但没有单侧代码)，可以先把linter加上（用pre-commit集成这些工具，pre-commit的缺点是必须联网+代理用，因为是从github clone工具源码），linter可以指出来一些常见误用和不好的使用方式，能从linter那学到不少。
+
+https://github.com/boholder/python_web_server_template/blob/a260aa8f966d80edcfd0533c911d061309d838e1/pyproject.toml#L53
+https://github.com/pdm-project/pdm/blob/main/.pre-commit-config.yaml
+
+如果是用 red green refactor 实践（大概十几分钟跑一次全部的单测）的话，我的建议是只用 ruff ruff-format pyupgrade 三个工具，python写的工具在不够强的电脑上跑得挺慢的，ruff是rust写的跑的很快。pyupgrade是检查过时语法的，相比其他工具来说更有用一些。
+其他工具：codespell 检查typo。mypy检查Typing（但是我不喜欢强制全部typing所以我不用），其他的 black pycln isort flake8 全被ruff替代了。
+
+red green refactor：
+https://martinfowler.com/bliki/TestDrivenDevelopment.html
+
+我看到你的git中每个commit涉及的文件一般是一两个，这是很好的实践，叫小步提交。
+小步提交的实践有助于通过 git bisect 定位bug。
+这本书中含有更多具体有用的实践，包括red green refactor和小步提交等：
+Code That Fits in Your Head : Heuristics for Software Engineering
