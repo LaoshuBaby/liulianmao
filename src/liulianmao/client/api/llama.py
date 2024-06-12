@@ -27,7 +27,8 @@ COMPLETION_API_URL = DEFAULT_API_URL + "/v1/chat/completions"
 
 
 # hoster 参数 unused，这个pycharm和ruff也会提醒
-def llama_completion(prompt_system: str,prompt_question: str, model: str="llama3", temperature: float = 0.5, hoster: str="ollama",no_history:bool=False):
+def llama_completion(prompt_system: str, prompt_question: str, model: str = "llama3", temperature: float = 0.5, hoster: str = "ollama",
+                     no_history: bool = False):
     # 为关键函数写文档，いい！
     """
     Sends a completion request to the llama API. OpenAI compatitable version.
@@ -60,10 +61,10 @@ def llama_completion(prompt_system: str,prompt_question: str, model: str="llama3
     payload = {
         "model": model,
         "messages": [
-            {"role": "system", "content": prompt_system},
-        ]
-        + append_conversation
-        + [{"role": "user", "content": prompt_question}],
+                        {"role": "system", "content": prompt_system},
+                    ]
+                    + append_conversation
+                    + [{"role": "user", "content": prompt_question}],
         "temperature": temperature,
     }
     logger.trace("[Headers]\n" + f"{headers}")
@@ -73,16 +74,8 @@ def llama_completion(prompt_system: str,prompt_question: str, model: str="llama3
 
     if response.status_code == 200:
         logger.trace("[Debug] response.status_code == 200")
-        # judge content_type
-        try:
-            logger.trace("[Response]\n" + str(response.json()))
-        except Exception as e:
-            # loguru可以把异常包装成打印堆栈的异常，然后这个新异常还要处理
-            # https://loguru.readthedocs.io/en/stable/overview.html#fully-descriptive-exceptions
-            # 有时候我省事用 @logger.catch() 处理包装的异常
-            # https://loguru.readthedocs.io/en/stable/overview.html#exceptions-catching-within-threads-or-main
-            logger.trace(e)
-            logger.critical("RESPONSE NOT JSON")
+        # 既然这个方法里调用了response.json()，就正好把结果返回来，省得重复调用
+        response_json = judge_response_content_type(response)
         # judge json schema
         try:
             if no_history == False:
@@ -101,13 +94,28 @@ def llama_completion(prompt_system: str,prompt_question: str, model: str="llama3
             logger.trace(e)
             logger.critical("WRONG RESPONSE SCHEMA")
         logger.trace("[History]\n" + str(conversation))
-        return response.json()
+        return response_json
     else:
         logger.trace("[Debug] response.status_code != 200")
         logger.error(
             f"Error: {response.status_code} {response.content.decode('utf-8')}"
         )
         return {}
+
+
+def judge_response_content_type(response):
+    # judge content_type
+    try:
+        response_json = response.json()
+        logger.trace("[Response]\n" + str(response_json))
+        return response_json
+    except Exception as e:
+        # loguru可以把异常包装成打印堆栈的异常，然后这个新异常还要处理
+        # https://loguru.readthedocs.io/en/stable/overview.html#fully-descriptive-exceptions
+        # 有时候我省事用 @logger.catch() 处理包装的异常
+        # https://loguru.readthedocs.io/en/stable/overview.html#exceptions-catching-within-threads-or-main
+        logger.trace(e)
+        logger.critical("RESPONSE NOT JSON")
 
 
 def llama_completion_native():
