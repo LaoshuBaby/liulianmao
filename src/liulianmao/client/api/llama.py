@@ -76,23 +76,17 @@ def llama_completion(prompt_system: str, prompt_question: str, model: str = "lla
         logger.trace("[Debug] response.status_code == 200")
         # 既然这个方法里调用了response.json()，就正好把结果返回来，省得重复调用
         response_json = judge_response_content_type(response)
-        # judge json schema
-        try:
-            if no_history == False:
-                conversation.append(
-                    {"role": "user", "content": prompt_question}
-                )
-                conversation.append(
-                    {
-                        "role": "system",
-                        "content": response.json()["choices"][0]["message"][
-                            "content"
-                        ],
-                    }
-                )
-        except Exception as e:
-            logger.trace(e)
-            logger.critical("WRONG RESPONSE SCHEMA")
+
+        # 好吧，是false的话用not好像比 is False 更好
+        if not no_history:
+            # 这一步无关响应的json格式是否异常，应该在try外，表明这个无关
+            # （这样改也没改变执行顺序）
+            conversation.append({"role": "user", "content": prompt_question})
+            # 这部分没有return没有raise，说明它不影响执行顺序，
+            # 抽成方法，减小读代码认知负担
+            # （我不知道logger.critical会不会抛异常，不会吧）
+            append_answer_to_history(response)
+
         logger.trace("[History]\n" + str(conversation))
         return response_json
     else:
@@ -101,6 +95,16 @@ def llama_completion(prompt_system: str, prompt_question: str, model: str = "lla
             f"Error: {response.status_code} {response.content.decode('utf-8')}"
         )
         return {}
+
+
+def append_answer_to_history(response):
+    try:
+        # judge json schema
+        answer = response.json()["choices"][0]["message"]["content"]
+        conversation.append({"role": "system", "content": answer})
+    except Exception as e:
+        logger.trace(e)
+        logger.critical("WRONG RESPONSE SCHEMA")
 
 
 def judge_response_content_type(response):
