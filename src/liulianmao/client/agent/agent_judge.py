@@ -14,6 +14,7 @@ from liulianmao.module.log import logger
 def get_agent_judge_template():
     flag_agent_debug = False
 
+    # 这段提示格式写得真好，我学习了
     agent_judge_template = """
     请你判断下列提问过程中是否需要调用外部程序？
 
