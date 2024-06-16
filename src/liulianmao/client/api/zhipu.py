@@ -35,8 +35,7 @@ def get_user_id() -> str:
 
 
 def zhipu_completion(
-    prompt_question: str,
-    prompt_system: str,
+    msg: str,
     model: str = "glm-4",
     amount: int = 1,
     no_history: bool = False,
@@ -45,8 +44,7 @@ def zhipu_completion(
     Sends a completion request to the Zhipu API.
 
     Args:
-        prompt_question (str): The question to be sent to the Zhipu API.
-        prompt_system (str): System-level information or context.
+        msg (str): The question to be sent to the Zhipu API.
         model (str): The model to use for the completion.
         amount (int): The number of completions to request.
         no_history (bool): Whether to ignore previous conversation history.
@@ -57,8 +55,7 @@ def zhipu_completion(
     向智谱 API发送一个完成请求。
 
     参数：
-        prompt_question (str): 发送到Zhipu API的问题。
-        prompt_system (str): 系统级信息或上下文。
+        msg (str): 发送到Zhipu API的问题。
         model (str): 用于完成的模型。
         amount (int): 请求的完成数量。
         no_history (bool): 是否忽略之前的对话历史。
@@ -76,11 +73,8 @@ def zhipu_completion(
     }
     payload = {
         "model": "glm-4",
-        "messages": [
-            {"role": "system", "content": prompt_system},
-        ]
-        + append_conversation
-        + [{"role": "user", "content": prompt_question}],
+        "messages": append_conversation
+        + [{"role": "user", "content": msg}],
         "user_id": get_user_id(),
     }
     logger.trace("[Headers]\n" + f"{headers}")
@@ -88,9 +82,9 @@ def zhipu_completion(
 
     flag_echo_input = False
     if flag_echo_input:
-        logger.debug("[Question]\n" + f"{prompt_question}")
+        logger.debug("[Question]\n" + f"{msg}")
     else:
-        logger.trace("[Question]\n" + f"{prompt_question}")
+        logger.trace("[Question]\n" + f"{msg}")
 
     response = requests.post(
         API_URL + "/paas/v4/chat/completions", headers=headers, json=payload
@@ -108,7 +102,7 @@ def zhipu_completion(
         try:
             if no_history == False:
                 conversation.append(
-                    {"role": "user", "content": prompt_question}
+                    {"role": "user", "content": msg}
                 )
                 conversation.append(
                     {

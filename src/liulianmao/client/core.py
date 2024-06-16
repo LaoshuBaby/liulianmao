@@ -97,8 +97,7 @@ def ask(
         )
     elif model_series == "zhipu":
         response = zhipu_completion(
-            prompt_question=msg,
-            prompt_system=config["system_message"]["content"],
+            msg=msg,
             model=config["model_type"]["zhipu"],
             no_history=no_history,
         )
