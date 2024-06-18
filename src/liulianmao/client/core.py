@@ -4,6 +4,7 @@ import sys
 from typing import Dict, List, Union
 
 from .agent import get_agent_judge_template
+from .api.llama import llama_completion
 from .api.openai import (
     openai_audio_speech,
     openai_chat_completion,
@@ -11,7 +12,6 @@ from .api.openai import (
     openai_models,
 )
 from .api.zhipu import zhipu_completion
-from .api.llama import llama_completion
 
 current_dir = os.path.dirname(os.path.realpath(__file__))
 sys.path.append(os.path.join(current_dir, ".."))
@@ -105,7 +105,7 @@ def ask(
         response = llama_completion(
             prompt_question=msg,
             prompt_system=config["system_message"]["content"],
-            model=config["model_type"].get("llama","llama3"),
+            model=config["model_type"].get("llama", "llama3"),
             no_history=no_history,
         )
     else:

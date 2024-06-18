@@ -73,8 +73,7 @@ def zhipu_completion(
     }
     payload = {
         "model": "glm-4",
-        "messages": append_conversation
-        + [{"role": "user", "content": msg}],
+        "messages": append_conversation + [{"role": "user", "content": msg}],
         "user_id": get_user_id(),
     }
     logger.trace("[Headers]\n" + f"{headers}")
@@ -101,9 +100,7 @@ def zhipu_completion(
         # judge json schema
         try:
             if no_history == False:
-                conversation.append(
-                    {"role": "user", "content": msg}
-                )
+                conversation.append({"role": "user", "content": msg})
                 conversation.append(
                     {
                         "role": "system",
