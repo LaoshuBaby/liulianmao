@@ -86,7 +86,7 @@ def local_file_reader(path_list: List[str], flag_recursive=False) -> str:
             )
             return None
 
-    def process_files_in_path_list(path_list: List[str]) -> str:
+    def process_files_in_path_list(path_list) -> List[Optional[str]]:
         """
         处理路径列表中的所有文件。
 
@@ -97,19 +97,37 @@ def local_file_reader(path_list: List[str], flag_recursive=False) -> str:
             str: 处理后的文件内容。
         """
         file_content = []
-        for path in path_list:
-            if os.path.isfile(path):
-                # path是文件
-                file_content.append((path, read_single_file(path)))
-            else:
-                # path是文件夹
-                for file in os.listdir(path):
-                    file_path = os.path.join(path, file)
-                    if os.path.isfile(file_path):
-                        file_content.append(
-                            (file_path, read_single_file(file_path))
-                        )
 
+        def recursive_read_files(path) -> List[Optional[Tuple[str, str]]]:
+            """
+            如果是文件，就返回这个文件内容，并封进list中。当然也可能是[None]
+            如果是目录，就递归逐个调用，返回的依然是一个list，里面的多个元素可能是Tuple[str,str](第一个路径，第二个正文)或None
+            """
+            # 初始化文件内容列表
+            logger.trace(f"{path} call recursive_read_files")
+            file_content = []
+
+            # 检查当前路径是否是文件
+            if os.path.isfile(path):
+                file_content.append((path, read_single_file(path)))
+            # 如果是目录，则继续遍历
+            elif os.path.isdir(path):
+                logger.trace(f"{path}是文件夹")
+                for file_or_dir in os.listdir(path):
+                    if flag_recursive:
+                        logger.trace(f"{path}是文件夹且要求继续递归查找")
+                        # 递归调用以处理子路径
+                        sub_path = os.path.join(path, file_or_dir)
+                        file_content.extend(recursive_read_files(sub_path))
+                    else:
+                        logger.trace(f"{path}是文件夹但里面更深的文件夹不管了")
+                        if os.path.isfile(file_or_dir):
+                            file_content.append((path, read_single_file(path)))
+
+            return file_content
+
+        for path in path_list:
+            file_content.extend(recursive_read_files(path))
         return file_content
 
     file_content = process_files_in_path_list(path_list)
@@ -125,7 +143,7 @@ def local_file_reader(path_list: List[str], flag_recursive=False) -> str:
                 f"File ({i+1}/{len(file_content)}): {file_content[i][0]}\n"
             )
             answer += ">" * 20 + "\n"
-            answer += file_content[i][1] + "\n"
+            answer += str(file_content[i][1]) + "\n"
 
     logger.trace(f"[local_file_reader().answer]: {answer}")
     return answer
