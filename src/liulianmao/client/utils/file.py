@@ -9,53 +9,47 @@ from module.const import all_available_languages
 from module.log import logger
 
 
-def local_file_reader(path_list: List[str], flag_recursive=False) -> str:
+def filter_files(file_list: List[str], ignore_rules: List[Tuple[str, bool]]) -> List[str]:
+    """根据忽略规则过滤文件列表。
+
+    Args:
+        file_list (List[str]): 原始文件列表。
+        ignore_rules (List[Tuple[str, bool]]): 忽略规则列表，每个元素为一个元组，包含匹配模式和是否递归应用的标志。
+
+    Returns:
+        List[str]: 过滤后的文件列表。
+    """
+    filtered_list = []
+    for file_path in file_list:
+        ignore = False
+        for pattern, recursive in ignore_rules:
+            if recursive:
+                if pattern in file_path:
+                    ignore = True
+                    break
+            else:
+                if pattern in os.path.basename(file_path):
+                    ignore = True
+                    break
+        if not ignore:
+            filtered_list.append(file_path)
+    return filtered_list
+
+
+def local_file_reader(path_list: List[str], ignore_rules: Optional[List[Tuple[str, bool]]] = None) -> str:
     """读取并处理指定路径列表中的文件内容，返回拼接后的结果。
 
     Args:
         path_list (List[str]): 文件路径列表。
-        flag_recursive (bool, optional): 是否递归处理文件夹。 Defaults to False.
+        ignore_rules (Optional[List[Tuple[str, bool]]]): 忽略规则列表。
 
     Returns:
         str: 处理后的文件内容。
     """
+    if ignore_rules is None:
+        ignore_rules = []
 
     logger.trace(f"[local_file_reader().path_list]: {path_list}")
-
-    def read_single_file_pdf(file_path):
-        """读取PDF文件并返回其内容作为纯文本字符串。
-
-        Args:
-            file_path (str): PDF文件路径。
-
-        Returns:
-            str: PDF文件内容作为纯文本字符串。
-        """
-        import pymupdf  # PyMuPDF
-
-        text_content = []
-        try:
-            doc = pymupdf.open(file_path)
-            for page in doc:
-                text = page.get_text()
-                text_content.append(text)
-        except Exception as e:
-            logger.error(f"Error while extracting text from PDF: {e}")
-            return str(e)
-
-        return "\n".join(text_content)
-
-    def read_single_image(file_path):
-        import easyocr
-
-        logger.trace(f"Begin scan {file_path}")
-
-        greater_china_common = ["en", "ch_sim"]
-        lang_code = greater_china_common
-        logger.trace(f"[lang_code]: {lang_code}")
-        reader = easyocr.Reader(lang_code, gpu=False)
-        result = reader.readtext(file_path, detail=1)
-        return str(result)
 
     def read_single_file(file_path: str) -> Optional[str]:
         """读取单个文件内容。
@@ -66,18 +60,9 @@ def local_file_reader(path_list: List[str], flag_recursive=False) -> str:
         Returns:
             Optional[str]: 文件内容或None（如果文件不存在）。
         """
-        extension_image = [".jpg", ".png", ".gif", ".bmp", ".jpeg"]
         try:
             with open(file_path, "r", encoding="utf-8") as file:
-                file_extension = os.path.splitext(file_path)[1].lower()
-                if file_extension == ".pdf":
-                    logger.info("[file_type]: PDF")
-                    return read_single_file_pdf(file_path)
-                elif file_extension in extension_image:
-                    logger.info(f"[file_type]: IMG ({file_extension})")
-                    return read_single_image(file_path)
-                else:
-                    return file.read()
+                return file.read()
         except Exception as e:
             logger.error(e)
             logger.warning(
@@ -86,157 +71,57 @@ def local_file_reader(path_list: List[str], flag_recursive=False) -> str:
             )
             return None
 
-    def process_files_in_path_list(path_list) -> List[Optional[str]]:
-        """
-        处理路径列表中的所有文件。
+    file_content = []
+    for path in path_list:
+        if os.path.isfile(path):
+            file_content.append(read_single_file(path))
+        elif os.path.isdir(path):
+            for root, dirs, files in os.walk(path):
+                for file in files:
+                    file_path = os.path.join(root, file)
+                    file_content.append(read_single_file(file_path))
+
+    file_content = filter_files(file_content, ignore_rules)
+
+    return "\n".join(filter(None, file_content))
+
+
+def combine_dir_to_string(directory: str, ignore_rules: Optional[List[Tuple[str, bool]]] = None) -> str:
+    """将目录内容组合成字符串。
+
+    Args:
+        directory (str): 目录路径。
+        ignore_rules (Optional[List[Tuple[str, bool]]]): 忽略规则列表。
+
+    Returns:
+        str: 目录内容的字符串表示。
+    """
+    if ignore_rules is None:
+        ignore_rules = []
+
+    def should_ignore(file_path: str) -> bool:
+        """判断文件是否应该被忽略。
 
         Args:
-            path_list (List[str]): 文件路径列表。
+            file_path (str): 文件路径。
 
         Returns:
-            str: 处理后的文件内容。
+            bool: 如果文件应该被忽略，则返回True，否则返回False。
         """
-        file_content = []
-
-        def recursive_read_files(path) -> List[Optional[Tuple[str, str]]]:
-            """
-            如果是文件，就返回这个文件内容，并封进list中。当然也可能是[None]
-            如果是目录，就递归逐个调用，返回的依然是一个list，里面的多个元素可能是Tuple[str,str](第一个路径，第二个正文)或None
-            """
-            # 初始化文件内容列表
-            logger.trace(f"{path} call recursive_read_files")
-            file_content = []
-
-            # 检查当前路径是否是文件
-            if os.path.isfile(path):
-                file_content.append((path, read_single_file(path)))
-            # 如果是目录，则继续遍历
-            elif os.path.isdir(path):
-                logger.trace(f"{path}是文件夹")
-                for file_or_dir in os.listdir(path):
-                    if flag_recursive:
-                        logger.trace(f"{path}是文件夹且要求继续递归查找")
-                        # 递归调用以处理子路径
-                        sub_path = os.path.join(path, file_or_dir)
-                        file_content.extend(recursive_read_files(sub_path))
-                    else:
-                        logger.trace(f"{path}是文件夹但里面更深的文件夹不管了")
-                        if os.path.isfile(file_or_dir):
-                            file_content.append((path, read_single_file(path)))
-
-            return file_content
-
-        for path in path_list:
-            file_content.extend(recursive_read_files(path))
-        return file_content
-
-    file_content = process_files_in_path_list(path_list)
-
-    logger.trace(file_content)
-
-    if len(file_content) == 1:
-        answer = file_content[0][1]
-    else:
-        answer = ""
-        for i in range(len(file_content)):
-            answer += (
-                f"File ({i+1}/{len(file_content)}): {file_content[i][0]}\n"
-            )
-            answer += ">" * 20 + "\n"
-            answer += str(file_content[i][1]) + "\n"
-
-    logger.trace(f"[local_file_reader().answer]: {answer}")
-    return answer
-
-
-def combine_dir_to_string(
-    dictionary,
-    ignore_rules: List[Tuple[str, bool]] = [
-        ("__pycache__", False),
-        (".git", True),
-    ],
-) -> str:
-
-    def should_ignore(dictionary, root, ignore_rules):
-        """
-        根据忽略规则判断目录是否应该被忽略。
-        :param dictionary: 当前目录路径
-        :param root: 根目录路径
-        :param ignore_rules: 忽略规则列表，每个规则是一个二元组，包含目录名和是否只在根目录下忽略
-        :return: 如果应该忽略，返回True；否则返回False。
-        # 如果只在根目录下忽略，检查当前目录是否为根目录下的直接子目录
-        # 如果在任意位置都忽略，检查当前目录名是否匹配
-        """
-        for ignore_dir, only_root in ignore_rules:
-            if only_root:
-                if (
-                    os.path.basename(dictionary) == ignore_dir
-                    and os.path.dirname(dictionary) == root
-                ):
+        for pattern, recursive in ignore_rules:
+            if recursive:
+                if pattern in file_path:
                     return True
             else:
-                if os.path.basename(dictionary) == ignore_dir:
+                if pattern in os.path.basename(file_path):
                     return True
         return False
 
-    def print_tree(dictionary, prefix="", ignore_rules=None, root=""):
-        if ignore_rules is None:
-            ignore_rules = []
-        if root == "":
-            root = dictionary
-        files = []
-        if prefix == "":
-            print(dictionary)
-        else:
-            print(prefix + os.path.basename(dictionary))
-        prefix = prefix.replace("├──", "│  ").replace("└──", "   ")
-
-        try:
-            files = os.listdir(dictionary)
-        except PermissionError as e:
-            print(f"PermissionError: {e}")
-            return
-        except FileNotFoundError as e:
-            print(f"FileNotFoundError: {e}")
-            return
-
-        files.sort()
-        entries = [os.path.join(dictionary, f) for f in files]
-
-        for i, entry in enumerate(entries):
-            if os.path.isdir(entry) and should_ignore(
-                entry, root, ignore_rules
-            ):
-                continue
-            connector = "├──" if i < len(entries) - 1 else "└──"
-            if os.path.isdir(entry):
-                print_tree(
-                    entry,
-                    prefix=prefix + connector,
-                    ignore_rules=ignore_rules,
-                    root=root,
-                )
-            else:
-                print(prefix + connector + os.path.basename(entry))
-
-    if ignore_rules is None:
-        ignore_rules = []
-    if root == "":
-        root = dictionary
-    if extensions is None:
-        extensions = [".py", ".rs", ".json"]
-    all_files_content = ""
-    for root, dirs, files in os.walk(dictionary):
-        dirs[:] = [
-            d
-            for d in dirs
-            if not should_ignore(os.path.join(root, d), root, ignore_rules)
-        ]
+    content_list = []
+    for root, dirs, files in os.walk(directory):
         for file in files:
-            if any(file.endswith(ext) for ext in extensions):
-                file_path = os.path.join(root, file)
-                all_files_content += f"File: {file_path}\n```\n"
-                with open(file_path, "r", encoding="utf-8") as f:
-                    all_files_content += f.read()
-                all_files_content += "\n```\n\n"
-    return all_files_content
+            file_path = os.path.join(root, file)
+            if not should_ignore(file_path):
+                content_list.append(f"File: {file_path}\nContent:\n{read_single_file(file_path)}\n")
+
+    return "\n".join(content_list)
