@@ -51,7 +51,7 @@ def local_file_reader(path_list: List[str], ignore_rules: Optional[List[Tuple[st
 
     logger.trace(f"[local_file_reader().path_list]: {path_list}")
 
-    def read_single_file_pdf(file_path):
+    def read_single_file_pdf(file_path)->str:
         """读取PDF文件并返回其内容作为纯文本字符串。
 
         Args:
@@ -74,7 +74,7 @@ def local_file_reader(path_list: List[str], ignore_rules: Optional[List[Tuple[st
 
         return "\n".join(text_content)
 
-    def read_single_image(file_path):
+    def read_single_file_image(file_path, detail_level:int=1)->str:
         import easyocr
 
         logger.trace(f"Begin scan {file_path}")
@@ -83,7 +83,7 @@ def local_file_reader(path_list: List[str], ignore_rules: Optional[List[Tuple[st
         lang_code = greater_china_common
         logger.trace(f"[lang_code]: {lang_code}")
         reader = easyocr.Reader(lang_code, gpu=False)
-        result = reader.readtext(file_path, detail=1)
+        result = reader.readtext(file_path, detail=detail_level)
         return str(result)
         
     def read_single_file(file_path: str) -> Optional[str]:
@@ -95,9 +95,18 @@ def local_file_reader(path_list: List[str], ignore_rules: Optional[List[Tuple[st
         Returns:
             Optional[str]: 文件内容或None（如果文件不存在）。
         """
+        extension_image = [".jpg", ".png", ".gif", ".bmp", ".jpeg"]
         try:
             with open(file_path, "r", encoding="utf-8") as file:
-                return file.read()
+                file_extension = os.path.splitext(file_path)[1].lower()
+                if file_extension == ".pdf":
+                    logger.info("[file_type]: PDF")
+                    return read_single_file_pdf(file_path)
+                elif file_extension in extension_image:
+                    logger.info(f"[file_type]: IMG ({file_extension})")
+                    return read_single_image(file_path)
+                else:
+                    return file.read()
         except Exception as e:
             logger.error(e)
             logger.warning(
@@ -121,11 +130,12 @@ def local_file_reader(path_list: List[str], ignore_rules: Optional[List[Tuple[st
     return "\n".join(filter(None, file_content))
 
 
-def combine_dir_to_string(directory: str, ignore_rules: Optional[List[Tuple[str, bool]]] = None) -> str:
+def combine_dir_to_string(directory: str, ignore_rules: Optional[List[Tuple[str, bool]]] = None,flag_recursive=False) -> str:
     """将目录内容组合成字符串。
 
     Args:
         directory (str): 目录路径。
+        flag_recursive (bool, optional): 是否递归处理文件夹。 Defaults to False.
         ignore_rules (Optional[List[Tuple[str, bool]]]): 忽略规则列表。
 
     Returns:
