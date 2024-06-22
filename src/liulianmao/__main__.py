@@ -5,6 +5,7 @@ from typing import List
 
 from const import LIULIANMAO_VERSION
 from module.log import logger
+from module.authentication import get_env
 
 
 @logger.catch(level="CRITICAL")
@@ -230,7 +231,23 @@ if __name__ == "__main__":
         help="""Enable continuous dialogue with a specified integer value, or True by default.
         默认值为 True，但如果用户提供了具体的轮数，这个数字将被使用""",
     )
+    parser.add_argument(
+        "-openai_api_key",
+        "--openai_api_key",
+        type=str,
+        help="Specify the OpenAI API key",
+    )
+    parser.add_argument(
+        "-openai_base_url",
+        "--openai_base_url",
+        type=str,
+        help="Specify the OpenAI base URL",
+    )
     args = parser.parse_args()
+
+    # Pass the parsed values to the authentication module
+    os.environ["OPENAI_API_KEY"] = args.openai_api_key if args.openai_api_key else get_env("OPENAI_API_KEY", "")
+    os.environ["OPENAI_BASE_URL"] = args.openai_base_url if args.openai_base_url else get_env("OPENAI_BASE_URL", "https://api.openai.com")
 
     actions = []
     if args.question is True:

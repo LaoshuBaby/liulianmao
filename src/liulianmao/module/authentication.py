@@ -6,9 +6,9 @@ from .log import logger
 from .storage import PROJECT_FOLDER, get_user_folder
 
 
-def get_env(var_name: str, default: str) -> str:
+def get_env(var_name: str, default: str, command_line_args: dict = None) -> str:
     """
-    尝试从环境变量获取值，如果失败，尝试从用户目录下和同目录下的文件读取，最后使用默认值。
+    尝试从命令行参数获取值，如果失败，尝试从环境变量获取值，如果失败，尝试从用户目录下和同目录下的文件读取，最后使用默认值。
     """
 
     def get_valid_value(value: str) -> Optional[str]:
@@ -35,6 +35,12 @@ def get_env(var_name: str, default: str) -> str:
                 )
         return None
 
+    def get_from_command_line_args(var_name: str) -> Optional[str]:
+        """尝试从命令行参数获取值。"""
+        if command_line_args and var_name in command_line_args:
+            return command_line_args[var_name]
+        return None
+
     def get_from_env(var_name: str) -> Optional[str]:
         """尝试从环境变量获取值。"""
         return os.environ.get(var_name)
@@ -54,7 +60,7 @@ def get_env(var_name: str, default: str) -> str:
         return value
 
     # 定义尝试顺序
-    attempts = [get_from_user_folder, get_from_current_dir, get_from_env]
+    attempts = [get_from_command_line_args, get_from_user_folder, get_from_current_dir, get_from_env]
 
     for attempt in attempts:
         result = attempt(var_name)
@@ -64,7 +70,7 @@ def get_env(var_name: str, default: str) -> str:
 
     # 如果所有尝试都失败了，记录错误并返回默认值
     logger.error(
-        f"{var_name} not found in environment variables, user folder, or current directory file, using default."
+        f"{var_name} not found in command line arguments, environment variables, user folder, or current directory file, using default."
     )
     return default
 

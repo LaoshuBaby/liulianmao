@@ -34,6 +34,16 @@ pip install langchain langchain_openai
 
 如果您不懂什么是环境变量，也可以在同目录下放置同名文件，亦可在代码中硬编码，但鼠宝宝不推荐这么做。
 
+### 通过命令行参数传递`OPENAI_API_KEY`和`OPENAI_BASE_URL`
+
+现在，您可以通过命令行参数的方式传递`OPENAI_API_KEY`和`OPENAI_BASE_URL`，这将优先于系统环境变量或文件中的配置。使用方法如下：
+
+```shell
+python -m liulianmao --openai_api_key YOUR_API_KEY --openai_base_url YOUR_BASE_URL
+```
+
+这种方式特别适合于不想在系统环境变量中设置或者需要临时更改API密钥和基础URL的场景。
+
 ## Agent使用
 
 目前能提供支持的Agent很有限。
