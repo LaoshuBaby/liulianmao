@@ -94,6 +94,7 @@ pip install langchain langchain_openai
 * 提供除OpenAI模型以外其他模型的支持，如llama（目前大部分模型都已兼容OpenAI格式）。在此基础上，目前的“core”可能要跟进调整，以及适应langchain的`langchain`+`langchain-core`+`langchain-openai`的模块名结构，考虑用`basic`等名称来命名通用部分。毕竟liulianmao是分为restful、sdk、langchain三条路径并驾齐驱，皆可用于展开对话的（核心也是用于CLI对话）。
   这可能需要同时兼容远端和本地的API实例。并且目前能基于llama模型部署的包括[meta-llama](https://github.com/meta-llama)官方[示例代码](https://github.com/meta-llama/llama3/blob/main/example_chat_completion.py)、[Ollama](https://github.com/ollama/ollama)、[Jan](https://github.com/janhq/jan)等，或许可以考虑尽可能多的适配其API。
 * 注释、日志输出、docstring，多语言化在路上了！方便非汉语开发者！
+* 参数列表不再全部堆叠在main入口函数中，可以从配置文件读取。这方面的合适选型还望积极开issue推荐。
 
 ## Prompt仓库
 
