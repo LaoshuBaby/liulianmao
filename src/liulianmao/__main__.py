@@ -63,8 +63,8 @@ def main(
     Args:
         recipe: A list of strings representing the operations to be processed.默认为["init", "chat"]。
         actions: A list of strings representing additional actions to be taken.
-        f_c: A boolean flag to enable continuous dialogue.
-        f_a: A boolean flag to enable the use of an agent.
+        f_c: A boolean feature to enable continuous dialogue.
+        f_a: A boolean feature to enable the use of an agent.
     """
     logger.trace(f"[f_c]: {f_c}")
     logger.trace(f"[f_a]: {f_a}")
@@ -137,8 +137,8 @@ def main(
             if operation_name == "chat" or operation_name == "default":
                 operation(
                     model_series=kwargs.get("series", "").lower(),
-                    flag_continue=f_c,
-                    flag_agent=f_a,
+                    feature_continue=f_c,
+                    feature_agent=f_a,
                 )
             else:
                 operation()
@@ -217,18 +217,24 @@ if __name__ == "__main__":
         help="A string representing a series",
     )
     parser.add_argument(
-        "-f_c",
-        "--f_c",
-        action="store_true",
-        default=True,
-        help="Enable continuous dialogue",
-    )
-    parser.add_argument(
+        "-fa",
         "-f_a",
         "--f_a",
         action="store_true",
         default=False,
         help="Enable the use of an agent",
+    )
+    parser.add_argument(
+        "-fc",
+        "-f_c",
+        "--f_c",
+        # action="store",
+        nargs="?",
+        type=int,
+        const=True,
+        default=True,
+        help="""Enable continuous dialogue with a specified integer value, or True by default.
+        默认值为 True，但如果用户提供了具体的轮数，这个数字将被使用""",
     )
     parser.add_argument(
         "-sc",

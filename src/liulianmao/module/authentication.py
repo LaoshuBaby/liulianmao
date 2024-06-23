@@ -70,8 +70,10 @@ def get_env(var_name: str, default: str) -> str:
 
 
 # 获取API URL和API KEY
+logger.trace("★"*5+"危险操作！请在向Issue反馈问题提交日志的时候不要将这部分内容提交"+"★"*5)
 API_URL = get_env("OPENAI_BASE_URL", "https://api.openai.com")
 API_KEY = get_env(
     "OPENAI_API_KEY",
     "You may need to check your environment variables' configure.",
 )
+logger.trace("★"*5+"危险操作！请在向Issue反馈问题提交日志的时候不要将这部分内容提交"+"★"*5)

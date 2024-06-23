@@ -15,9 +15,7 @@ def get_weather(city: str) -> str:
     elif city == "幻想乡":
         answer = "永恒之夏"
     else:
-        template = (
-            "| 温度 {tempature} | 湿度 {humidity} | 风力等级 {wind} | 天气状况 {weather} |"
-        )
+        template = "| 温度 {tempature} | 湿度 {humidity} | 风力等级 {wind} | 天气状况 {weather} |"
 
         import random
 

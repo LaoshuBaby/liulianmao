@@ -26,7 +26,7 @@ def get_agent_judge_template():
     AGENT:TRUE
     AGENT.ACTION:{{Prototype of function you think need to call, including parameters and typing}}
     AGENT.ACTION.NAME:{{The function's name}}
-    AGENT.ACTION.PARA:{{The function's parameters in json}}
+    AGENT.ACTION.PARA:{{The function's parameters in JSON, list each parameter as key and its value. This SHOULD be a JSON.}}
     =+=+=
     ```
 
@@ -59,7 +59,8 @@ def get_agent_judge_template():
 
     if flag_agent_debug == True:
         agent_judge_template = agent_judge_template.replace(
-            "{{{action_debug_or_action_return}}}", "并解释为什么不匹配所有函数的原因，需要逐个函数的解释"
+            "{{{action_debug_or_action_return}}}",
+            "并解释为什么不匹配所有函数的原因，需要逐个函数的解释",
         )
     else:
         agent_judge_template = agent_judge_template.replace(

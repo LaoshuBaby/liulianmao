@@ -1,9 +1,10 @@
 import json
 import os
 import sys
-from typing import Dict, List
+from typing import Dict, List, Union
 
 from .agent import get_agent_judge_template
+from .api.llama import llama_completion
 from .api.openai import (
     openai_audio_speech,
     openai_chat_completion,
@@ -27,6 +28,7 @@ def ask(
     default_amount: int = 1,
     model_series: str = "openai",
     no_history: bool = False,
+    **kwargs,
 ):
     """
     Sends a message to the OpenAI chat completion API and processes the response.
@@ -95,15 +97,22 @@ def ask(
         )
     elif model_series == "zhipu":
         response = zhipu_completion(
+            msg=msg,
+            model=config["model_type"]["zhipu"],
+            no_history=no_history,
+        )
+    elif model_series == "llama":
+        response = llama_completion(
             prompt_question=msg,
             prompt_system=config["system_message"]["content"],
-            model=config["model_type"]["zhipu"],
+            model=config["model_type"].get("llama", "llama3"),
             no_history=no_history,
         )
     else:
         response = {"choices": [{"message": {"content": "啊哈？"}}]}
 
     try:
+        # response = json.loads(response.text)
         choices = response.get("choices", [])
 
         # 使用.get()方法更安全地访问字典键值，以避免KeyError异常
@@ -136,6 +145,8 @@ def ask(
 
     except Exception as e:
         # 记录关键错误信息而不是直接退出程序，提供更好的错误上下文
+        # logger.error(response)
+        # logger.error(response.text)
         logger.exception(f"An error occurred: {e}", exc_info=True)
         # 可以在这里处理特定的清理工作，如果有必要的话
         # 最后，可能会根据程序的需要选择是否退出
@@ -173,8 +184,8 @@ def agent_judge(msg, available_models, model_series):
     def extract_function_prototypes(code):
         import re
 
-        pattern = r"def\s+(.*?)\((.*?)\)\s*->\s*(.*?):"
-        matches = re.findall(pattern, code)
+        pattern = r"^def\s+(.*?)\((.*?)\)\s*->\s*(.*?)\s*:"
+        matches = re.findall(pattern, code, re.MULTILINE)
 
         function_prototypes = []
         for match in matches:
@@ -220,21 +231,66 @@ def agent_judge(msg, available_models, model_series):
                 ):
                     func_proto_list.append(prototype)
 
-    agent_judge_question = (
-        get_agent_judge_template()
-        .replace("{func_list}", "\n".join(func_proto_list))
-        .replace("{question}", msg)
+    feature_use_native_functioncall = False
+    logger.warning(
+        f"Agent设定为启用，即将判断是否需要调用本地函数 (method={'model_native'+'.'+model_series if feature_use_native_functioncall==True else 'liulianmao_agent'})"
     )
-    logger.trace(f"[agent_judge_question]:\n{agent_judge_question}")
 
-    logger.warning("Agent设定为启用，即将判断是否需要调用本地函数")
-    agent_judge_conversation = ask(
-        agent_judge_question,
-        available_models,
-        model_series=model_series,
-        no_history=True,
-    )[0]
-    logger.trace(f"[agent_judge_conversation]:\n{agent_judge_conversation}")
+    if feature_use_native_functioncall == True and (
+        model_series.lower() == "zhipu" and "glm-4" in available_models
+    ):
+        # 专用schema
+        # tools_list后续应根据func_proto_list生成，此处仅为示意
+        tools_list = [
+            {
+                "type": "function",
+                "function": {
+                    "name": "get_random_shengxiao",
+                    "description": "随机选择一个生肖",
+                    "parameters": {
+                        "type": "object",
+                        "properties": {
+                            "select": {
+                                "description": "强制钦点一个生肖",
+                                "type": "string",
+                            }
+                        },
+                        "required": [],
+                    },
+                },
+            }
+        ]
+
+        # 召唤判定
+        agent_judge_conversation = ask(
+            msg,
+            available_models,
+            model_series=model_series,
+            no_history=True,
+            tools=tools_list,
+        )[0]
+        logger.trace(
+            f"[agent_judge_conversation]:\n{agent_judge_conversation}"
+        )
+    else:
+        # 土法炼钢
+        agent_judge_question = (
+            get_agent_judge_template()
+            .replace("{func_list}", "\n".join(func_proto_list))
+            .replace("{question}", msg)
+        )
+        logger.trace(f"[agent_judge_question]:\n{agent_judge_question}")
+
+        # 召唤判定
+        agent_judge_conversation = ask(
+            agent_judge_question,
+            available_models,
+            model_series=model_series,
+            no_history=True,
+        )[0]
+        logger.trace(
+            f"[agent_judge_conversation]:\n{agent_judge_conversation}"
+        )
 
     def extract_agent_variables(input_str: str) -> Dict[str, str]:
         slice_input = input_str.split("\n")
@@ -265,8 +321,8 @@ def agent_judge(msg, available_models, model_series):
 
 def chat(
     model_series: str = "openai",
-    flag_continue: bool = True,
-    flag_agent: bool = False,
+    feature_agent: bool = False,
+    feature_continue: Union[bool, int] = True,
 ):
     """
     Initiates a chat conversation by reading a question from a file and calling the OpenAI API.
@@ -286,8 +342,8 @@ def chat(
     """
     init()
 
-    logger.info(f"[flag_continue]: {flag_continue}")
-    logger.info(f"[flag_agent]: {flag_agent}")
+    logger.info(f"[feature_continue]: {feature_continue}")
+    logger.info(f"[feature_agent]: {feature_agent}")
 
     if model_series == "openai":
         available_models = openai_models("gpt")
@@ -391,15 +447,16 @@ def chat(
                 result = function_to_call(**params)
                 # result = function_to_call(city=params["city"])
                 # 打印或返回结果
-                logger.info(result)
+                if "\n" in result:
+                    logger.info(f"\n{result}")
+                else:
+                    logger.info(result)
             else:
                 logger.error(
                     f"Error: {action_name} is not a callable function."
                 )
-        except AttributeError as e:
-            logger.error(f"Error: Function {action_name} not found in module.")
         except Exception as e:
-            logger.error(f"An error occurred while running the function: {e}")
+            logger.error(f"[Error]: {e}")
 
         ## 在msg前面添加内容
         try:
@@ -418,27 +475,35 @@ def chat(
                     ensure_ascii=False,
                     sort_keys=False,
                 )
-                + ("-" * 30 + "\n" + "上述为执行函数调用的结果，请根据结果回答如下的输入")
-                + ("-" * 30 + "\n" + msg)
+                + ("\n" + "-" * 30 + "\n")
+                + "上述为执行函数调用的结果，请根据结果回答如下的输入"
+                + ("\n" + "-" * 30 + "\n")
+                + msg
             )
         except Exception as e:
             logger.error(f"An error occurred while modify msg: {e}")
 
         return msg
 
+    if type(feature_continue) == type(0):
+        logger.warning(f"本次对话最大限制轮数: {feature_continue}")
+        max_count_round = feature_continue
+    count_round = 0
+
     # call judge agent
-    if flag_agent == True:
+    if feature_agent == True:
         agent_judge_result = agent_judge(msg, available_models, model_series)
     # conduct conversation
-    if flag_agent == True and agent_judge_result.get("AGENT", False) in [
+    if feature_agent == True and agent_judge_result.get("AGENT", False) in [
         "TRUE",
         True,
     ]:
         msg = agent_run(msg, agent_judge_result)
         logger.trace(f"[modified_msg]:\n{msg}")
+    count_round += 1
     conversation = ask(msg, available_models, model_series=model_series)
 
-    if not flag_continue:
+    if not feature_continue:
         with open(
             os.path.join(
                 get_user_folder(), PROJECT_FOLDER, "terminal", "answer.txt"
@@ -450,6 +515,12 @@ def chat(
     else:
         flag_end = False
         while not flag_end:
+            if type(feature_continue) == type(0):
+                logger.warning(f"当前已进行对话轮数：{count_round}")
+                if count_round >= max_count_round:
+                    logger.error(f"对话轮数达到上限")
+                    break
+
             import time
 
             # 部分控制台输入是异步的，给足够的时间以保证不会打断输出
@@ -461,16 +532,13 @@ def chat(
                 .replace(" ", "")
                 .replace(" ", "")
             )
-            if (
-                append_question_normalized != "END"
-                and append_question_normalized != ""
-            ):
+            if append_question_normalized not in ["END", "", "/bye"]:
                 msg = append_question
-                if flag_agent == True:
+                if feature_agent == True:
                     agent_judge_result = agent_judge(
                         msg, available_models, model_series
                     )
-                if flag_agent == True and agent_judge_result.get(
+                if feature_agent == True and agent_judge_result.get(
                     "AGENT", False
                 ) in ["TRUE", True]:
                     msg = agent_run(msg, agent_judge_result)
@@ -480,8 +548,11 @@ def chat(
                     available_models,
                     model_series=model_series,
                 )
+
+                count_round += 1
             else:
                 flag_end = True
+                logger.success("再见！")
                 break
 
 
