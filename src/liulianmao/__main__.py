@@ -96,6 +96,11 @@ def main(
         os.startfile(config_file_path)
         sys.exit(0)
 
+    if "sync" in actions:
+        from module.sync import sync_profiles
+        sync_profiles()
+        sys.exit(0)
+
     import importlib.util
 
     FEATURE = {"core": True, "langchain": False}
@@ -225,6 +230,12 @@ if __name__ == "__main__":
         default=False,
         help="Enable the use of an agent",
     )
+    parser.add_argument(
+        "-sc",
+        "--sync",
+        action="store_true",
+        help="Sync profiles",
+    )
     args = parser.parse_args()
 
     actions = []
@@ -234,6 +245,8 @@ if __name__ == "__main__":
         actions.append("answer")
     if args.config is True:
         actions.append("config")
+    if args.sync is True:
+        actions.append("sync")
 
     main(
         recipe=args.recipe,
