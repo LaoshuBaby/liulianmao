@@ -2,8 +2,10 @@ import argparse
 import os
 import sys
 from typing import List
+import toml
 
-from const import LIULIANMAO_VERSION
+LIULIANMAO_VERSION = toml.load("pyproject.toml")["tool"]["poetry"]["version"]
+
 from module.log import logger
 
 

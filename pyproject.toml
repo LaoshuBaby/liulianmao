@@ -23,6 +23,7 @@ python = ">=3.11,<4.0"
 requests = ">=2.26.0"
 loguru = ">=0.5.3"
 hellologger = "*"
+toml = "^0.10.2"
 
 [tool.poetry.extras]
 langchain_support = ["langchain", "langchain_openai"]
