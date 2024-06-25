@@ -96,6 +96,11 @@ def main(
         os.startfile(config_file_path)
         sys.exit(0)
 
+    if "sync" in actions:
+        from module.sync import sync_profiles
+        sync_profiles()
+        sys.exit(0)
+
     import importlib.util
 
     FEATURE = {"core": True, "langchain": False}
@@ -212,7 +217,8 @@ if __name__ == "__main__":
         help="A string representing a series",
     )
     parser.add_argument(
-        "-fa" "-f_a",
+        "-fa",
+        "-f_a",
         "--f_a",
         action="store_true",
         default=False,
@@ -230,6 +236,12 @@ if __name__ == "__main__":
         help="""Enable continuous dialogue with a specified integer value, or True by default.
         默认值为 True，但如果用户提供了具体的轮数，这个数字将被使用""",
     )
+    parser.add_argument(
+        "-sc",
+        "--sync",
+        action="store_true",
+        help="Sync profiles",
+    )
     args = parser.parse_args()
 
     actions = []
@@ -239,6 +251,8 @@ if __name__ == "__main__":
         actions.append("answer")
     if args.config is True:
         actions.append("config")
+    if args.sync is True:
+        actions.append("sync")
 
     main(
         recipe=args.recipe,
