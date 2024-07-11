@@ -212,8 +212,6 @@ def ask(
             image = image_to_base64(image_path)
             logger.debug(f"[Fairy] 图像地址为Base64，长度为 {len(image)}")
 
-    logger.debug(f"[feature_vision]: {feature_vision}")
-
     if model_series == "openai":
         if feature_vision == True:
             response = openai_chat_completion_vision(

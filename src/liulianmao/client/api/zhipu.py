@@ -43,6 +43,21 @@ def zhipu_completion_vision(
     max_tokens: int = 1024,
     no_history: bool = False,
 ):
+    def trim_payload_for_logging(payload):
+        import copy
+
+        trimmed_payload = copy.deepcopy(payload)
+        for message in trimmed_payload["messages"]:
+            for content in message["content"]:
+                if content["type"] == "image_url":
+                    image_url = content["image_url"]["url"]
+                    if len(image_url) > 1024:
+                        content["image_url"][
+                            "url"
+                        ] = f"TOO LONG - len={len(image_url)}"
+        logger.trace(trimmed_payload)
+        return trimmed_payload
+
     if no_history:
         append_conversation = []
     else:
@@ -66,7 +81,7 @@ def zhipu_completion_vision(
         "user_id": get_user_id(),
     }
     logger.trace("[Headers]\n" + f"{headers}")
-    logger.trace("[Payload]\n" + f"{payload}")
+    logger.trace("[Payload]\n" + f"{trim_payload_for_logging(payload)}")
 
     flag_echo_input = False
     if flag_echo_input:
