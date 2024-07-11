@@ -110,13 +110,10 @@ def ask(
         base64_string = image_to_base64(image_path)
         
         response = openai_chat_completion_vision(
-            prompt_question=msg,
+            msg=msg,
+            image=base64_string,
             prompt_system=config["system_message"]["content"],
-            model=select_model(
-                config["model_type"]["openai"],
-                available_models,
-                direct_debug=True,
-            ),
+            model="gpt-4o",
             temperature=float(config["settings"]["temperature"]),
             amount=default_amount,
             no_history=no_history,

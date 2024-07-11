@@ -168,6 +168,7 @@ def openai_chat_completion_vision(
     top_p:float=1.0,
     max_tokens:int=2048,
     no_history: bool = False,
+    **kwargs
 ):
     if no_history:
         append_conversation = []
@@ -217,7 +218,7 @@ def openai_chat_completion_vision(
         try:
             if no_history == False:
                 conversation.append(
-                    {"role": "user", "content": prompt_question}
+                    {"role": "user", "content": msg}
                 )
                 conversation.append(
                     {
