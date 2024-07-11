@@ -87,7 +87,47 @@ def ask(
     import base64
     import re
 
-    if msg[0:11] == "```IMG_PATH":
+    # 低优先级：剪贴板
+
+    def get_windows_clip():
+        import platform
+        from io import BytesIO
+        from PIL import Image, ImageGrab
+        import base64
+        import logging
+        if platform.system() != 'Windows':
+            logger.info("Clipboard image capture is only supported on Windows.")
+            return ''
+
+        try:
+            image = ImageGrab.grabclipboard()
+            if image is None or not isinstance(image, Image.Image):
+                logger.info("No image found in clipboard.")
+                return ''
+
+            buffered = BytesIO()
+            image.save(buffered, format="PNG")
+            return base64.b64encode(buffered.getvalue()).decode('utf-8')
+        except ImportError:
+            logger.error("PIL or ImageGrab module not found. Please install pillow.")
+        except Exception as e:
+            logger.error(f"Error capturing clipboard image: {e}")
+        
+        return ''
+        
+    image_clip=get_windows_clip()
+    if image_clip!=None and image_clip!=None:
+        image_path=image_clip
+        logger.trace(f"[clip_image]:\n{image_path}")
+        
+        feature_vision = True
+        logger.warning("[Fairy] 当前从Win剪贴板读取了图片")
+        logger.debug(f"[Fairy] 图像Base64长度为 {len(image_path)}")
+
+    # 第二优先级：prompt解析
+    logger.debug(f"[feature_vision111]: {feature_vision}")
+
+    if (msg[0:11] == "```IMG_PATH") or feature_vision != True:
         match = re.search(r"IMG_PATH\n(.+)", msg)
         if match:
             image_path = match.group(1)
@@ -99,7 +139,10 @@ def ask(
         feature_vision = False
         image_path = ""
 
-    if kwargs.get("image", None) != None and kwargs.get("image", None) != "":
+    # 最高优先级：传参
+    logger.debug(f"[feature_vision222]: {feature_vision}")
+
+    if (kwargs.get("image", None) != None and kwargs.get("image", None) != "") or feature_vision!=True:
         image_path = kwargs["image"]
         logger.debug(f"[image_path]: {image_path}")
 
@@ -108,11 +151,13 @@ def ask(
     else:
         feature_vision = False
         image_path = ""
+        
+    logger.debug(f"[feature_vision333]: {feature_vision}")
 
     if image_path != "":
         if image_path[0:4] == "http":
             image = image_path
-            logger.debug(f"[Fairy]: 图像地址为链接 {image}")
+            logger.debug(f"[Fairy] 图像地址为链接 {image}")
         else:
 
             def image_to_base64(image_path):
@@ -123,7 +168,7 @@ def ask(
                     return base64_message
 
             image = image_to_base64(image_path)
-            logger.debug(f"[Fairy]: 图像地址为Base64，长度为 {len(image)}")
+            logger.debug(f"[Fairy] 图像地址为Base64，长度为 {len(image)}")
 
     logger.debug(f"[feature_vision]: {feature_vision}")
 
