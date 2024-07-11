@@ -56,9 +56,16 @@ def openai_models(model_series: str = "") -> List[str]:
         except Exception as e:
             logger.trace(e)
             logger.critical("RESPONSE NOT JSON")
-        extracted_ids = extract_ids(response.json()["data"])
-        logger.debug("[Available Models]\n" + str(extracted_ids))
-        return extracted_ids
+        try:
+            extracted_ids = extract_ids(response.json()["data"])
+            logger.debug("[Available Models]\n" + str(extracted_ids))
+            return extracted_ids
+
+        except Exception as e:
+            logger.error(
+            f"Error: {response.status_code} {response.content.decode('utf-8')}"
+        )
+            return {}
     else:
         logger.trace("[Debug] response.status_code != 200")
         logger.error(
@@ -151,6 +158,86 @@ def openai_audio_speech(
             response.content.decode("utf-8"),
         )
 
+
+def openai_chat_completion_vision(
+    msg: str,
+    image: str,
+    model: str = "gpt-4o",
+    amount: int = 1,
+    temperature:float=0.5,
+    top_p:float=1.0,
+    max_tokens:int=2048,
+    no_history: bool = False,
+):
+    if no_history:
+        append_conversation = []
+    else:
+        append_conversation = conversation
+
+    headers = {
+        "Content-Type": "application/json",
+        "Authorization": f"Bearer {API_KEY}",
+    }
+    payload = {
+        "model": model,
+        "messages": [
+            {
+                "role": "user",
+                "content": [
+                    {"type": "text", "text": msg},
+                    {"type": "image_url", "image_url": {"url": f"data:image/jpeg;base64,{image}"}},
+                ],
+            }
+        ],
+    }
+    logger.trace("[Headers]\n" + f"{headers}")
+    logger.trace("[Payload]\n" + f"{payload}")
+
+    flag_echo_input = False
+    if flag_echo_input:
+        logger.debug("[Question]\n" + f"{msg}")
+    else:
+        logger.trace("[Question]\n" + f"{msg}")
+
+    response = requests.post(
+        API_URL + "/v1/chat/completions",
+        headers=headers,
+        json=payload,
+    )
+
+    if response.status_code == 200:
+        logger.trace("[Debug] response.status_code == 200")
+        # judge mime
+        try:
+            logger.trace("[Response]\n" + str(response.json()))
+        except Exception as e:
+            logger.trace(e)
+            logger.critical("RESPONSE NOT JSON")
+        # judge schema
+        try:
+            if no_history == False:
+                conversation.append(
+                    {"role": "user", "content": prompt_question}
+                )
+                conversation.append(
+                    {
+                        "role": "system",
+                        "content": response.json()["choices"][0]["message"][
+                            "content"
+                        ],
+                    }
+                )
+        except Exception as e:
+            logger.trace(e)
+            logger.critical("WRONG RESPONSE SCHEMA")
+        logger.trace("[History]\n" + str(conversation))
+        return response.json()
+    else:
+        logger.trace("[Debug] response.status_code != 200")
+        logger.error(
+            f"Error: {response.status_code} {response.content.decode('utf-8')}"
+        )
+        return {}
 
 def openai_chat_completion(
     prompt_question,

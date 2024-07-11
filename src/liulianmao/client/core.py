@@ -8,6 +8,7 @@ from .api.llama import llama_completion
 from .api.openai import (
     openai_audio_speech,
     openai_chat_completion,
+    openai_chat_completion_vision,
     openai_images_generations,
     openai_models,
 )
@@ -84,7 +85,31 @@ def ask(
     config = load_conf()
 
     if model_series == "openai":
-        response = openai_chat_completion(
+        # response = openai_chat_completion(
+        #     prompt_question=msg,
+        #     prompt_system=config["system_message"]["content"],
+        #     model=select_model(
+        #         config["model_type"]["openai"],
+        #         available_models,
+        #         direct_debug=True,
+        #     ),
+        #     temperature=float(config["settings"]["temperature"]),
+        #     amount=default_amount,
+        #     no_history=no_history,
+        # )        
+        import base64
+
+        def image_to_base64(image_path):
+            with open(image_path, "rb") as image_file:
+                image_data = image_file.read()
+                base64_encoded_data = base64.b64encode(image_data)
+                base64_message = base64_encoded_data.decode('utf-8')
+                return base64_message
+
+        image_path = "yourimg.jpg"
+        base64_string = image_to_base64(image_path)
+        
+        response = openai_chat_completion_vision(
             prompt_question=msg,
             prompt_system=config["system_message"]["content"],
             model=select_model(
