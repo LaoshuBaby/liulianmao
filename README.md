@@ -94,6 +94,7 @@ pip install langchain langchain_openai
 * 提供除OpenAI模型以外其他模型的支持，如llama（目前大部分模型都已兼容OpenAI格式）。在此基础上，目前的“core”可能要跟进调整，以及适应langchain的`langchain`+`langchain-core`+`langchain-openai`的模块名结构，考虑用`basic`等名称来命名通用部分。毕竟liulianmao是分为restful、sdk、langchain三条路径并驾齐驱，皆可用于展开对话的（核心也是用于CLI对话）。
   这可能需要同时兼容远端和本地的API实例。并且目前能基于llama模型部署的包括[meta-llama](https://github.com/meta-llama)官方[示例代码](https://github.com/meta-llama/llama3/blob/main/example_chat_completion.py)、[Ollama](https://github.com/ollama/ollama)、[Jan](https://github.com/janhq/jan)等，或许可以考虑尽可能多的适配其API。
 * 注释、日志输出、docstring，多语言化在路上了！方便非汉语开发者！
+* 参数列表不再全部堆叠在main入口函数中，可以从配置文件读取。这方面的合适选型还望积极开issue推荐。
 
 ## Prompt仓库
 
@@ -147,3 +148,7 @@ A: 好问题，我也觉得。
 Q: 有没有类似榴莲猫的项目？
 
 A: 如果您有小米智能音响，可以试试[yihong0618/xiaogpt](https://github.com/yihong0618/xiaogpt)，给小爱同学装上最强大脑。
+
+## 题外话
+
+近日接到相关部门警示，部分转发服务可能在用于购买LLM提供商（如OpenAI等）的服务时存在使用诈骗或其他不法手段获取原始资金的行为，为避免您遭遇不必要的麻烦，还请谨慎选择可靠的转发服务，以及实测在大部分日常工作下，使用中国大陆的大语言模型一样可以获得很有效的替代。

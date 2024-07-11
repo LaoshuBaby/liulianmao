@@ -186,3 +186,6 @@ fabric.properties
 src/terminal/answer.txt
 src/terminal/question.txt
 /_build
+
+# VS Code folder
+.vscode
