@@ -85,36 +85,45 @@ def ask(
     config = load_conf()
 
     import base64
+    import re
 
     if msg[0:11] == "```IMG_PATH":
-        import re
-
         match = re.search(r"IMG_PATH\n(.+)", msg)
         if match:
             image_path = match.group(1)
             logger.debug(f"[image_path]: {image_path}")
 
             feature_vision = True
-            logger.warning("[Fairy] 检测到您输入了一张图片，将尝试调用包含视觉功能的模型（若支持）")
-
-            if image_path[0:4] == "http":
-                image = image_path
-                logger.debug(f"[Fairy]: 图像地址为链接 {image}")
-            else:
-
-                def image_to_base64(image_path):
-                    with open(image_path, "rb") as image_file:
-                        image_data = image_file.read()
-                        base64_encoded_data = base64.b64encode(image_data)
-                        base64_message = base64_encoded_data.decode("utf-8")
-                        return base64_message
-
-                image = image_to_base64(image_path)
-                logger.debug(f"[Fairy]: 图像地址为Base64，长度为 {len(image)}")
-        else:
-            feature_vision = False
+            logger.warning("[Fairy] 检测到您输入了一张图片的路径，将尝试调用包含视觉功能的模型（若支持）")
     else:
         feature_vision = False
+        image_path = ""
+
+    if kwargs.get("image", None) != None and kwargs.get("image", None) != "":
+        image_path = kwargs["image"]
+        logger.debug(f"[image_path]: {image_path}")
+
+        feature_vision = True
+        logger.warning("[Fairy] 检测到您通过参数传入了一张图片的路径，将尝试调用包含视觉功能的模型（若支持）")
+    else:
+        feature_vision = False
+        image_path = ""
+
+    if image_path != "":
+        if image_path[0:4] == "http":
+            image = image_path
+            logger.debug(f"[Fairy]: 图像地址为链接 {image}")
+        else:
+
+            def image_to_base64(image_path):
+                with open(image_path, "rb") as image_file:
+                    image_data = image_file.read()
+                    base64_encoded_data = base64.b64encode(image_data)
+                    base64_message = base64_encoded_data.decode("utf-8")
+                    return base64_message
+
+            image = image_to_base64(image_path)
+            logger.debug(f"[Fairy]: 图像地址为Base64，长度为 {len(image)}")
 
     logger.debug(f"[feature_vision]: {feature_vision}")
 
@@ -557,7 +566,12 @@ def chat(
         msg = agent_run(msg, agent_judge_result)
         logger.trace(f"[modified_msg]:\n{msg}")
     count_round += 1
-    conversation = ask(msg, available_models, model_series=model_series)
+    conversation = ask(
+        msg,
+        available_models,
+        model_series=model_series,
+        image="",
+    )
 
     if not feature_continue:
         with open(
