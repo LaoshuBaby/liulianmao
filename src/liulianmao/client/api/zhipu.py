@@ -33,51 +33,61 @@ def get_user_id() -> str:
     )
 
 
-def zhipu_vision_request(image_base64: str):
-    import base64
+def zhipu_completion_vision(
+    msg: str,
+    image: str,
+    model: str = "glm-4",
+    amount: int = 1,
+    temperature:float=0.8,
+    top_p:float=0.6,
+    max_tokens:int=1024,
+    no_history: bool = False,
+):
+    if no_history:
+        append_conversation = []
+    else:
+        append_conversation = conversation
 
-    try:
-        # 准备请求的头部和载荷
-        headers = {
-            "Content-Type": "application/json",
-            "Authorization": f"Bearer {API_KEY}",
-        }
-        payload = {
-            "model": "vision",  # 假定vision模型是用于图像识别的模型
-            "messages": [
-                {
-                    "role": "user",
-                    "content": {
-                        "type": "image_base64",
-                        "image_base64": image_base64,
-                    },
-                }
-            ],
-            "user_id": get_user_id(),
-        }
-        logger.trace("[Headers]\n" + f"{headers}")
-        logger.trace("[Payload]\n" + f"{payload}")
+    headers = {
+        "Content-Type": "application/json",
+        "Authorization": f"Bearer {API_KEY}",
+    }
+    payload = {
+        "model": "glm-4v",
+        "messages": [
+            {
+                "role": "user",
+                "content": [
+                    {"type": "text", "text": msg},
+                    {"type": "image_url", "image_url": {"url": image}},
+                ],
+            }
+        ],
+        "user_id": get_user_id(),
+    }
+    logger.trace("[Headers]\n" + f"{headers}")
+    logger.trace("[Payload]\n" + f"{payload}")
 
-        # 发送请求
-        response = requests.post(
-            API_URL + "/paas/v4/chat/completions",
-            headers=headers,
-            json=payload,
+    flag_echo_input = False
+    if flag_echo_input:
+        logger.debug("[Question]\n" + f"{msg}")
+    else:
+        logger.trace("[Question]\n" + f"{msg}")
+
+    response = requests.post(
+        API_URL + "/paas/v4/chat/completions",
+        headers=headers,
+        json=payload,
+    )
+
+    if response.status_code == 200:
+        logger.trace("[Debug] response.status_code == 200")
+        logger.trace("[Response]\n" + str(response.json()))
+        return response.json()
+    else:
+        logger.error(
+            f"Error: {response.status_code} {response.content.decode('utf-8')}"
         )
-
-        # 处理响应
-        if response.status_code == 200:
-            logger.trace("[Debug] response.status_code == 200")
-            logger.trace("[Response]\n" + str(response.json()))
-            return response.json()
-        else:
-            logger.error(
-                f"Error: {response.status_code} {response.content.decode('utf-8')}"
-            )
-            return {}
-
-    except Exception as e:
-        logger.error(f"An exception occurred: {e}")
         return {}
 
 

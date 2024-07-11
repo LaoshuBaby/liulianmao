@@ -11,7 +11,7 @@ from .api.openai import (
     openai_images_generations,
     openai_models,
 )
-from .api.zhipu import zhipu_completion
+from .api.zhipu import zhipu_completion, zhipu_completion_vision
 
 current_dir = os.path.dirname(os.path.realpath(__file__))
 sys.path.append(os.path.join(current_dir, ".."))
@@ -28,6 +28,7 @@ def ask(
     default_amount: int = 1,
     model_series: str = "openai",
     no_history: bool = False,
+    image_type:str = "none", # none/base64/url in lower case
     **kwargs,
 ):
     """
@@ -96,8 +97,26 @@ def ask(
             no_history=no_history,
         )
     elif model_series == "zhipu":
-        response = zhipu_completion(
+        # response = zhipu_completion(
+        #     msg=msg,
+        #     model=config["model_type"]["zhipu"],
+        #     no_history=no_history,
+        # )
+        import base64
+
+        def image_to_base64(image_path):
+            with open(image_path, "rb") as image_file:
+                image_data = image_file.read()
+                base64_encoded_data = base64.b64encode(image_data)
+                base64_message = base64_encoded_data.decode('utf-8')
+                return base64_message
+
+        image_path = 'path_to_your_image.jpg'
+        base64_string = image_to_base64(image_path)
+
+        response = zhipu_completion_vision(
             msg=msg,
+            image=base64_string,
             model=config["model_type"]["zhipu"],
             no_history=no_history,
         )
