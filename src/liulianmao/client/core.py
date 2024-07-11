@@ -87,77 +87,119 @@ def ask(
     import base64
     import re
 
-    # 低优先级：剪贴板
+    image_path = ""
+    feature_vision = False
 
-    def get_windows_clip():
-        import platform
-        from io import BytesIO
-        from PIL import Image, ImageGrab
-        import base64
-        import logging
-        if platform.system() != 'Windows':
-            logger.info("Clipboard image capture is only supported on Windows.")
-            return ''
-
-        try:
-            image = ImageGrab.grabclipboard()
-            if image is None or not isinstance(image, Image.Image):
-                logger.info("No image found in clipboard.")
-                return ''
-
-            buffered = BytesIO()
-            image.save(buffered, format="PNG")
-            return base64.b64encode(buffered.getvalue()).decode('utf-8')
-        except ImportError:
-            logger.error("PIL or ImageGrab module not found. Please install pillow.")
-        except Exception as e:
-            logger.error(f"Error capturing clipboard image: {e}")
-        
-        return ''
-        
-    image_clip=get_windows_clip()
-    if image_clip!=None and image_clip!=None:
-        image_path=image_clip
-        logger.trace(f"[clip_image]:\n{image_path}")
-        
-        feature_vision = True
-        logger.warning("[Fairy] 当前从Win剪贴板读取了图片")
-        logger.debug(f"[Fairy] 图像Base64长度为 {len(image_path)}")
-
-    # 第二优先级：prompt解析
-    logger.debug(f"[feature_vision111]: {feature_vision}")
-
-    if (msg[0:11] == "```IMG_PATH") or feature_vision != True:
-        match = re.search(r"IMG_PATH\n(.+)", msg)
-        if match:
-            image_path = match.group(1)
+    def get_image_argument():
+        logger.trace("尝试使用 get_image_argument 读取图片")
+        global image_path, feature_vision
+        if (
+            kwargs.get("image", None) != None
+            and kwargs.get("image", None) != ""
+        ):
+            image_path = kwargs["image"]
             logger.debug(f"[image_path]: {image_path}")
 
             feature_vision = True
-            logger.warning("[Fairy] 检测到您输入了一张图片的路径，将尝试调用包含视觉功能的模型（若支持）")
-    else:
-        feature_vision = False
-        image_path = ""
 
-    # 最高优先级：传参
-    logger.debug(f"[feature_vision222]: {feature_vision}")
+        else:
+            image_path = ""
+            feature_vision = False
 
-    if (kwargs.get("image", None) != None and kwargs.get("image", None) != "") or feature_vision!=True:
-        image_path = kwargs["image"]
-        logger.debug(f"[image_path]: {image_path}")
+        if feature_vision:
+            return True
+        return False
 
-        feature_vision = True
-        logger.warning("[Fairy] 检测到您通过参数传入了一张图片的路径，将尝试调用包含视觉功能的模型（若支持）")
-    else:
-        feature_vision = False
-        image_path = ""
-        
-    logger.debug(f"[feature_vision333]: {feature_vision}")
+    def get_image_prompt():
+        logger.trace("尝试使用 get_image_prompt 读取图片")
+        global image_path, feature_vision
+        if msg[0:11] == "```IMG_PATH":
+            match = re.search(r"IMG_PATH\n(.+)", msg)
+            if match:
+                image_path = match.group(1)
+                logger.debug(f"[image_path]: {image_path}")
+
+                feature_vision = True
+        else:
+            image_path = ""
+            feature_vision = False
+
+        if feature_vision:
+            return True
+        return False
+
+    def get_image_clip():
+        logger.trace("尝试使用 get_image_clip 读取图片")
+        global image_path, feature_vision
+
+        def get_windows_clip():
+            import platform
+            from io import BytesIO
+            from PIL import Image, ImageGrab
+            import base64
+
+            if platform.system() != "Windows":
+                logger.info(
+                    "Clipboard image capture is only supported on Windows."
+                )
+                return ""
+
+            try:
+                image = ImageGrab.grabclipboard()
+                if image is None or not isinstance(image, Image.Image):
+                    logger.info("No image found in clipboard.")
+                    return ""
+
+                buffered = BytesIO()
+                image.save(buffered, format="PNG")
+                return base64.b64encode(buffered.getvalue()).decode("utf-8")
+            except ImportError:
+                logger.error(
+                    "PIL or ImageGrab module not found. Please install pillow."
+                )
+            except Exception as e:
+                logger.error(f"Error capturing clipboard image: {e}")
+
+            return ""
+
+        image_clip = get_windows_clip()
+        if image_clip != None and image_clip != "":
+            image_path = image_clip
+            logger.trace(f"[clip_image]:\n{image_path}")
+            logger.debug(f"[clip_image] 图像Base64长度为 {len(image_path)}")
+
+            feature_vision = True
+
+        if feature_vision:
+            return True
+        return False
+
+    def get_image():
+        global image_path, feature_vision
+        if get_image_argument():
+            logger.warning("[Fairy] 检测到您通过参数传入了一张图片的路径")
+            logger.success("[Fairy] 将尝试调用包含视觉功能的模型（若支持）")
+        elif get_image_prompt():
+            logger.warning("[Fairy] 检测到您在prompt开始处输入了一张图片的路径")
+            logger.success("[Fairy] 将尝试调用包含视觉功能的模型（若支持）")
+        elif get_image_clip():
+            logger.warning("[Fairy] 检测到您剪贴板当前内容为一张图片并成功从Windows剪贴板读取了图片")
+            logger.success("[Fairy] 将尝试调用包含视觉功能的模型（若支持）")
+        return image_path, feature_vision
+
+    image_path, feature_vision = get_image()
+
+    logger.debug(f"[feature_vision]: {feature_vision}")
+    logger.debug(f"[image_path]: {len(image_path)}")
 
     if image_path != "":
         if image_path[0:4] == "http":
             image = image_path
             logger.debug(f"[Fairy] 图像地址为链接 {image}")
+        elif len(image_path) >= 1024:
+            # 这么长的肯定是raw数据
+            image = image_path
+            logger.debug(f"[Fairy] 图像地址为Base64，长度为 {len(image)}")
         else:
 
             def image_to_base64(image_path):
