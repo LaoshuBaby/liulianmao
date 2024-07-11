@@ -29,7 +29,7 @@ def ask(
     default_amount: int = 1,
     model_series: str = "openai",
     no_history: bool = False,
-    image_type:str = "none", # none/base64/url in lower case
+    image_type: str = "none",  # none/base64/url in lower case
     **kwargs,
 ):
     """
@@ -84,64 +84,77 @@ def ask(
 
     config = load_conf()
 
+    import base64
+
+    if msg[0:11] == "```IMG_PATH":
+        import re
+        match = re.search(r"IMG_PATH\n(.+)", msg)
+        if match:
+            image_path = match.group(1)
+            logger.debug(f"[image_path]: {image_path}")
+
+            feature_vision = True
+            logger.warning("[Fairy] 检测到您输入了一张图片，将尝试调用包含视觉功能的模型（若支持）")
+
+            if image_path[0:4] == "http":
+                image = image_path
+                logger.debug(f"[Fairy]: 图像地址为链接 {image}")
+            else:
+                def image_to_base64(image_path):
+                    with open(image_path, "rb") as image_file:
+                        image_data = image_file.read()
+                        base64_encoded_data = base64.b64encode(image_data)
+                        base64_message = base64_encoded_data.decode("utf-8")
+                        return base64_message
+
+                image = image_to_base64(image_path)
+                logger.debug(f"[Fairy]: 图像地址为Base64，长度为 {len(image)}")
+        else:
+            feature_vision = False
+    else:
+        feature_vision = False
+
+    logger.debug(f"[feature_vision]: {feature_vision}")
+
     if model_series == "openai":
-        # response = openai_chat_completion(
-        #     prompt_question=msg,
-        #     prompt_system=config["system_message"]["content"],
-        #     model=select_model(
-        #         config["model_type"]["openai"],
-        #         available_models,
-        #         direct_debug=True,
-        #     ),
-        #     temperature=float(config["settings"]["temperature"]),
-        #     amount=default_amount,
-        #     no_history=no_history,
-        # )        
-        import base64
+        if feature_vision == True:
+            response = openai_chat_completion_vision(
+                msg=msg,
+                image=image,
+                prompt_system=config["system_message"]["content"],
+                model="gpt-4o",
+                temperature=float(config["settings"]["temperature"]),
+                amount=default_amount,
+                no_history=no_history,
+            )
+        else:
+            response = openai_chat_completion(
+                prompt_question=msg,
+                prompt_system=config["system_message"]["content"],
+                model=select_model(
+                    config["model_type"]["openai"],
+                    available_models,
+                    direct_debug=True,
+                ),
+                temperature=float(config["settings"]["temperature"]),
+                amount=default_amount,
+                no_history=no_history,
+            )
 
-        def image_to_base64(image_path):
-            with open(image_path, "rb") as image_file:
-                image_data = image_file.read()
-                base64_encoded_data = base64.b64encode(image_data)
-                base64_message = base64_encoded_data.decode('utf-8')
-                return base64_message
-
-        image_path = "yourimg.jpg"
-        base64_string = image_to_base64(image_path)
-        
-        response = openai_chat_completion_vision(
-            msg=msg,
-            image=base64_string,
-            prompt_system=config["system_message"]["content"],
-            model="gpt-4o",
-            temperature=float(config["settings"]["temperature"]),
-            amount=default_amount,
-            no_history=no_history,
-        )
     elif model_series == "zhipu":
-        # response = zhipu_completion(
-        #     msg=msg,
-        #     model=config["model_type"]["zhipu"],
-        #     no_history=no_history,
-        # )
-        import base64
-
-        def image_to_base64(image_path):
-            with open(image_path, "rb") as image_file:
-                image_data = image_file.read()
-                base64_encoded_data = base64.b64encode(image_data)
-                base64_message = base64_encoded_data.decode('utf-8')
-                return base64_message
-
-        image_path = 'path_to_your_image.jpg'
-        base64_string = image_to_base64(image_path)
-
-        response = zhipu_completion_vision(
-            msg=msg,
-            image=base64_string,
-            model=config["model_type"]["zhipu"],
-            no_history=no_history,
-        )
+        if feature_vision == True:
+            response = zhipu_completion_vision(
+                msg=msg,
+                image=image,
+                model=config["model_type"]["zhipu"],
+                no_history=no_history,
+            )
+        else:
+            response = zhipu_completion(
+                msg=msg,
+                model=config["model_type"]["zhipu"],
+                no_history=no_history,
+            )
     elif model_series == "llama":
         response = llama_completion(
             prompt_question=msg,
