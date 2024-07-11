@@ -51,8 +51,11 @@ def local_file_reader(path_list: List[str], flag_recursive=False) -> str:
         # if file_path have none-ascii char
 
         import re
-        if re.search(r'[^\x00-\x7F]', file_path):
-            logger.warning(f"The path \"{file_path}\"contains non-ASCII characters.")
+
+        if re.search(r"[^\x00-\x7F]", file_path):
+            logger.warning(
+                f'The path "{file_path}"contains non-ASCII characters.'
+            )
         else:
             logger.trace("The pathfile_pathonly contains ASCII characters.")
 
@@ -62,11 +65,13 @@ def local_file_reader(path_list: List[str], flag_recursive=False) -> str:
         lang_code = greater_china_common
         logger.trace(f"[lang_code]: {lang_code}")
         reader = easyocr.Reader(lang_code, gpu=False)
-        detail=1
-        model_series="zhipu"
-        if model_series=="zhipu":
-            detail=0
-            logger.warning(f"根据反馈，您所使用的{model_series}模型对复杂文本识别返回内容的结构识别能力较为有限，不建议使用较为详细的描述")
+        detail = 1
+        model_series = "zhipu"
+        if model_series == "zhipu":
+            detail = 0
+            logger.warning(
+                f"根据反馈，您所使用的{model_series}模型对复杂文本识别返回内容的结构识别能力较为有限，不建议使用较为详细的描述"
+            )
         result = reader.readtext(file_path, detail=detail)
         return str(result)
 
@@ -169,7 +174,6 @@ def combine_dir_to_string(
         (".git", True),
     ],
 ) -> str:
-
     def should_ignore(dictionary, root, ignore_rules):
         """
         根据忽略规则判断目录是否应该被忽略。

@@ -98,6 +98,7 @@ def main(
 
     if "sync" in actions:
         from module.sync import sync_profiles
+
         sync_profiles()
         sys.exit(0)
 

@@ -63,8 +63,8 @@ def openai_models(model_series: str = "") -> List[str]:
 
         except Exception as e:
             logger.error(
-            f"Error: {response.status_code} {response.content.decode('utf-8')}"
-        )
+                f"Error: {response.status_code} {response.content.decode('utf-8')}"
+            )
             return {}
     else:
         logger.trace("[Debug] response.status_code != 200")
@@ -164,11 +164,11 @@ def openai_chat_completion_vision(
     image: str,
     model: str = "gpt-4o",
     amount: int = 1,
-    temperature:float=0.5,
-    top_p:float=1.0,
-    max_tokens:int=2048,
+    temperature: float = 0.5,
+    top_p: float = 1.0,
+    max_tokens: int = 2048,
     no_history: bool = False,
-    **kwargs
+    **kwargs,
 ):
     if no_history:
         append_conversation = []
@@ -179,6 +179,10 @@ def openai_chat_completion_vision(
         "Content-Type": "application/json",
         "Authorization": f"Bearer {API_KEY}",
     }
+    if image[0:4] == "http":
+        image_url = image
+    else:
+        image_url = f"data:image/jpeg;base64,{image}"
     payload = {
         "model": model,
         "messages": [
@@ -186,7 +190,10 @@ def openai_chat_completion_vision(
                 "role": "user",
                 "content": [
                     {"type": "text", "text": msg},
-                    {"type": "image_url", "image_url": {"url": f"data:image/jpeg;base64,{image}"}},
+                    {
+                        "type": "image_url",
+                        "image_url": {"url": image_url},
+                    },
                 ],
             }
         ],
@@ -217,9 +224,7 @@ def openai_chat_completion_vision(
         # judge schema
         try:
             if no_history == False:
-                conversation.append(
-                    {"role": "user", "content": msg}
-                )
+                conversation.append({"role": "user", "content": msg})
                 conversation.append(
                     {
                         "role": "system",
@@ -239,6 +244,7 @@ def openai_chat_completion_vision(
             f"Error: {response.status_code} {response.content.decode('utf-8')}"
         )
         return {}
+
 
 def openai_chat_completion(
     prompt_question,

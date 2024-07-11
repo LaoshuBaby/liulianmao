@@ -88,6 +88,7 @@ def ask(
 
     if msg[0:11] == "```IMG_PATH":
         import re
+
         match = re.search(r"IMG_PATH\n(.+)", msg)
         if match:
             image_path = match.group(1)
@@ -100,6 +101,7 @@ def ask(
                 image = image_path
                 logger.debug(f"[Fairy]: 图像地址为链接 {image}")
             else:
+
                 def image_to_base64(image_path):
                     with open(image_path, "rb") as image_file:
                         image_data = image_file.read()

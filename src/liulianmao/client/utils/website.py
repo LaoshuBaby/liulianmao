@@ -21,9 +21,7 @@ def url_reader(url: str, flag_keep_original: bool = False) -> str:
         if protocal in url:
             flag_have_protocal = True
     if flag_have_protocal == False:
-        logger.warning(
-            "您提交给url_reader的url没有指明协议，已自动补全https的协议头"
-        )
+        logger.warning("您提交给url_reader的url没有指明协议，已自动补全https的协议头")
         url = "https://" + url
 
     logger.trace(f"[url_reader().url.fixed]: {url}")

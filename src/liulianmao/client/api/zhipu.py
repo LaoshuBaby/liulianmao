@@ -38,9 +38,9 @@ def zhipu_completion_vision(
     image: str,
     model: str = "glm-4",
     amount: int = 1,
-    temperature:float=0.8,
-    top_p:float=0.6,
-    max_tokens:int=1024,
+    temperature: float = 0.8,
+    top_p: float = 0.6,
+    max_tokens: int = 1024,
     no_history: bool = False,
 ):
     if no_history:
