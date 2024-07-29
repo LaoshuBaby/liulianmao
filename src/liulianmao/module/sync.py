@@ -12,6 +12,24 @@ default_apikey = os.path.join(
 )
 
 
+import os
+import opendal
+
+os.environ['AWS_ACCESS_KEY_ID'] = ''
+os.environ['AWS_SECRET_ACCESS_KEY'] = ''
+
+op = opendal.Operator(
+    scheme="s3",
+    root="/",
+    bucket="laoshubaby",
+    region="cn-beijing",
+    endpoint="https://laoshubaby.oss-cn-beijing.aliyuncs.com",
+    enable_virtual_host_style="True",
+)
+
+file_content = op.read("/static/nihongo/nhgbkysms.metadata.json")
+print(file_content.decode('utf-8'))
+
 class DriverAWSS3:
     def __init__(
         self,
