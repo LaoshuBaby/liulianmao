@@ -230,6 +230,9 @@ def openai_chat_completion_vision(
 
     if response.status_code == 200:
         logger.trace("[Debug] response.status_code == 200")
+        logger.trace(
+            f"force_record: {response.status_code} {response.content.decode('utf-8')}"
+        )
         # judge mime
         try:
             logger.trace("[Response]\n" + str(response.json()))
@@ -375,6 +378,9 @@ def openai_chat_completion(
 
     if response.status_code == 200:
         logger.trace("[Debug] response.status_code == 200")
+        logger.trace(
+            f"force_record: {response.status_code} {response.content.decode('utf-8')}"
+        )
         # judge mime
         try:
             logger.trace("[Response]\n" + str(response.json()))
