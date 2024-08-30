@@ -141,31 +141,33 @@ def ask(
             import platform
             from io import BytesIO
 
-            from PIL import Image, ImageGrab
-
             if platform.system() != "Windows":
                 logger.info(
                     "Clipboard image capture is only supported on Windows."
                 )
                 return ""
+            else:
+                from PIL import Image, ImageGrab
 
-            try:
-                image = ImageGrab.grabclipboard()
-                if image is None or not isinstance(image, Image.Image):
-                    logger.info("No image found in clipboard.")
-                    return ""
+                try:
+                    image = ImageGrab.grabclipboard()
+                    if image is None or not isinstance(image, Image.Image):
+                        logger.info("No image found in clipboard.")
+                        return ""
 
-                buffered = BytesIO()
-                image.save(buffered, format="PNG")
-                return base64.b64encode(buffered.getvalue()).decode("utf-8")
-            except ImportError:
-                logger.error(
-                    "PIL or ImageGrab module not found. Please install pillow."
-                )
-            except Exception as e:
-                logger.error(f"Error capturing clipboard image: {e}")
+                    buffered = BytesIO()
+                    image.save(buffered, format="PNG")
+                    return base64.b64encode(buffered.getvalue()).decode(
+                        "utf-8"
+                    )
+                except ImportError:
+                    logger.error(
+                        "PIL or ImageGrab module not found. Please install pillow."
+                    )
+                except Exception as e:
+                    logger.error(f"Error capturing clipboard image: {e}")
 
-            return ""
+                return ""
 
         image_clip = get_windows_clip()
         if image_clip != None and image_clip != "":
