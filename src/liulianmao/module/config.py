@@ -11,18 +11,6 @@ from module.storage import PROJECT_FOLDER, get_user_folder
 
 
 def load_conf():
-    def is_serverlsss():
-        flag_serverless = False
-        for key, value in {
-            "flag_zeabur": os.environ.get("ZEABUR", ""),
-            "flag_aws": os.environ.get("AWS", ""),
-            "flag_aliyun": os.environ.get("ALIYUN", ""),
-        }.items():
-            if value != "":
-                flag_serverless = True
-                break
-        return flag_serverless
-
     config_file_path = os.path.join(
         get_user_folder(), PROJECT_FOLDER, "assets", "config.json"
     )
