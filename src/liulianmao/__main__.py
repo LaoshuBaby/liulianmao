@@ -54,7 +54,12 @@ def init_env():
 
 @logger.catch(level="CRITICAL")
 def main(
-    recipe: List[str], actions: List[str], f_c: bool, f_a: bool, **kwargs
+    recipe: List[str],
+    actions: List[str],
+    f_a: bool,
+    f_v: bool,
+    f_c: bool,
+    **kwargs,
 ):
     """Execute the operations specified in the recipe list.
 
@@ -66,8 +71,9 @@ def main(
         f_c: A boolean feature to enable continuous dialogue.
         f_a: A boolean feature to enable the use of an agent.
     """
-    logger.trace(f"[f_c]: {f_c}")
     logger.trace(f"[f_a]: {f_a}")
+    logger.trace(f"[f_v]: {f_v}")
+    logger.trace(f"[f_c]: {f_c}")
 
     if "question" in actions:
         from module.const import PROJECT_FOLDER, get_user_folder
@@ -230,6 +236,14 @@ if __name__ == "__main__":
         help="Enable the use of an agent",
     )
     parser.add_argument(
+        "-fv",
+        "-f_v",
+        "--f_v",
+        action="store_true",
+        default=True,
+        help="Enable the use of using image",
+    )
+    parser.add_argument(
         "-fc",
         "-f_c",
         "--f_c",
@@ -262,7 +276,8 @@ if __name__ == "__main__":
     main(
         recipe=args.recipe,
         actions=actions,
-        f_c=args.f_c,
         f_a=args.f_a,
+        f_v=args.f_v,
+        f_c=args.f_c,
         series=args.series,
     )

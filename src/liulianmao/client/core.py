@@ -497,6 +497,7 @@ def agent_judge(msg, available_models, model_series):
 def chat(
     model_series: str = "openai",
     feature_agent: bool = False,
+    feature_vision: bool = True,
     feature_continue: Union[bool, int] = True,
 ):
     """
@@ -517,8 +518,9 @@ def chat(
     """
     init()
 
-    logger.info(f"[feature_continue]: {feature_continue}")
     logger.info(f"[feature_agent]: {feature_agent}")
+    logger.info(f"[feature_vision]: {feature_vision}")
+    logger.info(f"[feature_continue]: {feature_continue}")
 
     if model_series == "openai":
         available_models = openai_models("gpt")
@@ -679,6 +681,7 @@ def chat(
     conversation = ask(
         msg,
         available_models,
+        feature_vision,
         model_series=model_series,
         image="",
     )
