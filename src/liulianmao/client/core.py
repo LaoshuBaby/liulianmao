@@ -4,6 +4,7 @@ import sys
 from typing import Dict, List, Union
 
 from .agent import get_agent_judge_template
+from .api.liulianmao import meow
 from .api.llama import llama_completion
 from .api.openai import (
     openai_audio_speech,
@@ -94,7 +95,8 @@ def ask(
     image_path = ""
     feature_vision = False
 
-    # def judge_is_liulianmao_backend():
+    def judge_is_liulianmao_backend():
+        return True if meow() else False
 
     def get_image_argument():
         logger.trace("尝试使用 get_image_argument 读取图片")
