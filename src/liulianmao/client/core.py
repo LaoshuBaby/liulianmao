@@ -22,6 +22,7 @@ from module.config import load_conf
 from module.const import default_config_json
 from module.log import logger
 from module.model import select_model
+from module.runtime import is_serverlsss
 from module.storage import PROJECT_FOLDER, get_user_folder, init
 
 
@@ -320,6 +321,7 @@ def ask(
         )
 
     try:
+        logger.trace(f"[return_schema<-config]: {config}")
         if config.get("environ", {}) != {}:
             environ_dict = config.get("environ", {})
             runtime_flag = environ_dict.get("LIULIANMAO_RUNTIME", "LOCAL")
@@ -329,7 +331,8 @@ def ask(
         logger.critical(e)
     logger.trace(f"[runtime_flag]: {runtime_flag}")
 
-    if runtime_flag == "SERVERLESS":
+    # if runtime_flag == "SERVERLESS":
+    if is_serverlsss() == True:
         # 在服务器模式下就返回完整response，否则只返回choices列表
         return response
     else:
