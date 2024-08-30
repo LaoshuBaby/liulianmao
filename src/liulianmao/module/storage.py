@@ -1,7 +1,7 @@
 import json
 import os
 
-from .const import PROJECT_FOLDER, get_user_folder
+from .const import PROJECT_FOLDER, default_config_json, get_user_folder
 from .log import logger
 
 
@@ -14,16 +14,7 @@ def init():
         (
             ["assets", "config.json"],
             json.dumps(
-                {
-                    "model_type": {
-                        "openai": "gpt-4-turbo-preview",
-                        "zhipu": "glm-4",
-                    },
-                    "system_message": {
-                        "content": "You are a helpful assistant."
-                    },
-                    "settings": {"temperature": 0.5},
-                },
+                default_config_json,
                 indent=4,
             ),
         ),

@@ -18,6 +18,7 @@ current_dir = os.path.dirname(os.path.realpath(__file__))
 sys.path.append(os.path.join(current_dir, ".."))
 
 from module.config import load_conf
+from module.const import default_config_json
 from module.log import logger
 from module.model import select_model
 from module.storage import PROJECT_FOLDER, get_user_folder, init
@@ -84,14 +85,8 @@ def ask(
 
     config = load_conf()
     if config["environ"]["LIULIANMAO_RUNTIME"] == "SERVERLESS":
-        # manually init config with used value
-        # indeed all storaged in storage.py but I'm lazy in trying to write only once
-        config["system_message"]["content"] = "You are a helpful assistant."
-        config["settings"]["temperature"] = kwargs.get("temperature", 0.5)
-        config["model_type"] = {
-            "openai": "gpt-4-turbo-preview",
-            "zhipu": "glm-4",
-        }
+        config = default_config_json
+        logger.trace(f"[Override config]:\n{config}")
 
     import base64
     import re

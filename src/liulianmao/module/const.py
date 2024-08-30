@@ -4,6 +4,15 @@ import platform
 PROJECT_NAME = "LIULIANMAO"
 PROJECT_FOLDER = "." + PROJECT_NAME.lower()
 
+default_config_json = {
+    "model_type": {
+        "openai": "gpt-4-turbo-preview",
+        "zhipu": "glm-4",
+    },
+    "system_message": {"content": "You are a helpful assistant."},
+    "settings": {"temperature": 0.5},
+}
+
 all_available_languages = [
     "abq",
     "ady",
