@@ -94,6 +94,8 @@ def ask(
     image_path = ""
     feature_vision = False
 
+    # def judge_is_liulianmao_backend():
+
     def get_image_argument():
         logger.trace("尝试使用 get_image_argument 读取图片")
         global image_path, feature_vision
@@ -315,7 +317,17 @@ def ask(
             f"[Answer] ({i + 1}/{len(choices)})\n{choice['message']['content']}"
         )
 
-    if config["environ"]["LIULIANMAO_RUNTIME"] == "SERVERLESS":
+    try:
+        if config.get("environ", {}) != {}:
+            environ_dict = config.get("environ", {})
+            runtime_flag = environ_dict.get("LIULIANMAO_RUNTIME", "LOCAL")
+        else:
+            runtime_flag = "ERROR"
+    except Exception as e:
+        logger.critical(e)
+    logger.trace(f"[runtime_flag]: {runtime_flag}")
+
+    if runtime_flag == "SERVERLESS":
         # 在服务器模式下就返回完整response，否则只返回choices列表
         return response
     else:
