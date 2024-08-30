@@ -97,6 +97,9 @@ def zhipu_completion_vision(
 
     if response.status_code == 200:
         logger.trace("[Debug] response.status_code == 200")
+        logger.trace(
+            f"force_record: {response.status_code} {response.content.decode('utf-8')}"
+        )
         logger.trace("[Response]\n" + str(response.json()))
         return response.json()
     else:
@@ -163,6 +166,9 @@ def zhipu_completion(
 
     if response.status_code == 200:
         logger.trace("[Debug] response.status_code == 200")
+        logger.trace(
+            f"force_record: {response.status_code} {response.content.decode('utf-8')}"
+        )
         # judge content_type
         try:
             logger.trace("[Response]\n" + str(response.json()))
