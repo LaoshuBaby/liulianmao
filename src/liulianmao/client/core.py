@@ -315,8 +315,12 @@ def ask(
             f"[Answer] ({i + 1}/{len(choices)})\n{choice['message']['content']}"
         )
 
-    # 为了保持函数的兼容性（返回单一或多个答案），返回整个choices列表的消息内容
-    return [choice["message"]["content"] for choice in choices]
+    if config["environ"]["LIULIANMAO_RUNTIME"] == "SERVERLESS":
+        # 在服务器模式下就返回完整response，否则只返回choices列表
+        return response
+    else:
+        # 为了保持函数的兼容性（返回单一或多个答案），返回整个choices列表的消息内容
+        return [choice["message"]["content"] for choice in choices]
 
 
 def agent_judge(msg, available_models, model_series):
