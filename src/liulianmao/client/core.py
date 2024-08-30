@@ -83,6 +83,16 @@ def ask(
         )
 
     config = load_conf()
+    if config["environ"]["LIULIANMAO_RUNTIME"]=="SERVERLESS":
+        # manually init config with used value
+        # indeed all storaged in storage.py but I'm lazy in trying to write only once
+        config["system_message"]["content"]="You are a helpful assistant."
+        config["settings"]["temperature"]=kwargs.get("temperature",0.5)
+        config["model_type"]={
+        "openai": "gpt-4-turbo-preview",
+        "zhipu": "glm-4"
+    }
+
 
     import base64
     import re
