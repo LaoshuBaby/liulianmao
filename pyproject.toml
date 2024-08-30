@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "liulianmao"
-version = "__LIULIANMAO_VERSION__"
+version = "2.2.1.post2"
 description = "A LLM client for use from the command line or IDE."
 authors = ["快乐的老鼠宝宝 <laoshubaby@protonmail.com>"]
 license = "MIT"
