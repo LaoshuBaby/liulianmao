@@ -90,6 +90,7 @@ def main(
     if "config" in actions:
         from module.const import PROJECT_FOLDER, get_user_folder
         from module.runtime import is_serverlsss
+
         config_file_path = os.path.join(
             str(get_user_folder()), PROJECT_FOLDER, "assets", "config.json"
         )

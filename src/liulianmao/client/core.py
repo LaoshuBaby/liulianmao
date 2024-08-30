@@ -83,16 +83,15 @@ def ask(
         )
 
     config = load_conf()
-    if config["environ"]["LIULIANMAO_RUNTIME"]=="SERVERLESS":
+    if config["environ"]["LIULIANMAO_RUNTIME"] == "SERVERLESS":
         # manually init config with used value
         # indeed all storaged in storage.py but I'm lazy in trying to write only once
-        config["system_message"]["content"]="You are a helpful assistant."
-        config["settings"]["temperature"]=kwargs.get("temperature",0.5)
-        config["model_type"]={
-        "openai": "gpt-4-turbo-preview",
-        "zhipu": "glm-4"
-    }
-
+        config["system_message"]["content"] = "You are a helpful assistant."
+        config["settings"]["temperature"] = kwargs.get("temperature", 0.5)
+        config["model_type"] = {
+            "openai": "gpt-4-turbo-preview",
+            "zhipu": "glm-4",
+        }
 
     import base64
     import re
@@ -143,10 +142,11 @@ def ask(
         global image_path, feature_vision
 
         def get_windows_clip():
+            import base64
             import platform
             from io import BytesIO
+
             from PIL import Image, ImageGrab
-            import base64
 
             if platform.system() != "Windows":
                 logger.info(

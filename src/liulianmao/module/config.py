@@ -18,12 +18,15 @@ def load_conf():
     if is_serverlsss() == True:
         logger.warning("LIULIANMAO RUNNING IN SERVERLESS ENVIRONMENT")
         logger.trace(
-            "[Config]\n" + f"{{'environ':{'LIULIANMAO_RUNTIME':'SERVERLESS'}}}"
+            "[Config]\n"
+            + str({"environ": {"LIULIANMAO_RUNTIME": "SERVERLESS"}})
         )
-        return {}
+        return {"environ": {"LIULIANMAO_RUNTIME": "SERVERLESS"}}
     else:
         with open(config_file_path, "r", encoding="utf-8") as file:
             config = json.load(file)
-        joint_dict = {**config, **{"environ": {"LIULIANMAO_RUNTIME": "LOCAL"}}}
-        logger.trace("[Config]\n" + f"{joint_dict}")
-        return config
+        logger.trace(
+            "[Config]\n"
+            + str({**config, **{"environ": {"LIULIANMAO_RUNTIME": "LOCAL"}}})
+        )
+        return {**config, **{"environ": {"LIULIANMAO_RUNTIME": "LOCAL"}}}

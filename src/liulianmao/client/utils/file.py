@@ -46,11 +46,10 @@ def local_file_reader(path_list: List[str], flag_recursive=False) -> str:
         return "\n".join(text_content)
 
     def read_single_image(file_path):
-        import easyocr
-
         # if file_path have none-ascii char
-
         import re
+
+        import easyocr
 
         if re.search(r"[^\x00-\x7F]", file_path):
             logger.warning(
