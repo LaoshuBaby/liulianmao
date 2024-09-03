@@ -255,6 +255,7 @@ def ask(
                 msg=msg,
                 image=image,
                 model=config["model_type"]["zhipu"],
+                available_models=["glm-4-plus", "glm-4v-plus"],
                 no_history=no_history,
             )
         else:

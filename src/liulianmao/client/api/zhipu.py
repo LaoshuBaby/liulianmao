@@ -68,7 +68,7 @@ def zhipu_completion_vision(
         "Authorization": f"Bearer {API_KEY}",
     }
     payload = {
-        "model": "glm-4v",
+        "model": "glm-4v-plus",
         "messages": [
             {
                 "role": "user",
