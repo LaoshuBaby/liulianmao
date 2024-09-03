@@ -42,6 +42,7 @@ def zhipu_completion_vision(
     top_p: float = 0.6,
     max_tokens: int = 1024,
     no_history: bool = False,
+    **kwargs
 ):
     def trim_payload_for_logging(payload):
         import copy
