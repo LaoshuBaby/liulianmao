@@ -38,7 +38,7 @@ def get_user_id() -> str:
 def zhipu_completion_vision(
     msg: str,
     image: str,
-    model: str = "glm-4",
+    model: str,
     amount: int = 1,
     temperature: float = 0.8,
     top_p: float = 0.6,
@@ -114,7 +114,7 @@ def zhipu_completion_vision(
 
 def zhipu_completion(
     msg: str,
-    model: str = "glm-4",
+    model: str,
     amount: int = 1,
     no_history: bool = False,
 ):
@@ -150,7 +150,7 @@ def zhipu_completion(
         "Authorization": f"Bearer {API_KEY}",
     }
     payload = {
-        "model": "glm-4",
+        "model": model,
         "messages": append_conversation + [{"role": "user", "content": msg}],
         "user_id": get_user_id(),
     }
