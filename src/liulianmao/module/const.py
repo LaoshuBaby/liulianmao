@@ -7,7 +7,11 @@ PROJECT_FOLDER = "." + PROJECT_NAME.lower()
 default_config_json = {
     "model_type": {
         "openai": "gpt-4-turbo-preview",
-        "zhipu": "glm-4",
+        "openai.normal": "gpt-4-turbo-preview",
+        "openai.vision": "gpt-4v",
+        "zhipu": "glm-4-plus",
+        "zhipu.normal": "glm-4-plus",
+        "zhipu.vision": "glm-4v-plus",
     },
     "system_message": {"content": "You are a helpful assistant."},
     "settings": {"temperature": 0.5},
