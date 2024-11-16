@@ -44,7 +44,7 @@ def zhipu_completion_vision(
     top_p: float = 0.6,
     max_tokens: int = 1024,
     no_history: bool = False,
-    **kwargs
+    **kwargs,
 ):
     def trim_payload_for_logging(payload):
         import copy
@@ -275,7 +275,6 @@ def zhipu_batch(
         return {}
 
 
-
 def openai_images_generations(
     prompt,
     model: str = "cogview-3-plus",
@@ -303,12 +302,19 @@ def openai_images_generations(
         API_URL + "/paas/v4/images/generations", headers=headers, json=payload
     )
 
-    def checker_size(size:str)->bool:
-        if size in ["1024x1024","768x1344","864x1152","1344x768","1152x864","1440x720","720x1440"]:
+    def checker_size(size: str) -> bool:
+        if size in [
+            "1024x1024",
+            "768x1344",
+            "864x1152",
+            "1344x768",
+            "1152x864",
+            "1440x720",
+            "720x1440",
+        ]:
             return True
         else:
             return False
-
 
     def download_image(url, save_path):
         from urllib.parse import parse_qs, urlparse

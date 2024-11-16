@@ -192,10 +192,14 @@ def ask(
             logger.warning("[Fairy] 检测到您通过参数传入了一张图片的路径")
             logger.success("[Fairy] 将尝试调用包含视觉功能的模型（若支持）")
         elif get_image_prompt():
-            logger.warning("[Fairy] 检测到您在prompt开始处输入了一张图片的路径")
+            logger.warning(
+                "[Fairy] 检测到您在prompt开始处输入了一张图片的路径"
+            )
             logger.success("[Fairy] 将尝试调用包含视觉功能的模型（若支持）")
         elif get_image_clip():
-            logger.warning("[Fairy] 检测到您剪贴板当前内容为一张图片并成功从Windows剪贴板读取了图片")
+            logger.warning(
+                "[Fairy] 检测到您剪贴板当前内容为一张图片并成功从Windows剪贴板读取了图片"
+            )
             logger.success("[Fairy] 将尝试调用包含视觉功能的模型（若支持）")
         return image_path, feature_vision
 
