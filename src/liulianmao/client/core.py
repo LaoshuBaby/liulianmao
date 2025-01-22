@@ -236,7 +236,7 @@ def ask(
                 prompt_system=config["system_message"]["content"],
                 model="gpt-4o",
                 temperature=float(config["settings"]["temperature"]),
-                amount=default_amount,
+                generate_amount=default_amount,
                 no_history=no_history,
             )
         else:
@@ -249,7 +249,7 @@ def ask(
                     direct_debug=True,
                 ),
                 temperature=float(config["settings"]["temperature"]),
-                amount=default_amount,
+                generate_amount=default_amount,
                 no_history=no_history,
             )
 

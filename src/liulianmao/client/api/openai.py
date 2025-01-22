@@ -163,7 +163,7 @@ def openai_chat_completion_vision(
     msg: str,
     image: str,
     model: str = "gpt-4o",
-    amount: int = 1,
+    generate_amount: int = 1,
     temperature: float = 0.5,
     top_p: float = 1.0,
     max_tokens: int = 2048,
@@ -274,7 +274,7 @@ def openai_chat_completion(
     frequency_penalty: float = 0.0,
     presence_penalty: float = 0.0,
     stop=None,
-    amount: int = 1,
+    generate_amount: int = 1,
     use_plugin: bool = False,  # 新增参数来控制是否使用插件
     no_history: bool = False,
 ) -> Optional[dict]:
@@ -291,7 +291,7 @@ def openai_chat_completion(
         frequency_penalty: Decreases the likelihood of repeating tokens.
         presence_penalty: Increases the likelihood of introducing new tokens.
         stop: Sequence where the API will stop generating further tokens.
-        amount: The number of completions to generate.
+        generate_amount: The number of completions to generate.
         use_plugin: Whether to use a plugin for additional functionality.
         no_history: Whether to ignore previous conversation history.
 
@@ -331,7 +331,7 @@ def openai_chat_completion(
         "frequency_penalty": frequency_penalty,
         "presence_penalty": presence_penalty,
         "stop": stop,
-        "n": amount,
+        "n": int(generate_amount),
     }
 
     # 如果启用插件，添加到payload中
@@ -419,7 +419,7 @@ def openai_images_generations(
     model: str = "dall-e-3",
     size: str = "1024x1024",
     quality: str = "standard",
-    amount: int = 1,
+    generate_amount: int = 1,
 ):
     """
     Generates images based on the given prompt using the specified OpenAI model.
@@ -429,7 +429,7 @@ def openai_images_generations(
         model: The model to use for image generation.
         size: The size of the generated images.
         quality: The quality of the generated images.
-        amount: The number of images to generate.
+        generate_amount: The number of images to generate.
 
     Returns:
         None. The generated images are saved locally.
@@ -444,7 +444,7 @@ def openai_images_generations(
         "prompt": prompt,
         "size": size,
         "quality": quality,
-        "n": amount,
+        "n": generate_amount,
     }
 
     logger.trace("[Headers]\n" + f"{headers}")
