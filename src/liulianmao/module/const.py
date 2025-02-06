@@ -12,6 +12,7 @@ default_config_json = {
         "zhipu": "glm-4-plus",
         "zhipu.normal": "glm-4-plus",
         "zhipu.vision": "glm-4v-plus",
+        "deepseek": "deepseek-chat",
     },
     "system_message": {"content": "You are a helpful assistant."},
     "settings": {"temperature": 0.5},
