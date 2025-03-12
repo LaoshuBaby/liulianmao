@@ -216,21 +216,21 @@ add_extra_command_check.pack(anchor=tk.W, pady=2)
 
 # Keywords input column
 keywords_frame = ttk.Frame(options_frame)
-keywords_frame.grid(row=0, column=1, padx=5, sticky=tk.N)
+keywords_frame.grid(row=0, column=1, padx=5, sticky="ns")
 keywords_label = ttk.Label(keywords_frame, text="关键词 (每行一组)")
 keywords_label.pack(anchor=tk.W)
 keywords_entry = tk.Text(keywords_frame, height=5, width=20)
-keywords_entry.pack()
+keywords_entry.pack(fill=tk.BOTH, expand=True)
 
 # Extra commands input column
 extra_commands_frame = ttk.Frame(options_frame)
-extra_commands_frame.grid(row=0, column=2, padx=5, sticky=tk.N)
+extra_commands_frame.grid(row=0, column=2, padx=5, sticky="ns")
 extra_commands_label = ttk.Label(
     extra_commands_frame, text="额外指令 (每行一条)"
 )
 extra_commands_label.pack(anchor=tk.W)
 extra_commands_entry = tk.Text(extra_commands_frame, height=5, width=20)
-extra_commands_entry.pack()
+extra_commands_entry.pack(fill=tk.BOTH, expand=True)
 
 # Button column
 button_frame = ttk.Frame(options_frame)
@@ -266,11 +266,20 @@ button_run_liulianmao = tk.Button(
 )
 button_run_liulianmao.pack(anchor=tk.W, pady=2)
 
-# Distribute the columns equally
-options_frame.columnconfigure(0, weight=1)
-options_frame.columnconfigure(1, weight=1)
-options_frame.columnconfigure(2, weight=1)
-options_frame.columnconfigure(3, weight=1)
+# Ensure each frame or widget in the columns can expand using grid
+lang_frame.grid(row=0, column=0, padx=5, sticky="nsew")
+keywords_frame.grid(row=0, column=1, padx=5, sticky="nsew")
+extra_commands_frame.grid(row=0, column=2, padx=5, sticky="nsew")
+button_frame.grid(row=0, column=3, padx=5, sticky="nsew")
+
+# Adjust the weight for each column to control their relative width
+options_frame.columnconfigure(0, weight=1)  # Language and checkboxes
+options_frame.columnconfigure(1, weight=4)  # Keywords input
+options_frame.columnconfigure(2, weight=4)  # Extra commands input
+options_frame.columnconfigure(3, weight=2)  # Buttons
+
+# Allow rows to expand vertically
+options_frame.rowconfigure(0, weight=1)
 
 # Run the application
 root.mainloop()
