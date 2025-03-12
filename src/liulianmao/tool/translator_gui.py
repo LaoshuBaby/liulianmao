@@ -1,6 +1,7 @@
 import tkinter as tk
 from tkinter import ttk
 import pyperclip
+import json
 
 # 初始化应用程序窗口
 root = tk.Tk()
@@ -24,7 +25,7 @@ add_keywords_check = ttk.Checkbutton(root, text="追加关键词", variable=add_
 add_keywords_check.pack()
 
 # 关键词输入框
-keywords_label = ttk.Label(root, text="输入关键词翻译(格式: 原文=译文):")
+keywords_label = ttk.Label(root, text="输入关键词翻译(格式: 原文=译文，每行一个):")
 keywords_label.pack()
 
 keywords_entry = tk.Text(root, height=5, width=50)
@@ -34,9 +35,19 @@ keywords_entry.pack()
 add_extra_command_check = ttk.Checkbutton(root, text="追加额外指令", variable=add_extra_command_var)
 add_extra_command_check.pack()
 
-# 文本框
+# 输入文本框
+text_label = ttk.Label(root, text="输入需要翻译的文本:")
+text_label.pack()
+
 text_box = tk.Text(root, height=10, width=50)
 text_box.pack()
+
+# 生成的 JSON 显示框
+output_label = ttk.Label(root, text="生成的 JSON:")
+output_label.pack()
+
+output_box = tk.Text(root, height=15, width=50, state='normal')
+output_box.pack()
 
 # 复制到剪贴板的功能
 def copy_to_clipboard():
@@ -45,11 +56,12 @@ def copy_to_clipboard():
 
 # 生成命令
 def generate_command():
+    text = text_box.get("1.0", tk.END).strip()  # 获取用户输入的文本
     command = {
         "task": "translator",
         "content": {
             "lang": lang_var.get(),
-            "text": "今後も継続となります。"
+            "text": text
         }
     }
 
@@ -73,7 +85,13 @@ def generate_command():
             ]
         }
 
-    return str(command)
+    formatted_command = json.dumps(command, indent=2, ensure_ascii=False)
+
+    # 在输出框中显示生成的 JSON
+    output_box.delete("1.0", tk.END)
+    output_box.insert(tk.END, formatted_command)
+
+    return formatted_command
 
 # 生成按钮
 generate_button = ttk.Button(root, text="生成并复制到剪贴板", command=copy_to_clipboard)
