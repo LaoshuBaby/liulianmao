@@ -150,42 +150,42 @@ def action_run_liulianmao():
         print(f"Error running liulianmao: {e}")
 
 
-# 初始化应用程序窗口
+# Initialize the application window
 root = tk.Tk()
 root.title("翻译器")
-root.geometry("900x500")  # 调整窗口高度
+root.geometry("900x500")
 
-# 定义变量
+# Define variables
 lang_var = tk.StringVar()
-prompt_lang_var = tk.StringVar(value=DEFAULT_PROMPT_LANG)  # 新增变量
+prompt_lang_var = tk.StringVar(value=DEFAULT_PROMPT_LANG)
 add_keywords_var = tk.BooleanVar()
 add_extra_command_var = tk.BooleanVar()
 
-# 左右两个大框
+# Main frame
 frame = ttk.Frame(root)
-frame.pack(pady=10, padx=10, fill=tk.BOTH, expand=True)
+frame.pack(pady=5, padx=5, fill=tk.BOTH, expand=True)
 
-# 输入文本框
-text_box = tk.Text(frame, height=15, width=50)  # 调整高度
-text_box.pack(side=tk.LEFT, padx=5, pady=5, fill=tk.BOTH, expand=True)
+# Input text box
+text_box = tk.Text(frame, height=15, width=50)
+text_box.pack(side=tk.LEFT, padx=3, pady=3, fill=tk.BOTH, expand=True)
 
-# 生成的 JSON 显示框
-output_box = tk.Text(frame, height=15, width=50, state="normal")  # 调整高度
-output_box.pack(side=tk.RIGHT, padx=5, pady=5, fill=tk.BOTH, expand=True)
+# Output JSON display box
+output_box = tk.Text(frame, height=15, width=50, state="normal")
+output_box.pack(side=tk.RIGHT, padx=3, pady=3, fill=tk.BOTH, expand=True)
 
-# 添加一个分隔线
+# Separator
 separator = ttk.Separator(root, orient="horizontal")
 separator.pack(fill=tk.X, pady=5)
 
-# 添加选项框（垂直排列）
+# Options frame
 options_frame = ttk.Frame(root)
 options_frame.pack(pady=5, fill=tk.X)
 
-# 第一列：语言选择和复选框
+# Language and checkboxes column
 lang_frame = ttk.Frame(options_frame)
 lang_frame.grid(row=0, column=0, padx=5, sticky=tk.N)
 
-# target语言选项
+# Target language selection
 lang_label = ttk.Label(lang_frame, text="选择target语言:")
 lang_label.pack(anchor=tk.W, pady=2)
 lang_options = ["en", "zh", "ja"]
@@ -194,7 +194,7 @@ lang_menu = ttk.Combobox(
 )
 lang_menu.pack(anchor=tk.W, pady=2)
 
-# prompt语言选项
+# Prompt language selection
 prompt_lang_label = ttk.Label(lang_frame, text="选择prompt语言:")
 prompt_lang_label.pack(anchor=tk.W, pady=2)
 prompt_lang_menu = ttk.Combobox(
@@ -202,56 +202,57 @@ prompt_lang_menu = ttk.Combobox(
 )
 prompt_lang_menu.pack(anchor=tk.W, pady=2)
 
-# 是否追加关键词
+# Add keywords checkbox
 add_keywords_check = ttk.Checkbutton(
     lang_frame, text="追加关键词", variable=add_keywords_var
 )
 add_keywords_check.pack(anchor=tk.W, pady=2)
 
-# 是否追加额外指令
+# Add extra command checkbox
 add_extra_command_check = ttk.Checkbutton(
     lang_frame, text="追加额外指令", variable=add_extra_command_var
 )
 add_extra_command_check.pack(anchor=tk.W, pady=2)
 
-# 第二列：关键词输入框
+# Keywords input column
 keywords_frame = ttk.Frame(options_frame)
-keywords_frame.grid(row=0, column=1, padx=5)
-
+keywords_frame.grid(row=0, column=1, padx=5, sticky=tk.N)
+keywords_label = ttk.Label(keywords_frame, text="关键词 (每行一组)")
+keywords_label.pack(anchor=tk.W)
 keywords_entry = tk.Text(keywords_frame, height=5, width=20)
 keywords_entry.pack()
 
-# 第三列：额外指令输入框
+# Extra commands input column
 extra_commands_frame = ttk.Frame(options_frame)
-extra_commands_frame.grid(row=0, column=2, padx=5)
-
+extra_commands_frame.grid(row=0, column=2, padx=5, sticky=tk.N)
+extra_commands_label = ttk.Label(
+    extra_commands_frame, text="额外指令 (每行一条)"
+)
+extra_commands_label.pack(anchor=tk.W)
 extra_commands_entry = tk.Text(extra_commands_frame, height=5, width=20)
 extra_commands_entry.pack()
 
-# 第四列：生成按钮
+# Button column
 button_frame = ttk.Frame(options_frame)
-button_frame.grid(row=0, column=3, padx=5)
+button_frame.grid(row=0, column=3, padx=5, sticky=tk.N)
 
-
-
-
-button_width = max(len("生成并复制"), len("打开question文件"), len("运行liulianmao"))
 button_generate_json = tk.Button(
     button_frame,
     text="生成并复制",
     command=action_copy_to_clipboard,
-    bg="red",
+    bg="yellow",
     font=("Arial", 12),
-    width=button_width
+    width=14,
 )
-button_generate_json.pack(anchor=tk.W)
+button_generate_json.pack(anchor=tk.W, pady=2)
 
 button_open_question = tk.Button(
     button_frame,
     text="打开question文件",
     command=action_open_question_file,
+    bg="green",
     font=("Arial", 12),
-    width=button_width
+    width=14,
 )
 button_open_question.pack(anchor=tk.W, pady=2)
 
@@ -259,8 +260,9 @@ button_run_liulianmao = tk.Button(
     button_frame,
     text="运行liulianmao",
     command=action_run_liulianmao,
+    bg="red",
     font=("Arial", 12),
-    width=button_width
+    width=14,
 )
 button_run_liulianmao.pack(anchor=tk.W, pady=2)
 
@@ -270,7 +272,5 @@ options_frame.columnconfigure(1, weight=1)
 options_frame.columnconfigure(2, weight=1)
 options_frame.columnconfigure(3, weight=1)
 
-
-
-# 运行应用程序
+# Run the application
 root.mainloop()
