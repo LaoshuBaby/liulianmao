@@ -1,3 +1,6 @@
+import subprocess
+import os
+
 import tkinter as tk
 from tkinter import ttk
 import pyperclip
@@ -73,6 +76,75 @@ def get_translation(key, lang):
 def copy_to_clipboard():
     command = generate_command()
     pyperclip.copy(command)
+
+
+def open_question_file():
+    # 替换 'path/to/question/file' 为实际的文件路径
+    file_path = 'path/to/question/file'
+    try:
+        if os.name == 'posix':
+            subprocess.run(['xdg-open', file_path])
+        elif os.name == 'nt':
+            os.startfile(file_path)
+        elif os.name == 'mac':
+            subprocess.run(['open', file_path])
+    except Exception as e:
+        print(f"Error opening file: {e}")
+
+def run_liulianmao():
+    try:
+        if os.name == 'posix' or os.name == 'mac':
+            subprocess.run(['gnome-terminal', '--', 'python3', '-m', 'liulianmao'])
+        elif os.name == 'nt':
+            subprocess.run(['start', 'cmd', '/k', 'python', '-m', 'liulianmao'], shell=True)
+    except Exception as e:
+        print(f"Error running liulianmao: {e}")
+
+# 生成命令
+def generate_command():
+    text = text_box.get("1.0", tk.END).strip()
+    prompt_lang = prompt_lang_var.get()
+    command = {
+        "task": "translator",
+        "description": [
+            get_translation("description-task", prompt_lang),
+            get_translation("description-json", prompt_lang),
+            get_translation("description-extra", prompt_lang),
+            get_translation("description-keepcrlf", prompt_lang),
+            get_translation("description-escaped-crlf", prompt_lang),
+            get_translation("description-nocodeinstruct", prompt_lang),
+            get_translation("description-no-markdown", prompt_lang),
+            get_translation("description-keyword", prompt_lang),
+            get_translation("description-once", prompt_lang),
+        ],
+        "content": {"lang": lang_var.get(), "text": text},
+    }
+
+    if lang_var.get() in ["zh", "ja"]:
+        command["content"]["command"] = get_translation(
+            "command-cjk-no-romanization", prompt_lang
+        )
+
+    if add_keywords_var.get():
+        keywords_text = keywords_entry.get("1.0", tk.END).strip()
+        keyword_translation = {}
+        for line in keywords_text.splitlines():
+            if "=" in line:
+                key, value = line.split("=", 1)
+                keyword_translation[key.strip()] = value.strip()
+        command["keyword_translation"] = keyword_translation
+
+    if add_extra_command_var.get():
+        extra_commands_text = extra_commands_entry.get("1.0", tk.END).strip()
+        extra_commands = extra_commands_text.splitlines()
+        command["extra"] = {"command": extra_commands}
+
+    formatted_command = json.dumps(command, indent=2, ensure_ascii=False)
+    # 在输出框中显示生成的 JSON
+    output_box.delete("1.0", tk.END)
+    output_box.insert(tk.END, formatted_command)
+    return formatted_command
+
 
 
 # 初始化应用程序窗口
@@ -166,51 +238,23 @@ generate_button = tk.Button(
 )
 generate_button.pack()
 
+# 打开 question 文件的按钮
+open_question_button = tk.Button(
+    button_frame,
+    text="打开question文件",
+    command=open_question_file,
+    font=("Arial", 12),
+)
+open_question_button.pack(pady=2)
 
-# 生成命令
-def generate_command():
-    text = text_box.get("1.0", tk.END).strip()
-    prompt_lang = prompt_lang_var.get()
-    command = {
-        "task": "translator",
-        "description": [
-            get_translation("description-task", prompt_lang),
-            get_translation("description-json", prompt_lang),
-            get_translation("description-extra", prompt_lang),
-            get_translation("description-keepcrlf", prompt_lang),
-            get_translation("description-escaped-crlf", prompt_lang),
-            get_translation("description-nocodeinstruct", prompt_lang),
-            get_translation("description-no-markdown", prompt_lang),
-            get_translation("description-keyword", prompt_lang),
-            get_translation("description-once", prompt_lang),
-        ],
-        "content": {"lang": lang_var.get(), "text": text},
-    }
-
-    if lang_var.get() in ["zh", "ja"]:
-        command["content"]["command"] = get_translation(
-            "command-cjk-no-romanization", prompt_lang
-        )
-
-    if add_keywords_var.get():
-        keywords_text = keywords_entry.get("1.0", tk.END).strip()
-        keyword_translation = {}
-        for line in keywords_text.splitlines():
-            if "=" in line:
-                key, value = line.split("=", 1)
-                keyword_translation[key.strip()] = value.strip()
-        command["keyword_translation"] = keyword_translation
-
-    if add_extra_command_var.get():
-        extra_commands_text = extra_commands_entry.get("1.0", tk.END).strip()
-        extra_commands = extra_commands_text.splitlines()
-        command["extra"] = {"command": extra_commands}
-
-    formatted_command = json.dumps(command, indent=2, ensure_ascii=False)
-    # 在输出框中显示生成的 JSON
-    output_box.delete("1.0", tk.END)
-    output_box.insert(tk.END, formatted_command)
-    return formatted_command
+# 运行 liulianmao 的按钮
+run_liulianmao_button = tk.Button(
+    button_frame,
+    text="运行liulianmao",
+    command=run_liulianmao,
+    font=("Arial", 12),
+)
+run_liulianmao_button.pack(pady=2)
 
 
 # 运行应用程序
