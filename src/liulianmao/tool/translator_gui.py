@@ -73,32 +73,10 @@ def get_translation(key, lang):
 
 
 # 复制到剪贴板的功能
-def copy_to_clipboard():
+def action_copy_to_clipboard():
     command = generate_command()
     pyperclip.copy(command)
 
-
-def open_question_file():
-    # 替换 'path/to/question/file' 为实际的文件路径
-    file_path = 'path/to/question/file'
-    try:
-        if os.name == 'posix':
-            subprocess.run(['xdg-open', file_path])
-        elif os.name == 'nt':
-            os.startfile(file_path)
-        elif os.name == 'mac':
-            subprocess.run(['open', file_path])
-    except Exception as e:
-        print(f"Error opening file: {e}")
-
-def run_liulianmao():
-    try:
-        if os.name == 'posix' or os.name == 'mac':
-            subprocess.run(['gnome-terminal', '--', 'python3', '-m', 'liulianmao'])
-        elif os.name == 'nt':
-            subprocess.run(['start', 'cmd', '/k', 'python', '-m', 'liulianmao'], shell=True)
-    except Exception as e:
-        print(f"Error running liulianmao: {e}")
 
 # 生成命令
 def generate_command():
@@ -146,6 +124,31 @@ def generate_command():
     return formatted_command
 
 
+def action_open_question_file():
+    try:
+        home_directory = os.path.expanduser("~")
+        os.chdir(home_directory)
+
+        if os.name == "posix" or os.name == "mac":
+            os.system("python3 -m liulianmao --question")
+        elif os.name == "nt":
+            os.system("python -m liulianmao --question")
+    except Exception as e:
+        print(f"Error opening question file: {e}")
+
+
+def action_run_liulianmao():
+    try:
+        home_directory = os.path.expanduser("~")
+        os.chdir(home_directory)
+
+        if os.name == "posix" or os.name == "mac":
+            os.system("gnome-terminal -- python3 -m liulianmao")
+        elif os.name == "nt":
+            os.system("start cmd /k python -m liulianmao")
+    except Exception as e:
+        print(f"Error running liulianmao: {e}")
+
 
 # 初始化应用程序窗口
 root = tk.Tk()
@@ -182,8 +185,8 @@ options_frame.pack(pady=5, fill=tk.X)
 lang_frame = ttk.Frame(options_frame)
 lang_frame.grid(row=0, column=0, padx=5, sticky=tk.N)
 
-# 目标语言选项
-lang_label = ttk.Label(lang_frame, text="选择目标语言:")
+# target语言选项
+lang_label = ttk.Label(lang_frame, text="选择target语言:")
 lang_label.pack(anchor=tk.W, pady=2)
 lang_options = ["en", "zh", "ja"]
 lang_menu = ttk.Combobox(
@@ -229,32 +232,44 @@ extra_commands_entry.pack()
 button_frame = ttk.Frame(options_frame)
 button_frame.grid(row=0, column=3, padx=5)
 
-generate_button = tk.Button(
+
+
+
+button_width = max(len("生成并复制"), len("打开question文件"), len("运行liulianmao"))
+button_generate_json = tk.Button(
     button_frame,
     text="生成并复制",
-    command=copy_to_clipboard,
+    command=action_copy_to_clipboard,
     bg="red",
     font=("Arial", 12),
+    width=button_width
 )
-generate_button.pack()
+button_generate_json.pack(anchor=tk.W)
 
-# 打开 question 文件的按钮
-open_question_button = tk.Button(
+button_open_question = tk.Button(
     button_frame,
     text="打开question文件",
-    command=open_question_file,
+    command=action_open_question_file,
     font=("Arial", 12),
+    width=button_width
 )
-open_question_button.pack(pady=2)
+button_open_question.pack(anchor=tk.W, pady=2)
 
-# 运行 liulianmao 的按钮
-run_liulianmao_button = tk.Button(
+button_run_liulianmao = tk.Button(
     button_frame,
     text="运行liulianmao",
-    command=run_liulianmao,
+    command=action_run_liulianmao,
     font=("Arial", 12),
+    width=button_width
 )
-run_liulianmao_button.pack(pady=2)
+button_run_liulianmao.pack(anchor=tk.W, pady=2)
+
+# Distribute the columns equally
+options_frame.columnconfigure(0, weight=1)
+options_frame.columnconfigure(1, weight=1)
+options_frame.columnconfigure(2, weight=1)
+options_frame.columnconfigure(3, weight=1)
+
 
 
 # 运行应用程序
