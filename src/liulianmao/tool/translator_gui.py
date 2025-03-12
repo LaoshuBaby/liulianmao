@@ -64,6 +64,13 @@ DEFAULT_PROMPT_LANG = "zh"
 def get_translation(key, lang):
     return TRANSLATIONS.get(key, {}).get(lang, TRANSLATIONS[key][DEFAULT_PROMPT_LANG])
 
+# 复制到剪贴板的功能
+def copy_to_clipboard():
+    command = generate_command()
+    pyperclip.copy(command)
+
+
+
 # 初始化应用程序窗口
 root = tk.Tk()
 root.title("翻译器")
@@ -91,38 +98,56 @@ output_box.pack(side=tk.RIGHT, padx=5, pady=5, fill=tk.BOTH, expand=True)
 separator = ttk.Separator(root, orient='horizontal')
 separator.pack(fill=tk.X, pady=5)
 
-# 添加选项框（水平排列）
+# 添加选项框（垂直排列）
 options_frame = ttk.Frame(root)
 options_frame.pack(pady=5, fill=tk.X)
 
+# 第一列：语言选择和复选框
+lang_frame = ttk.Frame(options_frame)
+lang_frame.grid(row=0, column=0, padx=5, sticky=tk.N)
+
 # 目标语言选项
-lang_label = ttk.Label(options_frame, text="选择目标语言:")
-lang_label.grid(row=0, column=0, padx=5)
+lang_label = ttk.Label(lang_frame, text="选择目标语言:")
+lang_label.pack(anchor=tk.W, pady=2)
 lang_options = ["en", "zh", "ja"]
-lang_menu = ttk.Combobox(options_frame, textvariable=lang_var, values=lang_options)
-lang_menu.grid(row=0, column=1, padx=5)
+lang_menu = ttk.Combobox(lang_frame, textvariable=lang_var, values=lang_options)
+lang_menu.pack(anchor=tk.W, pady=2)
 
 # prompt语言选项
-prompt_lang_label = ttk.Label(options_frame, text="选择prompt语言:")
-prompt_lang_label.grid(row=0, column=2, padx=5)
-prompt_lang_menu = ttk.Combobox(options_frame, textvariable=prompt_lang_var, values=lang_options)
-prompt_lang_menu.grid(row=0, column=3, padx=5)
+prompt_lang_label = ttk.Label(lang_frame, text="选择prompt语言:")
+prompt_lang_label.pack(anchor=tk.W, pady=2)
+prompt_lang_menu = ttk.Combobox(lang_frame, textvariable=prompt_lang_var, values=lang_options)
+prompt_lang_menu.pack(anchor=tk.W, pady=2)
 
 # 是否追加关键词
-add_keywords_check = ttk.Checkbutton(options_frame, text="追加关键词", variable=add_keywords_var)
-add_keywords_check.grid(row=0, column=4, padx=5)
-
-# 关键词输入框
-keywords_entry = tk.Text(options_frame, height=5, width=20)
-keywords_entry.grid(row=0, column=5, padx=5)
+add_keywords_check = ttk.Checkbutton(lang_frame, text="追加关键词", variable=add_keywords_var)
+add_keywords_check.pack(anchor=tk.W, pady=2)
 
 # 是否追加额外指令
-add_extra_command_check = ttk.Checkbutton(options_frame, text="追加额外指令", variable=add_extra_command_var)
-add_extra_command_check.grid(row=0, column=6, padx=5)
+add_extra_command_check = ttk.Checkbutton(lang_frame, text="追加额外指令", variable=add_extra_command_var)
+add_extra_command_check.pack(anchor=tk.W, pady=2)
 
-# 额外指令输入框
-extra_commands_entry = tk.Text(options_frame, height=5, width=20)
-extra_commands_entry.grid(row=0, column=7, padx=5)
+# 第二列：关键词输入框
+keywords_frame = ttk.Frame(options_frame)
+keywords_frame.grid(row=0, column=1, padx=5)
+
+keywords_entry = tk.Text(keywords_frame, height=5, width=20)
+keywords_entry.pack()
+
+# 第三列：额外指令输入框
+extra_commands_frame = ttk.Frame(options_frame)
+extra_commands_frame.grid(row=0, column=2, padx=5)
+
+extra_commands_entry = tk.Text(extra_commands_frame, height=5, width=20)
+extra_commands_entry.pack()
+
+# 第四列：生成按钮
+button_frame = ttk.Frame(options_frame)
+button_frame.grid(row=0, column=3, padx=5)
+
+generate_button = tk.Button(button_frame, text="生成并复制", command=copy_to_clipboard, bg='red', font=("Arial", 12))
+generate_button.pack()
+
 
 # 生成命令
 def generate_command():
@@ -172,14 +197,6 @@ def generate_command():
     output_box.insert(tk.END, formatted_command)
     return formatted_command
 
-# 复制到剪贴板的功能
-def copy_to_clipboard():
-    command = generate_command()
-    pyperclip.copy(command)
-
-# 生成按钮
-generate_button = tk.Button(options_frame, text="生成并复制", command=copy_to_clipboard, bg='red', font=("Arial", 12))
-generate_button.grid(row=0, column=8, padx=5)
 
 # 运行应用程序
 root.mainloop()
