@@ -30,6 +30,11 @@ def get_agent_judge_template():
     =+=+=
     ```
 
+    请注意，在你返回的时候，请不要再包含大括号，这里的大括号和里面的内容是希望您替换的内容。
+
+    例如，如果您认为希望调用那个产生随机数的函数，那么您应该把{{The function's name}}替换成"get_random_num"(不含括号)
+    （此外这并不意味着您永远需要需要输出这个回答，您需要根据具体问题具体分析）
+
     如果你认为不需要调用外部程序，则请输出{{{no_debug_only_return}}}如下agentcommand代码段中内容：
 
     ```agentcommand
