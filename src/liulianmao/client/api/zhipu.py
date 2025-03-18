@@ -54,7 +54,7 @@ def zhipu_completion_vision(
             for content in message["content"]:
                 if content["type"] == "image_url":
                     image_url = content["image_url"]["url"]
-                    if len(image_url) > 1024:
+                    if len(image_url) > 1024*1024:
                         content["image_url"][
                             "url"
                         ] = f"TOO LONG - len={len(image_url)}"
