@@ -4,7 +4,11 @@ from liulianmao import logger
 aai.settings.api_key = input("Please input assemblyai apikey")
 transcriber = aai.Transcriber()
 config = aai.TranscriptionConfig(speaker_labels=True)
-transcript = transcriber.transcribe(input("Please input URI you want to transcribe"),config=config)
+# transcript = transcriber.transcribe(
+#     input("Please input URI you want to transcribe"),
+#     config=config
+# )
+transcript = transcriber.transcribe(    input("Please input URI you want to transcribe"))
 
 # demo
 # transcriber.transcribe("https://assembly.ai/news.mp4")
@@ -14,6 +18,6 @@ transcript = transcriber.transcribe(input("Please input URI you want to transcri
 if transcript.status == aai.TranscriptStatus.error:
     print(transcript.error)
 else:
-    # logger.info(transcript.text) # 如果没带config
-    for utterance in transcript.utterances:
-        logger.info(f"Speaker {utterance.speaker}: {utterance.text}")
+    logger.info(transcript.text) # 如果没带config
+    # for utterance in transcript.utterances:
+    #     logger.info(f"Speaker {utterance.speaker}: {utterance.text}")
