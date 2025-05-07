@@ -114,7 +114,6 @@ def main(
 
     import importlib.util
 
-    FEATURE = {"core": True, "langchain": False}
 
     spec = importlib.util.find_spec(".core", package="client")
     core = importlib.util.module_from_spec(spec)
@@ -124,11 +123,6 @@ def main(
     api_openai = importlib.util.module_from_spec(spec_openai)
     spec_openai.loader.exec_module(api_openai)
 
-    if FEATURE["langchain"]:
-        # spec = importlib.util.find_spec('.langchain', package='client')
-        # langchain = importlib.util.module_from_spec(spec)
-        # spec.loader.exec_module(langchain)
-        from client.langchain import main as langchain
 
     operations = {
         "default": core.chat,

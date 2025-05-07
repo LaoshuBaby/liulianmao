@@ -22,7 +22,6 @@
 * __main__.py 接受命令行传参和import，解析recipe并执行
 * /client/core.py 平凡的restful客户端
 * /client/openai.py 使用openai的py库的客户端
-* /client/langchain.py 使用langchain的客户端
 * /module 下面都是无论如何都会用到的各个模块
 * /client/api 这个和模型提供方有关，不同模型提供方会有不同的API(如openai、llama、zhipu、enrie)
 
