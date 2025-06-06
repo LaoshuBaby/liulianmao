@@ -326,13 +326,21 @@ def openai_chat_completion(
         ),
         "model": model,
         "temperature": validate_temperature(temperature),
-        "max_tokens": max_tokens,
         "top_p": top_p,
         "frequency_penalty": frequency_penalty,
         "presence_penalty": presence_penalty,
         "stop": stop,
         "n": int(generate_amount),
     }
+
+    # maybe need to renamed to token_threshold
+    # below is because reasoning model token not contain in output, but will also been charged.
+    # some third party provider will also show reasoning output at same time. 
+    # This only apply to openai official provider.
+    if "o1" in model or "o4" in model:
+        payload={**payload,**{"max_completion_tokens": max_tokens}}
+    else:
+        payload={**payload,**{"max_tokens": max_tokens}}
 
     # 如果启用插件，添加到payload中
     if use_plugin:
