@@ -293,6 +293,12 @@ def ask(
             "total_tokens", -1
         )
 
+        reasoning_tokens=0
+        if response.get("usage",{}).get("completion_tokens_details",None):
+            if response.get("usage",{}).get("completion_tokens_details",None).get("reasoning_tokens",None):
+                reasoning_tokens=response.get("usage",{}).get("completion_tokens_details",None).get("reasoning_tokens",None)
+
+
         # 使用展平路径的变量名进行日志记录，仅在包含token记录时
         logger.debug(
             "[Token Usage]\n"
@@ -300,7 +306,7 @@ def ask(
                 {
                     "response_usage_completion_tokens": response_usage_completion_tokens,
                     "response_usage_prompt_tokens": response_usage_prompt_tokens,
-                    "response_usage_total_tokens": response_usage_total_tokens,
+                    "response_usage_total_tokens": response_usage_total_tokens if reasoning_tokens==0 else f"{response_usage_total_tokens} (reasoning: {reasoning_tokens})",
                     # 计算验证
                     "verify": f"{response_usage_completion_tokens} + {response_usage_prompt_tokens} = {response_usage_completion_tokens + response_usage_prompt_tokens}",
                 },
