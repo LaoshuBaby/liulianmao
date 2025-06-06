@@ -4,8 +4,13 @@ import platform
 PROJECT_NAME = "LIULIANMAO"
 PROJECT_FOLDER = "." + PROJECT_NAME.lower()
 
+# default series will be set to compatiable to avoid openai center prospective.
 default_config_json = {
     "model_type": {
+        "compatiable":"DeepSeek-R1-0528",
+        "compatiable.complication":"DeepSeek-R1-0528",
+        "compatiable.vision":"DeepSeek-R1-0528",
+        "compatiable.reasoning":"DeepSeek-R1-0528",
         "openai": "gpt-4-turbo-preview",
         "openai.normal": "gpt-4-turbo-preview",
         "openai.vision": "gpt-4v",
@@ -17,6 +22,27 @@ default_config_json = {
     "system_message": {"content": "You are a helpful assistant."},
     "settings": {"temperature": 0.5},
 }
+
+series_list=[
+    "openai",
+    "deepseek",
+    "anthropic"
+    "meta",
+    "zhipu",
+    "xai",
+    "mistral"
+]
+
+provider_list=series_list+["github"
+                           "cloudflare",
+                           "one-api(selfhost)",
+                           "litellm(selfhost)"]
+
+def get_endpoint():
+    pass
+
+def get_endpoint_profile():
+    pass
 
 all_available_languages = [
     "abq",
