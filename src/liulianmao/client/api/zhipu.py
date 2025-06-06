@@ -38,7 +38,7 @@ def get_user_id() -> str:
 def zhipu_completion_vision(
     msg: str,
     image: str,
-    model:str ="glm-4v-plus",
+    model: str = "glm-4v-plus",
     amount: int = 1,
     temperature: float = 0.8,
     top_p: float = 0.6,
@@ -54,7 +54,7 @@ def zhipu_completion_vision(
             for content in message["content"]:
                 if content["type"] == "image_url":
                     image_url = content["image_url"]["url"]
-                    if len(image_url) > 1024*1024:
+                    if len(image_url) > 1024 * 1024:
                         content["image_url"][
                             "url"
                         ] = f"TOO LONG - len={len(image_url)}"
@@ -114,7 +114,7 @@ def zhipu_completion_vision(
 
 def zhipu_completion(
     msg: str,
-    model: str="glm-4",
+    model: str = "glm-4",
     amount: int = 1,
     no_history: bool = False,
 ):

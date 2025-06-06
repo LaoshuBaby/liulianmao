@@ -1,6 +1,7 @@
 import os
 import sys
 from datetime import datetime
+import time
 from typing import List, Optional
 
 import requests
@@ -222,11 +223,14 @@ def openai_chat_completion_vision(
     else:
         logger.trace("[Question]\n" + f"{msg}")
 
+    time_start = time.time()
     response = requests.post(
         API_URL + "/v1/chat/completions",
         headers=headers,
         json=payload,
     )
+    time_end = time.time()
+    logger.debug(f"[TIME] completion cost {round(time_end-time_start,2)}s")
 
     if response.status_code == 200:
         logger.trace("[Debug] response.status_code == 200")
@@ -325,7 +329,6 @@ def openai_chat_completion(
             + [{"role": "user", "content": prompt_question}]
         ),
         "model": model,
-        "temperature": validate_temperature(temperature),
         "top_p": top_p,
         "frequency_penalty": frequency_penalty,
         "presence_penalty": presence_penalty,
@@ -335,12 +338,18 @@ def openai_chat_completion(
 
     # maybe need to renamed to token_threshold
     # below is because reasoning model token not contain in output, but will also been charged.
-    # some third party provider will also show reasoning output at same time. 
+    # some third party provider will also show reasoning output at same time.
     # This only apply to openai official provider.
     if "o1" in model or "o4" in model:
-        payload={**payload,**{"max_completion_tokens": max_tokens}}
+        payload = {**payload, **{"max_completion_tokens": max_tokens}}
     else:
-        payload={**payload,**{"max_tokens": max_tokens}}
+        payload = {
+            **payload,
+            **{
+                "max_tokens": max_tokens,
+                "temperature": validate_temperature(temperature),
+            },
+        }
 
     # 如果启用插件，添加到payload中
     if use_plugin:
@@ -380,9 +389,12 @@ def openai_chat_completion(
     else:
         logger.trace("[Question]\n" + f"{prompt_question}")
 
+    time_start = time.time()
     response = requests.post(
         API_URL + "/v1/chat/completions", headers=headers, json=payload
     )
+    time_end = time.time()
+    logger.debug(f"[TIME] completion cost {round(time_end-time_start,2)}s")
 
     if response.status_code == 200:
         logger.trace("[Debug] response.status_code == 200")
