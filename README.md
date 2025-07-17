@@ -2,17 +2,11 @@
 
 **liulianmao**是[@LaoshuBaby](https://github.com/LaoshuBaby)自用的一个在命令行或者IDE中使用的大语言模型客户端。本项目主要为鼠宝宝及友人提供服务，亦用作个人codebase在各种机器人和实验性项目中快速调用。
 
-目前仅测试了OpenAI提供的服务。理论上亦可直接用于零一万物或通义千问的服务。
-
-若需要快速切换不同模型，可使用通过[one-api](https://github.com/songquanpeng/one-api)或[new-api](https://github.com/Calcium-Ion/new-api)聚合后的token。
-
 您可脱离IDE在纯命令行中无头调用，亦可在IDE中同时并列若干窗口，运行客户端交互式对话。
 
 | Use in VSCode                    | Use in PyCharm                     |
 |----------------------------------|------------------------------------|
 | ![VSCode](screenshot_vscode.png) | ![PyCharm](screenshot_pycharm.png) |
-
-如果您是希望寻找图形化的客户端，可以去隔壁的[ChatBox](https://github.com/Bin-Huang/chatbox)、[ChatHub](https://github.com/chathub-dev/chathub)或[LibreChat](https://github.com/danny-avila/LibreChat)看看。
 
 仅提供简体中文文档。若有疑问您可以联系我。
 
@@ -147,7 +141,27 @@ A: 好问题，我也觉得。
 
 Q: 有没有类似榴莲猫的项目？
 
-A: 如果您有小米智能音响，可以试试[yihong0618/xiaogpt](https://github.com/yihong0618/xiaogpt)，给小爱同学装上最强大脑。
+A: 有的，不过不一定是Python，对于多种模型的综合适配和快速切换不同模型，可使用通过聚合API工具或者库来实现。
+
+* [one-api](https://github.com/songquanpeng/one-api) Gateway
+* [new-api](https://github.com/Calcium-Ion/new-api) Gateway
+* [litellm](https://github.com/BerriAI/litellm) Gateway
+* [xsai](https://github.com/moeru-ai/xsai) SDK
+
+当然用[Dify](https://github.com/langgenius/dify)之类的框架也是可以的不过多少有点杀鸡用牛刀了。
+
+Q: 但我希望图形化的客户端怎么办？
+
+A: 理论上我确实想写一个，但是摆了。
+
+开源的话，可以去隔壁的这些看看：
+
+* [ChatBox](https://github.com/Bin-Huang/chatbox)
+* [ChatHub](https://github.com/chathub-dev/chathub)
+* [LibreChat](https://github.com/danny-avila/LibreChat)
+* [lobechat](https://github.com/lobehub/lobe-chat)
+
+如果不介意是否是真开源，那么还有一个[ChatWise](https://github.com/egoist/chatwise-releases)但我个人是不推荐用的
 
 ## 题外话
 
