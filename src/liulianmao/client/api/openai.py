@@ -340,16 +340,18 @@ def openai_chat_completion(
     # below is because reasoning model token not contain in output, but will also been charged.
     # some third party provider will also show reasoning output at same time.
     # This only apply to openai official provider.
-    if "o1" in model or "o4" in model:
-        payload = {**payload, **{"max_completion_tokens": max_tokens}}
-    else:
-        payload = {
-            **payload,
-            **{
-                "max_tokens": max_tokens,
-                "temperature": validate_temperature(temperature),
-            },
-        }
+    reasoning_keyword = ["o1", "o4", "gpt5"]
+    for keyword in reasoning_keyword:
+        if keyword in model:
+            payload = {**payload, **{"max_completion_tokens": max_tokens}}
+        else:
+            payload = {
+                **payload,
+                **{
+                    "max_tokens": max_tokens,
+                    "temperature": validate_temperature(temperature),
+                },
+            }
 
     # 如果启用插件，添加到payload中
     if use_plugin:
