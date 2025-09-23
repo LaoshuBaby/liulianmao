@@ -354,7 +354,10 @@ def openai_chat_completion(
         logger.info(
             "[reasoning_keyword]: This is reasoning model so only can limit completion length"
         )
-        payload = {**payload, **{"max_completion_tokens": max_tokens}}
+        payload = {
+            **payload,
+            **{"max_completion_tokens": int(max_tokens * 10)},
+        }
     else:
         logger.trace("[reasoning_keyword]: lucky!")
         payload = {
