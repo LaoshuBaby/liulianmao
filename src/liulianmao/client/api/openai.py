@@ -341,7 +341,7 @@ def openai_chat_completion(
     # some third party provider will also show reasoning output at same time.
     # This only apply to openai official provider.
 
-    reasoning_keyword = ["o1", "o4", "gpt5"]
+    reasoning_keyword = ["o1", "o4", "gpt-5"]
     flag_reasoning_maxlength_warn = False
 
     for keyword in reasoning_keyword:
