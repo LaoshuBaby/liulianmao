@@ -340,18 +340,30 @@ def openai_chat_completion(
     # below is because reasoning model token not contain in output, but will also been charged.
     # some third party provider will also show reasoning output at same time.
     # This only apply to openai official provider.
+
     reasoning_keyword = ["o1", "o4", "gpt5"]
+    flag_reasoning_maxlength_warn = False
+
     for keyword in reasoning_keyword:
         if keyword in model:
-            payload = {**payload, **{"max_completion_tokens": max_tokens}}
+            flag_reasoning_maxlength_warn = True
         else:
-            payload = {
-                **payload,
-                **{
-                    "max_tokens": max_tokens,
-                    "temperature": validate_temperature(temperature),
-                },
-            }
+            pass
+
+    if flag_reasoning_maxlength_warn == True:
+        logger.info(
+            "[reasoning_keyword]: This is reasoning model so only can limit completion length"
+        )
+        payload = {**payload, **{"max_completion_tokens": max_tokens}}
+    else:
+        logger.trace("[reasoning_keyword]: lucky!")
+        payload = {
+            **payload,
+            **{
+                "max_tokens": max_tokens,
+                "temperature": validate_temperature(temperature),
+            },
+        }
 
     # 如果启用插件，添加到payload中
     if use_plugin:
