@@ -439,9 +439,28 @@ def openai_chat_completion(
         logger.trace("[Question]\n" + f"{prompt_question}")
 
     time_start = time.time()
-    response = requests.post(
-        API_URL + "/v1/chat/completions", headers=headers, json=payload
-    )
+    if model=="gpt-5-pro":
+        # 其实这是新api的，未来其他新api上了也可以安排上
+        payload["input"]=payload["messages"]
+        payload.pop("messages")
+
+        payload["max_output_tokens"]=payload["max_completion_tokens"]
+        payload.pop("max_completion_tokens")
+
+        payload.pop("presence_penalty")
+        payload.pop("frequency_penalty")
+        payload.pop("stop")
+        payload.pop("top_p")
+        payload.pop("n")
+
+        payload["service_tier"]="standard"
+        response = requests.post(
+            API_URL + "/v1/responses", headers=headers, json=payload
+        )
+    else:
+        response = requests.post(
+            API_URL + "/v1/chat/completions", headers=headers, json=payload
+        )
     time_end = time.time()
     logger.debug(f"[TIME] completion cost {round(time_end-time_start,2)}s")
 
