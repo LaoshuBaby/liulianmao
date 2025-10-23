@@ -341,18 +341,25 @@ def openai_chat_completion(
     # some third party provider will also show reasoning output at same time.
     # This only apply to openai official provider.
 
-    # 模型定制化：openai
+    # 模型定制化
+    flag_customed_openai = False
+    flag_customed_xai = False
 
+    # 模型参数定制化：openai
     customed_openai_reasoning_keyword = ["o1", "o4", "gpt-5"]
     flag_reasoning_maxlength_warn = False
 
     for keyword in customed_openai_reasoning_keyword:
         if keyword in model:
+            flag_customed_openai = True
             flag_reasoning_maxlength_warn = True
         else:
             pass
 
-    if flag_reasoning_maxlength_warn == True:
+    if flag_customed_openai:
+        logger.trace("[model customize]: Detected using model from [openai]")
+
+    if flag_reasoning_maxlength_warn:
         logger.info(
             "[reasoning_keyword]: This is reasoning model so only can limit completion length"
         )
@@ -370,16 +377,28 @@ def openai_chat_completion(
             },
         }
 
-    # 模型定制化参数：xai
+    # 模型参数定制化：xai
 
-    customed_xai_keyword = "grok"
+    customed_xai_keyword = ["grok", "xai"]
 
-    if customed_xai_keyword in model:
-        logger.warning("YOU ARE USING MODEL PROVIDED BY ELON MUSK")
+    for keyword in customed_xai_keyword:
+        if keyword in model:
+            flag_customed_xai = True
+        else:
+            pass
+
+    if flag_customed_xai:
+        logger.trace("[model customize]: Detected using model from [xai]")
+
+    if flag_customed_xai:
+        logger.info("YOU ARE USING MODEL PROVIDED BY ELON MUSK")
         payload.pop("presence_penalty")
         payload.pop("frequency_penalty")
         payload["stream"] = False
         payload["temperature"] = 0
+
+    # 模型参数定制化：deepseek
+    # 考虑如何绕过缓存或者强制指定不要缓存的（不过想要保证一定是缓存的倒是有可行的
 
     # 如果启用插件，添加到payload中
     if use_plugin:
