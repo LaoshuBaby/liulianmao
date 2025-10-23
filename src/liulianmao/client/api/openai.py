@@ -43,11 +43,13 @@ def openai_models(acceptable_model_series: List[str] = [""]) -> List[str]:
             for key, value in item.items():
                 if key == "id":
                     for target_series in acceptable_model_series:
-                        if target_series != "" and target_series in value.lower():
+                        if (
+                            target_series != ""
+                            and target_series in value.lower()
+                        ):
                             collected_ids.append(value)
                         elif target_series == "":
                             collected_ids.append(value)
-
 
         return collected_ids
 
@@ -402,7 +404,15 @@ def openai_chat_completion(
 
     # 模型参数定制化：mistral
 
-    customed_keyword_mistral = ["mistral", "codestral"]
+    customed_keyword_mistral = [
+        "mistral",
+        "codestral",
+        "magistral",
+        "voxtral",
+        "devstral",
+        "ministral",
+        "pixtral" "tral",
+    ]
 
     for keyword in customed_keyword_mistral:
         if keyword in model:
@@ -459,12 +469,12 @@ def openai_chat_completion(
         logger.trace("[Question]\n" + f"{prompt_question}")
 
     time_start = time.time()
-    if model=="gpt-5-pro":
+    if model == "gpt-5-pro":
         # 其实这是新api的，未来其他新api上了也可以安排上
-        payload["input"]=payload["messages"]
+        payload["input"] = payload["messages"]
         payload.pop("messages")
 
-        payload["max_output_tokens"]=payload["max_completion_tokens"]
+        payload["max_output_tokens"] = payload["max_completion_tokens"]
         payload.pop("max_completion_tokens")
 
         payload.pop("presence_penalty")
@@ -505,13 +515,13 @@ def openai_chat_completion(
                         {"role": "user", "content": prompt_question}
                     )
                     conversation.append(
-                            {
-                                "role": "system",
-                                "content": response.json()["output"][1]["content"][0][
-                                    "text"
-                                ],
-                            }
-                        )
+                        {
+                            "role": "system",
+                            "content": response.json()["output"][1]["content"][
+                                0
+                            ]["text"],
+                        }
+                    )
                 else:
                     conversation.append(
                         {"role": "user", "content": prompt_question}
@@ -519,9 +529,9 @@ def openai_chat_completion(
                     conversation.append(
                         {
                             "role": "system",
-                            "content": response.json()["choices"][0]["message"][
-                                "content"
-                            ],
+                            "content": response.json()["choices"][0][
+                                "message"
+                            ]["content"],
                         }
                     )
         except Exception as e:
