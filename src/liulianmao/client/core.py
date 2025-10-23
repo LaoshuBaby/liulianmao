@@ -366,6 +366,43 @@ def ask(
         # 最后，可能会根据程序的需要选择是否退出
         # sys.exit()
 
+    # 探测thinking段落
+    flag_enable_thinking_display = False
+    if (
+        select_model(
+            config["model_type"]["openai"],
+            available_models,
+            direct_debug=True,
+        )
+        != "gpt-5-pro"
+        and flag_enable_thinking_display
+    ):
+        # 对传统兼容格式的模型，可以进行thinking段落提取
+        # 对于前后令牌式的thinking可以考虑从正式回答中删除
+
+        ## tag式
+        try:
+            thinking_contents_tag = response.get("choices")[0]["message"].get(
+                "reasoning_content"
+            )
+
+            logger.success(f"[thinking_contents_tag]: {thinking_contents_tag}")
+        except Exception as e:
+            logger.error(e)
+
+        ## xml式
+        try:
+            import re
+
+            thinking_contents_xml = re.findall(
+                r"<think>(.*)</think>.*",
+                response.get("choices")[0]["message"]["content"],
+            )
+            # .replace("\\n", "\n")
+            logger.success(f"[thinking_contents_xml]: {thinking_contents_xml}")
+        except Exception as e:
+            logger.error(e)
+
     # 根据choices的数量来输出
     if (
         select_model(
