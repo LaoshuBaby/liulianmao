@@ -477,23 +477,43 @@ def openai_chat_completion(
             logger.critical("RESPONSE NOT JSON")
         # judge schema
         try:
+            # 如果不留历史的话就不存了
             if no_history == False:
-                conversation.append(
-                    {"role": "user", "content": prompt_question}
-                )
-                conversation.append(
-                    {
-                        "role": "system",
-                        "content": response.json()["choices"][0]["message"][
-                            "content"
-                        ],
-                    }
-                )
+                # 根据是否新api来分别解析
+                if model == "gpt-5-pro":
+                    conversation.append(
+                        {"role": "user", "content": prompt_question}
+                    )
+                    conversation.append(
+                        {
+                            "role": "system",
+                            "content": response.json()["output"][1]["content"][
+                                "text"
+                            ],
+                        }
+                    )
+                else:
+                    conversation.append(
+                        {"role": "user", "content": prompt_question}
+                    )
+                    conversation.append(
+                        {
+                            "role": "system",
+                            "content": response.json()["choices"][0]["message"][
+                                "content"
+                            ],
+                        }
+                    )
         except Exception as e:
             logger.trace(e)
             logger.critical("WRONG RESPONSE SCHEMA")
         logger.trace("[History]\n" + str(conversation))
-        return response.json()
+        # 暂且还是不管如何都原封不动输出会response，解析是上一次提问的工作，API层就忠实返回
+        # if model=="gpt-5-pro":
+        #     result=response.json()
+        # else:
+        #     result=response.json()
+        return result
     else:
         logger.trace("[Debug] response.status_code != 200")
         logger.error(

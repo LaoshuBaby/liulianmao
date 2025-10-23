@@ -337,10 +337,27 @@ def ask(
         # sys.exit()
 
     # 根据choices的数量来输出
-    for i, choice in enumerate(choices):
-        logger.success(
-            f"[Answer] ({i + 1}/{len(choices)})\n{choice['message']['content']}"
+    if (
+        select_model(
+            config["model_type"]["openai"],
+            available_models,
+            direct_debug=True,
         )
+        == "gpt-5-pro"
+    ):
+        # openai 新api
+
+        logger.success(
+            f"[Answer] {response.json()["output"][1]["content"][
+                                "text"
+                            ]}"
+        )
+    else:
+        # openai 兼容api
+        for i, choice in enumerate(choices):
+            logger.success(
+                f"[Answer] ({i + 1}/{len(choices)})\n{choice['message']['content']}"
+            )
 
     try:
         logger.trace(f"[return_schema<-config]: {config}")
