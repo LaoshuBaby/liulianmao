@@ -660,7 +660,7 @@ def chat(
         )
     elif model_series == "openai":
         # 各个兼容的model都要体现出来的，因为兼容也都在用“openai”
-        available_models = openai_models(["gpt", "grok", "deepseek"])
+        available_models = openai_models(["gpt", "grok", "deepseek", "mistral"])
     elif model_series == "zhipu":
         available_models = ["glm-4", "glm-3-turbo", "glm-4v"]
     elif model_series == "llama":
