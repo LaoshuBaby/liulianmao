@@ -348,9 +348,7 @@ def ask(
         # openai 新api
 
         logger.success(
-            f"[Answer] {response.json()["output"][1]["content"][
-                                "text"
-                            ]}"
+            f"[Answer] {response.json()["output"][1]["content"]["text"]}"
         )
     else:
         # openai 兼容api
@@ -565,15 +563,15 @@ def chat(
     logger.info(f"[feature_continue]: {feature_continue}")
 
     if model_series == "openai":  # 各个兼容的model都要体现出来的
-        # available_models = openai_models("gpt")
-        available_models_openai = openai_models("gpt")
-        available_models_xai = openai_models("grok")
-        available_models_deepseek = openai_models("deepseek")
-        available_models = (
-            available_models_openai
-            + available_models_xai
-            + available_models_deepseek
-        )
+        available_models = openai_models(["gpt","grok","deepseek"])
+        # available_models_openai = openai_models("gpt")
+        # available_models_xai = openai_models("grok")
+        # available_models_deepseek = openai_models("deepseek")
+        # available_models = (
+        #     available_models_openai
+        #     + available_models_xai
+        #     + available_models_deepseek
+        # )
     elif model_series == "zhipu":
         available_models = ["glm-4", "glm-3-turbo", "glm-4v"]
     elif model_series == "llama":

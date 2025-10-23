@@ -17,17 +17,17 @@ from module.storage import PROJECT_FOLDER, get_user_folder, init
 conversation = []
 
 
-def openai_models(model_series: str = "") -> List[str]:
+def openai_models(acceptable_model_series: List[str] = [""]) -> List[str]:
     """
     Fetches a list of available models from the OpenAI API.
 
     Args:
-        model_series: A string to filter models by series.
+        acceptable_model_series: A list of to filter models by series, each item is str.
 
     Returns:
         A list of strings representing the available models.
     """
-    logger.debug(f"[model_series]: {model_series}")
+    logger.debug(f"[model_series]: {acceptable_model_series}")
     headers = {
         "Authorization": f"Bearer {API_KEY}",
         "Content-Type": "application/json",
@@ -42,10 +42,12 @@ def openai_models(model_series: str = "") -> List[str]:
         for item in data:
             for key, value in item.items():
                 if key == "id":
-                    if model_series != "" and model_series in value.lower():
-                        collected_ids.append(value)
-                    elif model_series == "":
-                        collected_ids.append(value)
+                    for target_series in acceptable_model_series:
+                        if target_series != "" and target_series in value.lower():
+                            collected_ids.append(value)
+                        elif target_series == "":
+                            collected_ids.append(value)
+
 
         return collected_ids
 
@@ -453,7 +455,7 @@ def openai_chat_completion(
         payload.pop("top_p")
         payload.pop("n")
 
-        payload["service_tier"]="standard"
+        # payload["service_tier"]="default"
         response = requests.post(
             API_URL + "/v1/responses", headers=headers, json=payload
         )
