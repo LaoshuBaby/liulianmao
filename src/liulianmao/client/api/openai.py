@@ -341,10 +341,12 @@ def openai_chat_completion(
     # some third party provider will also show reasoning output at same time.
     # This only apply to openai official provider.
 
-    reasoning_keyword = ["o1", "o4", "gpt-5"]
+    # 模型定制化：openai
+
+    customed_openai_reasoning_keyword = ["o1", "o4", "gpt-5"]
     flag_reasoning_maxlength_warn = False
 
-    for keyword in reasoning_keyword:
+    for keyword in customed_openai_reasoning_keyword:
         if keyword in model:
             flag_reasoning_maxlength_warn = True
         else:
@@ -367,6 +369,17 @@ def openai_chat_completion(
                 "temperature": validate_temperature(temperature),
             },
         }
+
+    # 模型定制化参数：xai
+
+    customed_xai_keyword = "grok"
+
+    if customed_xai_keyword in model:
+        logger.warning("YOU ARE USING MODEL PROVIDED BY ELON MUSK")
+        payload.pop("presence_penalty")
+        payload.pop("frequency_penalty")
+        payload["stream"] = False
+        payload["temperature"] = 0
 
     # 如果启用插件，添加到payload中
     if use_plugin:
