@@ -346,12 +346,13 @@ def openai_chat_completion(
     # 模型定制化
     flag_customed_openai = False
     flag_customed_xai = False
+    flag_customed_mistral = False
 
     # 模型参数定制化：openai
-    customed_openai_reasoning_keyword = ["o1", "o4", "gpt-5"]
+    customed_keyword_openai_reasoning = ["o1", "o4", "gpt-5"]
     flag_reasoning_maxlength_warn = False
 
-    for keyword in customed_openai_reasoning_keyword:
+    for keyword in customed_keyword_openai_reasoning:
         if keyword in model:
             flag_customed_openai = True
             flag_reasoning_maxlength_warn = True
@@ -381,9 +382,9 @@ def openai_chat_completion(
 
     # 模型参数定制化：xai
 
-    customed_xai_keyword = ["grok", "xai"]
+    customed_keyword_xai = ["grok", "xai"]
 
-    for keyword in customed_xai_keyword:
+    for keyword in customed_keyword_xai:
         if keyword in model:
             flag_customed_xai = True
         else:
@@ -398,6 +399,23 @@ def openai_chat_completion(
         payload.pop("frequency_penalty")
         payload["stream"] = False
         payload["temperature"] = 0
+
+    # 模型参数定制化：mistral
+
+    customed_keyword_mistral = ["mistral", "codestral"]
+
+    for keyword in customed_keyword_mistral:
+        if keyword in model:
+            flag_customed_mistral = True
+        else:
+            pass
+
+    if flag_customed_mistral:
+        logger.trace("[model customize]: Detected using model from [xai]")
+
+    if flag_customed_mistral:
+        logger.info("MAKE EUROPE GREAT AGAIN")
+        payload.pop("stop")
 
     # 模型参数定制化：deepseek
     # 考虑如何绕过缓存或者强制指定不要缓存的（不过想要保证一定是缓存的倒是有可行的
