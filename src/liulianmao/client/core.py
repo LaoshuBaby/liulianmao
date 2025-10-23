@@ -562,16 +562,13 @@ def chat(
     logger.info(f"[feature_vision]: {feature_vision}")
     logger.info(f"[feature_continue]: {feature_continue}")
 
-    if model_series == "openai":  # 各个兼容的model都要体现出来的
+    # 是硬编码还是调用查model的api，取决于这个provider（官方或者转发）有没有提供一个打一下就出所有可选模型的api
+    # 有的转发反而会自己写一个，有的官方反而没的有（说的就是你zhipu怎么自己不做描述文件呢）
+    if model_series == "compatiable":
+        available_models = openai_models(["gpt","grok","deepseek","glm","llama","claude","qwen","gemini","phi",])
+    elif model_series == "openai":  
+        # 各个兼容的model都要体现出来的，因为兼容也都在用“openai”
         available_models = openai_models(["gpt","grok","deepseek"])
-        # available_models_openai = openai_models("gpt")
-        # available_models_xai = openai_models("grok")
-        # available_models_deepseek = openai_models("deepseek")
-        # available_models = (
-        #     available_models_openai
-        #     + available_models_xai
-        #     + available_models_deepseek
-        # )
     elif model_series == "zhipu":
         available_models = ["glm-4", "glm-3-turbo", "glm-4v"]
     elif model_series == "llama":
@@ -803,7 +800,7 @@ def talk():
     没有参数或返回值。这个函数通过文件IO和API通信等副作用来操作。
     """
     init()
-    available_models = openai_models("tts")
+    available_models = openai_models(["tts"])
 
     with open(
         os.path.join(
@@ -834,7 +831,7 @@ def draw(model_series: str = "openai"):
     init()
 
     if model_series == "openai":
-        available_models = openai_models("dall-e")
+        available_models = openai_models(["dall-e"])
     elif model_series == "zhipu":
         available_models = ["cogview-3"]
     else:
