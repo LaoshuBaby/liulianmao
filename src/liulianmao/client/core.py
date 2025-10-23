@@ -293,11 +293,18 @@ def ask(
             "total_tokens", -1
         )
 
-        reasoning_tokens=0
-        if response.get("usage",{}).get("completion_tokens_details",None):
-            if response.get("usage",{}).get("completion_tokens_details",None).get("reasoning_tokens",None):
-                reasoning_tokens=response.get("usage",{}).get("completion_tokens_details",None).get("reasoning_tokens",None)
-
+        reasoning_tokens = 0
+        if response.get("usage", {}).get("completion_tokens_details", None):
+            if (
+                response.get("usage", {})
+                .get("completion_tokens_details", None)
+                .get("reasoning_tokens", None)
+            ):
+                reasoning_tokens = (
+                    response.get("usage", {})
+                    .get("completion_tokens_details", None)
+                    .get("reasoning_tokens", None)
+                )
 
         # 使用展平路径的变量名进行日志记录，仅在包含token记录时
         logger.debug(
@@ -306,7 +313,11 @@ def ask(
                 {
                     "response_usage_completion_tokens": response_usage_completion_tokens,
                     "response_usage_prompt_tokens": response_usage_prompt_tokens,
-                    "response_usage_total_tokens": response_usage_total_tokens if reasoning_tokens==0 else f"{response_usage_total_tokens} (reasoning: {reasoning_tokens})",
+                    "response_usage_total_tokens": (
+                        response_usage_total_tokens
+                        if reasoning_tokens == 0
+                        else f"{response_usage_total_tokens} (reasoning: {reasoning_tokens})"
+                    ),
                     # 计算验证
                     "verify": f"{response_usage_completion_tokens} + {response_usage_prompt_tokens} = {response_usage_completion_tokens + response_usage_prompt_tokens}",
                 },
@@ -536,8 +547,16 @@ def chat(
     logger.info(f"[feature_vision]: {feature_vision}")
     logger.info(f"[feature_continue]: {feature_continue}")
 
-    if model_series == "openai":
-        available_models = openai_models("gpt")
+    if model_series == "openai":  # 各个兼容的model都要体现出来的
+        # available_models = openai_models("gpt")
+        available_models_openai = openai_models("gpt")
+        available_models_xai = openai_models("grok")
+        available_models_deepseek = openai_models("deepseek")
+        available_models = (
+            available_models_openai
+            + available_models_xai
+            + available_models_deepseek
+        )
     elif model_series == "zhipu":
         available_models = ["glm-4", "glm-3-turbo", "glm-4v"]
     elif model_series == "llama":
