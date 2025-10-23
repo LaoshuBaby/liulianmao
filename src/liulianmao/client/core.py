@@ -280,52 +280,82 @@ def ask(
 
     try:
         # response = json.loads(response.text)
-        choices = response.get("choices", [])
+        if (
+            select_model(
+                config["model_type"]["openai"],
+                available_models,
+                direct_debug=True,
+            )
+            != "gpt-5-pro"
+        ):
+            choices = response.get("choices", [])
 
-        # 使用.get()方法更安全地访问字典键值，以避免KeyError异常
-        response_usage_completion_tokens = response.get("usage", {}).get(
-            "completion_tokens", -1
-        )
-        response_usage_prompt_tokens = response.get("usage", {}).get(
-            "prompt_tokens", -1
-        )
-        response_usage_total_tokens = response.get("usage", {}).get(
-            "total_tokens", -1
-        )
+            # 使用.get()方法更安全地访问字典键值，以避免KeyError异常
+            response_usage_completion_tokens = response.get("usage", {}).get(
+                "completion_tokens", -1
+            )
+            response_usage_prompt_tokens = response.get("usage", {}).get(
+                "prompt_tokens", -1
+            )
+            response_usage_total_tokens = response.get("usage", {}).get(
+                "total_tokens", -1
+            )
 
-        reasoning_tokens = 0
-        if response.get("usage", {}).get("completion_tokens_details", None):
-            if (
-                response.get("usage", {})
-                .get("completion_tokens_details", None)
-                .get("reasoning_tokens", None)
+            reasoning_tokens = 0
+            if response.get("usage", {}).get(
+                "completion_tokens_details", None
             ):
-                reasoning_tokens = (
+                if (
                     response.get("usage", {})
                     .get("completion_tokens_details", None)
                     .get("reasoning_tokens", None)
-                )
+                ):
+                    reasoning_tokens = (
+                        response.get("usage", {})
+                        .get("completion_tokens_details", None)
+                        .get("reasoning_tokens", None)
+                    )
 
-        # 使用展平路径的变量名进行日志记录，仅在包含token记录时
-        logger.debug(
-            "[Token Usage]\n"
-            + json.dumps(
-                {
-                    "response_usage_completion_tokens": response_usage_completion_tokens,
-                    "response_usage_prompt_tokens": response_usage_prompt_tokens,
-                    "response_usage_total_tokens": (
-                        response_usage_total_tokens
-                        if reasoning_tokens == 0
-                        else f"{response_usage_total_tokens} (reasoning: {reasoning_tokens})"
-                    ),
-                    # 计算验证
-                    "verify": f"{response_usage_completion_tokens} + {response_usage_prompt_tokens} = {response_usage_completion_tokens + response_usage_prompt_tokens}",
-                },
-                indent=2,
-                ensure_ascii=False,
-                sort_keys=False,
+            # 使用展平路径的变量名进行日志记录，仅在包含token记录时
+            logger.debug(
+                "[Token Usage]\n"
+                + json.dumps(
+                    {
+                        "[input]  response_usage_prompt_tokens": response_usage_prompt_tokens,
+                        "[output] response_usage_completion_tokens": response_usage_completion_tokens,
+                        "[stat]   response_usage_total_tokens": (
+                            response_usage_total_tokens
+                            if reasoning_tokens == 0
+                            else f"{response_usage_total_tokens} (reasoning: {reasoning_tokens})"
+                        ),
+                        # 计算验证
+                        # 保留计算验证是因为有的provider返回是当轮的有的是返回总计全文的
+                        # "verify"在2025年价值不高了说实话
+                        "verify": f"{response_usage_completion_tokens} + {response_usage_prompt_tokens} = {response_usage_completion_tokens + response_usage_prompt_tokens}",
+                    },
+                    indent=2,
+                    ensure_ascii=False,
+                    sort_keys=False,
+                )
             )
-        )
+
+        else:
+            # 恭喜你，openai新api格式
+            usage = response.get("usage", [])
+            logger.debug(
+                "[Token Usage]\n"
+                + json.dumps(
+                    {
+                        "[note]": "The response is following openai's latest response format",
+                        "[input]  response_usage_prompt_tokens": f"{usage.get("input_tokens")} (cached: {usage.get("input_tokens_details").get("cached_tokens")})",
+                        "[output] response_usage_completion_tokens": f"{usage.get("output_tokens")} (reasoning: {usage.get("output_tokens_details").get("reasoning_tokens")})",
+                        "[stat]   response_usage_total_tokens": f"{usage.get("total_tokens")}",
+                    },
+                    indent=2,
+                    ensure_ascii=False,
+                    sort_keys=False,
+                )
+            )
 
     except Exception as e:
         # 记录关键错误信息而不是直接退出程序，提供更好的错误上下文
@@ -346,9 +376,10 @@ def ask(
         == "gpt-5-pro"
     ):
         # openai 新api
+        # ["output"][1] 这个有点疑问，暂时不知道是否会不断增加
 
         logger.success(
-            f"[Answer] {response.json()["output"][1]["content"]["text"]}"
+            f"[Answer] {response["output"][1]["content"][0]["text"]}"
         )
     else:
         # openai 兼容api
@@ -374,7 +405,19 @@ def ask(
         return response
     else:
         # 为了保持函数的兼容性（返回单一或多个答案），返回整个choices列表的消息内容
-        return [choice["message"]["content"] for choice in choices]
+
+        if (
+            select_model(
+                config["model_type"]["openai"],
+                available_models,
+                direct_debug=True,
+            )
+            != "gpt-5-pro"
+        ):
+            # 传承经典兼容格式
+            return [choice["message"]["content"] for choice in choices]
+        else:
+            return [response["output"][1]["content"][0]["text"]]
 
 
 def agent_judge(msg, available_models, model_series):
@@ -565,10 +608,22 @@ def chat(
     # 是硬编码还是调用查model的api，取决于这个provider（官方或者转发）有没有提供一个打一下就出所有可选模型的api
     # 有的转发反而会自己写一个，有的官方反而没的有（说的就是你zhipu怎么自己不做描述文件呢）
     if model_series == "compatiable":
-        available_models = openai_models(["gpt","grok","deepseek","glm","llama","claude","qwen","gemini","phi",])
-    elif model_series == "openai":  
+        available_models = openai_models(
+            [
+                "gpt",
+                "grok",
+                "deepseek",
+                "glm",
+                "llama",
+                "claude",
+                "qwen",
+                "gemini",
+                "phi",
+            ]
+        )
+    elif model_series == "openai":
         # 各个兼容的model都要体现出来的，因为兼容也都在用“openai”
-        available_models = openai_models(["gpt","grok","deepseek"])
+        available_models = openai_models(["gpt", "grok", "deepseek"])
     elif model_series == "zhipu":
         available_models = ["glm-4", "glm-3-turbo", "glm-4v"]
     elif model_series == "llama":

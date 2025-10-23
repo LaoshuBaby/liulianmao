@@ -515,7 +515,7 @@ def openai_chat_completion(
         #     result=response.json()
         # else:
         #     result=response.json()
-        return result
+        return response.json()
     else:
         logger.trace("[Debug] response.status_code != 200")
         logger.error(
