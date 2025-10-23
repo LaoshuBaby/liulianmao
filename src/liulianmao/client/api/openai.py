@@ -487,13 +487,13 @@ def openai_chat_completion(
                         {"role": "user", "content": prompt_question}
                     )
                     conversation.append(
-                        {
-                            "role": "system",
-                            "content": response.json()["output"][1]["content"][
-                                "text"
-                            ],
-                        }
-                    )
+                            {
+                                "role": "system",
+                                "content": response.json()["output"][1]["content"][0][
+                                    "text"
+                                ],
+                            }
+                        )
                 else:
                     conversation.append(
                         {"role": "user", "content": prompt_question}
