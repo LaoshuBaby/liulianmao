@@ -1,6 +1,7 @@
 import argparse
 import os
 import sys
+import time
 from typing import List
 
 from const import LIULIANMAO_VERSION
@@ -35,6 +36,7 @@ def init_env():
         logger.debug(
             f'[ENV] "os.listdir(bundled_dir)" = {os.listdir(bundled_dir)}'
         )
+        logger.trace(f'[ENV] "time.time()" = {time.time()}')
     except Exception as e:
         print(
             __file__,
