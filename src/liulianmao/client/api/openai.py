@@ -487,6 +487,13 @@ def openai_chat_completion(
         response = requests.post(
             API_URL + "/v1/responses", headers=headers, json=payload
         )
+    if model in ["Exotic Shorthair", "Orange Cat"]:
+        response = requests.post(
+            API_URL + "/v1/msg/019-***-***-dd/stream", headers=headers, json=payload
+        )
+        # response = requests.post(
+        #     API_URL + "/v1/chat", headers=headers, json=payload
+        # )
     else:
         response = requests.post(
             API_URL + "/v1/chat/completions", headers=headers, json=payload
