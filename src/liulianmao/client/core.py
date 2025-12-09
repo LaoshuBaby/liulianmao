@@ -206,7 +206,7 @@ def ask(
     image_path, feature_vision = get_image()
 
     logger.debug(f"[feature_vision]: {feature_vision}")
-    logger.debug(f"[image_path]: {len(image_path)}")
+    logger.debug(f"[len(image_path)]: {len(image_path)}")
 
     if image_path != "":
         if image_path[0:4] == "http":
@@ -226,7 +226,7 @@ def ask(
                     return base64_message
 
             image = image_to_base64(image_path)
-            logger.debug(f"[Fairy] 图像地址为Base64，长度为 {len(image)}")
+            logger.debug(f"[Fairy] 图像地址为本地图片，读取后Base64长度为 {len(image)}")
 
     if model_series == "openai":
         if feature_vision == True:
@@ -234,7 +234,11 @@ def ask(
                 msg=msg,
                 image=image,
                 prompt_system=config["system_message"]["content"],
-                model="gpt-4o",
+                model=select_model(
+                    config["model_type"]["openai"],
+                    available_models,
+                    direct_debug=True,
+                ),
                 temperature=float(config["settings"]["temperature"]),
                 generate_amount=default_amount,
                 no_history=no_history,
