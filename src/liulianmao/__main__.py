@@ -265,6 +265,8 @@ if __name__ == "__main__":
     )
     args = parser.parse_args()
 
+    logger.trace(args)
+
     actions = []
     if args.question is True:
         actions.append("question")
@@ -274,6 +276,8 @@ if __name__ == "__main__":
         actions.append("config")
     if args.sync is True:
         actions.append("sync")
+
+    logger.trace(actions)
 
     main(
         recipe=args.recipe,
