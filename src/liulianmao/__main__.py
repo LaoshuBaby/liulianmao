@@ -126,12 +126,6 @@ def main(
     api_openai = importlib.util.module_from_spec(spec_openai)
     spec_openai.loader.exec_module(api_openai)
 
-    if FEATURE["langchain"]:
-        # spec = importlib.util.find_spec('.langchain', package='client')
-        # langchain = importlib.util.module_from_spec(spec)
-        # spec.loader.exec_module(langchain)
-        from client.langchain import main as langchain
-
     operations = {
         "default": core.chat,
         "models": api_openai.openai_models,
@@ -164,6 +158,14 @@ if __name__ == "__main__":
     logger.success(f"=== LIULIANMAO:{LIULIANMAO_VERSION} ===")
     default_recipe = ["default"]
     parser = argparse.ArgumentParser(description="Process some operations.")
+    parser.add_argument(
+        "-m",
+        "-model","-models"
+        "--model","--models",
+        type=str,
+        default="gpt",
+        help="select a keyword for search models in a /model api call.",
+    )
     parser.add_argument(
         "-q",
         "-question",
