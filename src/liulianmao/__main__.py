@@ -99,6 +99,8 @@ def main(
         from module.const import PROJECT_FOLDER, get_user_folder
         from module.runtime import is_serverlsss
 
+        logger.info("config")
+
         config_file_path = os.path.join(
             str(get_user_folder()), PROJECT_FOLDER, "assets", "config.json"
         )
@@ -110,6 +112,8 @@ def main(
 
     if "sync" in actions:
         from module.sync import sync_profiles
+
+        logger.info("sync")
 
         sync_profiles()
         sys.exit(0)
@@ -159,17 +163,17 @@ if __name__ == "__main__":
     default_recipe = ["default"]
     parser = argparse.ArgumentParser(description="Process some operations.")
     parser.add_argument(
-        "-m",
-        "-model","-models"
+       
+        "-model","-models",
         "--model","--models",
         type=str,
-        default="gpt",
-        help="select a keyword for search models in a /model api call.",
+        default="gpt-5.2",
+        help="select a special model",
     )
     parser.add_argument(
-        "-q",
-        "-question",
-        "--question",
+        "-q", "-m",
+        "-question","-msg"
+        "--question","--msg",
         nargs="?",
         const=True,
         default=False,
@@ -232,6 +236,14 @@ if __name__ == "__main__":
         help="A string representing a series",
     )
     parser.add_argument(
+        "-sm",
+        "-search_models"
+        "--search_models",
+        type=str,
+        default="gpt",
+        help="select a keyword for search models in a /model api call.",
+    )
+    parser.add_argument(
         "-fa",
         "-f_a",
         "--f_a",
@@ -266,6 +278,7 @@ if __name__ == "__main__":
         help="Sync profiles",
     )
     args = parser.parse_args()
+    logger.trace(args)
 
     actions = []
     if args.question is True:
@@ -277,6 +290,8 @@ if __name__ == "__main__":
     if args.sync is True:
         actions.append("sync")
 
+    logger.trace(actions)
+
     main(
         recipe=args.recipe,
         actions=actions,
@@ -284,4 +299,5 @@ if __name__ == "__main__":
         f_v=args.f_v,
         f_c=args.f_c,
         series=args.series,
+        s_m=args.search_models
     )
