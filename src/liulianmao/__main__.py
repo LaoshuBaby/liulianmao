@@ -163,17 +163,21 @@ if __name__ == "__main__":
     default_recipe = ["default"]
     parser = argparse.ArgumentParser(description="Process some operations.")
     parser.add_argument(
-       
-        "-model","-models",
-        "--model","--models",
+        "-model",
+        "-models",
+        "--model",
+        "--models",
         type=str,
         default="gpt-5.2",
         help="select a special model",
     )
     parser.add_argument(
-        "-q", "-m",
-        "-question","-msg"
-        "--question","--msg",
+        "-q",
+        "-m",
+        "-question",
+        "-msg",
+        "--question",
+        "--msg",
         nargs="?",
         const=True,
         default=False,
@@ -237,7 +241,7 @@ if __name__ == "__main__":
     )
     parser.add_argument(
         "-sm",
-        "-search_models"
+        "-search_models",
         "--search_models",
         type=str,
         default="gpt",
@@ -299,5 +303,5 @@ if __name__ == "__main__":
         f_v=args.f_v,
         f_c=args.f_c,
         series=args.series,
-        s_m=args.search_models
+        s_m=args.search_models,
     )
