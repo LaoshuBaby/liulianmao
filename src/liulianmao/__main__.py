@@ -80,6 +80,8 @@ def main(
     if "question" in actions:
         from module.const import PROJECT_FOLDER, get_user_folder
 
+        logger.info("[action]: question")
+
         question_file_path = os.path.join(
             str(get_user_folder()), PROJECT_FOLDER, "terminal", "question.txt"
         )
@@ -88,6 +90,8 @@ def main(
 
     if "answer" in actions:
         from module.const import PROJECT_FOLDER, get_user_folder
+
+        logger.info("[action]: answer")
 
         answer_file_path = os.path.join(
             str(get_user_folder()), PROJECT_FOLDER, "terminal", "answer.txt"
@@ -99,7 +103,7 @@ def main(
         from module.const import PROJECT_FOLDER, get_user_folder
         from module.runtime import is_serverlsss
 
-        logger.info("config")
+        logger.info("[action]: config")
 
         config_file_path = os.path.join(
             str(get_user_folder()), PROJECT_FOLDER, "assets", "config.json"
@@ -113,7 +117,7 @@ def main(
     if "sync" in actions:
         from module.sync import sync_profiles
 
-        logger.info("sync")
+        logger.info("[action]: sync")
 
         sync_profiles()
         sys.exit(0)
@@ -130,7 +134,7 @@ def main(
     api_openai = importlib.util.module_from_spec(spec_openai)
     spec_openai.loader.exec_module(api_openai)
 
-    operations = {
+    recipe_operation_list = {
         "default": core.chat,
         "models": api_openai.openai_models,
         "ask": core.ask,
@@ -141,7 +145,7 @@ def main(
 
     logger.debug(f"[Recipe]: {recipe}")
     for operation_name in recipe:
-        operation = operations.get(operation_name)
+        operation = recipe_operation_list.get(operation_name)
         if operation:
             if operation_name == "ask":
                 operation("this is a question")
@@ -162,7 +166,94 @@ if __name__ == "__main__":
     logger.success(f"=== LIULIANMAO:{LIULIANMAO_VERSION} ===")
     default_recipe = ["default"]
     parser = argparse.ArgumentParser(description="Process some operations.")
+    # argument category: manual
+    # -h/-help/--help
+
+    # argument category: io
     parser.add_argument(
+        "-q",  # fastkey[Q]
+        "-m",  # fastkey[M]
+        "-question",  # 有歧义
+        "--question",  # 有歧义
+        "-msg",  # 无歧义，建议后续分拆有参数的question重定向到msg
+        "--msg",  # 无歧义，同上
+        nargs="?",
+        const=True,
+        default=False,
+        help=(
+            "Open the question.txt file with default program or pass a specific message,"
+            + "if this argument has value, it should only work if input argument is not specified."
+        ),
+    )
+    # argument category: io
+    parser.add_argument(
+        "-a",  # fastkey[A]
+        "-answer",
+        "--answer",
+        action="store_true",
+        help="Open the answer.txt file with default program",
+    )
+    # argument category: io
+    parser.add_argument(
+        "-i",  # fastkey[I]
+        "-input",
+        "--input",
+        help="Specify input file, read this file as question, not default question.txt",
+    )
+    # argument category: io
+    parser.add_argument(
+        "-o",  # fastkey[O]
+        "-output",
+        "--output",
+        help="Specify output file, write answer to this file, not default answer.txt",
+    )
+
+    # argument category: show content
+    parser.add_argument(
+        "-c", # fastkey[C]
+        "-config",
+        "--config",
+        action="store_true",
+        help="Open the config.txt file with default program",
+    )
+    # argument category: show content
+    parser.add_argument(
+        "-l", # fastkey[L]
+        "-log",
+        "--log",
+        action="store_true",
+        help="Open Log folder",
+    )
+    # argument category: show content
+    parser.add_argument(
+        "-k", # fastkey[K]
+        "-key",
+        "--key",
+        action="store_true",
+        help="Open OPENAI_API_KEY and OPENAI_BASE_URL files with default program",
+    )
+    # argument category: set content (WIP)
+    # user can set config/log/key in pure cli command
+    # argument category: set content (WIP)
+    parser.add_argument(
+        "-sc",
+        "--sync",
+        action="store_true",
+        help="Sync profiles",
+    )
+
+    # argument category: response control
+    parser.add_argument(
+        "-s", # fastkey[S]
+        "-series",
+        "--series",
+        type=str,
+        default="openai",
+        help="A string representing a series",
+    )
+    # argument category: response control
+    parser.add_argument(
+        # 没给fastkey，主要是想不出model怎么简写，以及m到底是给msg好还是给model好
         "-model",
         "-models",
         "--model",
@@ -171,100 +262,46 @@ if __name__ == "__main__":
         default="gpt-5.2",
         help="select a special model",
     )
+
+    # argument category: agent and multimodel 
     parser.add_argument(
-        "-q",
-        "-m",
-        "-question",
-        "-msg",
-        "--question",
-        "--msg",
-        nargs="?",
-        const=True,
-        default=False,
-        help="Open the question.txt file with default program or pass a specific message",
-    )
-    parser.add_argument(
-        "-a",
-        "-answer",
-        "--answer",
-        action="store_true",
-        help="Open the answer.txt file with default program",
-    )
-    parser.add_argument(
-        "-c",
-        "-config",
-        "--config",
-        action="store_true",
-        help="Open the config.txt file with default program",
-    )
-    parser.add_argument(
-        "-l",
-        "-log",
-        "--log",
-        action="store_true",
-        help="Open Log folder",
-    )
-    parser.add_argument(
-        "-k",
-        "-key",
-        "--key",
-        action="store_true",
-        help="Open OPENAI_API_KEY and OPENAI_BASE_URL files with default program",
-    )
-    parser.add_argument(
-        "-i",
-        "-input",
-        "--input",
-        help="Specify input file, read this file as question, not default question.txt",
-    )
-    parser.add_argument(
-        "-o",
-        "-output",
-        "--output",
-        help="Specify output file, write answer to this file, not default answer.txt",
-    )
-    parser.add_argument(
-        "-r",
+        "-r", # fastkey[R]
         "-recipe",
         "--recipe",
         nargs="*",
         default=default_recipe,
         help="List of operations to process",
     )
+    # argument category: agent and multimodal 
     parser.add_argument(
-        "-s",
-        "-series",
-        "--series",
-        type=str,
-        default="openai",
-        help="A string representing a series",
-    )
-    parser.add_argument(
-        "-sm",
+        "-sm", # fastkey[SM]
         "-search_models",
         "--search_models",
         type=str,
         default="gpt",
         help="select a keyword for search models in a /model api call.",
     )
+    # argument category: agent and multimodal  (ability)
     parser.add_argument(
-        "-fa",
+        "-fa", # fastkey[FA]
         "-f_a",
         "--f_a",
         action="store_true",
         default=False,
         help="Enable the use of an agent",
     )
+    # argument category: agent and multimodal  (ability)
     parser.add_argument(
-        "-fv",
+        "-fv", # fastkey[FV]
         "-f_v",
         "--f_v",
         action="store_true",
         default=True,
         help="Enable the use of using image",
     )
+    # argument category: agent and multimodal  (ability)
     parser.add_argument(
-        "-fc",
+        "-fc", # fastkey[FC]
         "-f_c",
         "--f_c",
         # action="store",
@@ -275,12 +312,7 @@ if __name__ == "__main__":
         help="""Enable continuous dialogue with a specified integer value, or True by default.
         默认值为 True，但如果用户提供了具体的轮数，这个数字将被使用""",
     )
-    parser.add_argument(
-        "-sc",
-        "--sync",
-        action="store_true",
-        help="Sync profiles",
-    )
+
     args = parser.parse_args()
     logger.trace(args)
 
