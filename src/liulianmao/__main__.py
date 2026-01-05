@@ -284,6 +284,8 @@ if __name__ == "__main__":
     args = parser.parse_args()
     logger.trace(args)
 
+    logger.trace(args)
+
     actions = []
     if args.question is True:
         actions.append("question")
