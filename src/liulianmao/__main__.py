@@ -142,10 +142,16 @@ def main(
         "talk": core.talk,
         "draw": core.draw,
     }
+    # 目前的问题是，recipe只能在启动的时候被指定，而不能在对话过程中进行判断是否有必要执行recipe，应该把recipe也做成一个能力，然后如果启用了那就是在执行阶段再去进行判断
+    # 但这样就需要一个足够强大的入口函数代替现在的operation一个名字对应不同函数的情况，需要单独开分支去解决
 
     logger.debug(f"[Recipe]: {recipe}")
+    def nya():
+        logger.warning("Looks like your operation in recipe haven't been recorded")
+        pass
+
     for operation_name in recipe:
-        operation = recipe_operation_list.get(operation_name)
+        operation = recipe_operation_list.get(operation_name,nya)
         if operation:
             if operation_name == "ask":
                 operation("this is a question")
