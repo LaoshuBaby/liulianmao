@@ -471,6 +471,23 @@ def openai_chat_completion(
         logger.trace("[Question]\n" + f"{prompt_question}")
 
     time_start = time.time()
+    
+    # judge by endpoint
+    ## add rand app name for zhipu
+    ## 
+    ## add app name for openrouter
+    if "openrouter.ai" in API_URL:
+        logger.info("[openrouter] referer was send while the request for analytic usage.")
+        # https://openrouter.ai/docs/app-attribution#privacy-considerations
+        import copy
+        extra_headers=copy.deepcopy(headers)
+        extra_headers["HTTP-Referer"]="https://github.com/laoshubaby/liulianmao"
+        extra_headers["X-Title"]="liulianmao"
+        headers=extra_headers
+        safe_display_headers={**extra_headers,**{"Authorization":""}}
+        logger.info(f"[headers(extra_headers)]: {safe_display_headers}")
+
+    # judge by model
     if model == "gpt-5-pro":
         # 其实这是新api的，未来其他新api上了也可以安排上
         payload["input"] = payload["messages"]
