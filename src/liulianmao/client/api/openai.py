@@ -480,21 +480,44 @@ def openai_chat_completion(
         logger.info("[openrouter] referer was send while the request for analytic usage.")
         # https://openrouter.ai/docs/app-attribution#privacy-considerations
         import copy
-        extra_headers=copy.deepcopy(headers)
-        extra_headers["HTTP-Referer"]="https://github.com/laoshubaby/liulianmao"
-        extra_headers["X-Title"]="liulianmao"
-        headers=extra_headers
-        safe_display_headers={**extra_headers,**{"Authorization":""}}
-        logger.info(f"[headers(extra_headers)]: {safe_display_headers}")
+        headers_openrouter=copy.deepcopy(headers)
+        headers_openrouter["HTTP-Referer"]="https://github.com/laoshubaby/liulianmao"
+        headers_openrouter["X-Title"]="liulianmao"
+        headers=headers_openrouter
+        headers_openrouter_safe={**headers_openrouter,**{"Authorization":"__REMOVED__"}}
+        logger.trace(f"[headers(headers_openrouter)]: {headers_openrouter_safe}")
 
     # judge by model
+    ## reasoning length
+    import re
+
+    flag_reasoning_model = False
+    patterns = [
+        r"gpt-5(?!\.[12])*",r"deepseek-(?!chat)",
+        r"(?<!no-)(?<!non-)(?<!none-)reasoning",
+        r"\b(o1|o3|o5|r1)\b",
+        r"think",
+        r"pony-alpha"
+    ]
+
+    for pattern in patterns:
+        if re.search(pattern, model, re.IGNORECASE):
+            flag_reasoning_model = True
+            logger.debug("detected thinking keywords by regex")
+            break
+
+    if flag_reasoning_model:
+        logger.trace(f"[payload(pop_before)]: {payload}")
+        payload.pop("max_tokens")
+        logger.trace(f"[payload(pop_after)]: {payload}")
+
+    ## openai new endpoint
     if model == "gpt-5-pro":
         # 其实这是新api的，未来其他新api上了也可以安排上
         payload["input"] = payload["messages"]
         payload.pop("messages")
 
-        payload["max_output_tokens"] = payload["max_completion_tokens"]
-        payload.pop("max_completion_tokens")
+
 
         payload.pop("presence_penalty")
         payload.pop("frequency_penalty")
@@ -506,6 +529,7 @@ def openai_chat_completion(
         response = requests.post(
             API_URL + "/v1/responses", headers=headers, json=payload
         )
+    ## hacked endpoint
     if model in ["Exotic Shorthair", "Orange Cat"]:
         response = requests.post(
             API_URL + "/v1/msg/019-***-***-dd/stream", headers=headers, json=payload
@@ -513,6 +537,7 @@ def openai_chat_completion(
         # response = requests.post(
         #     API_URL + "/v1/chat", headers=headers, json=payload
         # )
+    ## normal
     else:
         response = requests.post(
             API_URL + "/v1/chat/completions", headers=headers, json=payload
