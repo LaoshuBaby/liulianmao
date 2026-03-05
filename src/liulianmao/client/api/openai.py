@@ -497,7 +497,8 @@ def openai_chat_completion(
         r"(?<!no-)(?<!non-)(?<!none-)reasoning",
         r"\b(o1|o3|o5|r1)\b",
         r"think",
-        r"pony-alpha"
+        r"pony-alpha",
+        r"nemotron"
     ]
 
     for pattern in patterns:
