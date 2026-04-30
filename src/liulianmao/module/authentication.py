@@ -5,6 +5,20 @@ from typing import Optional
 from .log import logger
 from .storage import PROJECT_FOLDER, get_user_folder
 
+ENVIRONMENT_KEYWORD = [
+    {
+        "provider": "openai",
+        "document": ["https://developers.openai.com/api/reference/python"],
+        "api_key": "OPENAI_API_KEY",
+        "endpoint": "OPENAI_BASE_URL",
+    },    {
+        "provider": "anthropic",
+        "document": ["https://code.claude.com/docs/en/llm-gateway"],
+        "api_key": "ANTHROPIC_AUTH_TOKEN",
+        "endpoint": "ANTHROPIC_BASE_URL",
+    }
+]
+
 
 def get_env(var_name: str, default: str) -> str:
     """
