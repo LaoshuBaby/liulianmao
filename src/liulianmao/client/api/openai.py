@@ -347,26 +347,54 @@ def openai_chat_completion(
     # some third party provider will also show reasoning output at same time.
     # This only apply to openai official provider.
 
-    # 模型定制化
+    # 模型参数定制化
+
     flag_customed_openai = False
+    flag_customed_anthropic = False
+    flag_customed_deepseek = False
+    flag_customed_nvidia = False
+    flag_customed_openrouter = False
     flag_customed_xai = False
     flag_customed_mistral = False
 
+    # 模型参数定制化；通用
+
+    flag_customed_reasoning_maxlength = False
+
+    import re
+
+    flag_reasoning_model = False
+    patterns = [
+        r"gpt-5(?!\.[12])*",
+        r"deepseek-(?!chat)",
+        r"(?<!no-)(?<!non-)(?<!none-)reasoning",
+        r"\b(o1|o3|o5|r1)\b",
+        r"think",
+        r"pony-alpha",
+        r"nemotron",
+    ]
+
+    for pattern in patterns:
+        if re.search(pattern, model, re.IGNORECASE):
+            flag_reasoning_model = True
+            logger.debug("detected thinking keywords by regex")
+            break
+
     # 模型参数定制化：openai
+
     customed_keyword_openai_reasoning = ["o1", "o4", "gpt-5"]
-    flag_reasoning_maxlength_warn = False
 
     for keyword in customed_keyword_openai_reasoning:
         if keyword in model:
             flag_customed_openai = True
-            flag_reasoning_maxlength_warn = True
+            flag_customed_reasoning_maxlength = True
         else:
             pass
 
     if flag_customed_openai:
         logger.trace("[model customize]: Detected using model from [openai]")
 
-    if flag_reasoning_maxlength_warn:
+    if flag_customed_reasoning_maxlength:
         logger.info(
             "[reasoning_keyword]: This is reasoning model so only can limit completion length"
         )
@@ -413,7 +441,8 @@ def openai_chat_completion(
         "voxtral",
         "devstral",
         "ministral",
-        "pixtral" "tral",
+        "pixtral",
+        "tral",
     ]
 
     for keyword in customed_keyword_mistral:
@@ -430,7 +459,10 @@ def openai_chat_completion(
         payload.pop("stop")
 
     # 模型参数定制化：deepseek
-    # 考虑如何绕过缓存或者强制指定不要缓存的（不过想要保证一定是缓存的倒是有可行的
+
+    ## deepseek：强制绕过缓存或者优先缓存
+    ## deepseek：指定是否使用思考模型（因为目前存在flash和pro两个可思考模型）
+    ## deepseek：指定思考深度
 
     # 如果启用插件，添加到payload中
     if use_plugin:
@@ -471,42 +503,35 @@ def openai_chat_completion(
         logger.trace("[Question]\n" + f"{prompt_question}")
 
     time_start = time.time()
-    
-    # judge by endpoint
+
+    # pre-processing by endpoint
+
     ## add rand app name for zhipu
-    ## 
+
     ## add app name for openrouter
     if "openrouter.ai" in API_URL:
-        logger.info("[openrouter] referer was send while the request for analytic usage.")
+        logger.info(
+            "[openrouter] referer was send while the request for analytic usage."
+        )
         # https://openrouter.ai/docs/app-attribution#privacy-considerations
         import copy
-        headers_openrouter=copy.deepcopy(headers)
-        headers_openrouter["HTTP-Referer"]="https://github.com/laoshubaby/liulianmao"
-        headers_openrouter["X-Title"]="liulianmao"
-        headers=headers_openrouter
-        headers_openrouter_safe={**headers_openrouter,**{"Authorization":"__REMOVED__"}}
-        logger.trace(f"[headers(headers_openrouter)]: {headers_openrouter_safe}")
 
-    # judge by model
+        headers_openrouter = copy.deepcopy(headers)
+        headers_openrouter["HTTP-Referer"] = (
+            "https://github.com/laoshubaby/liulianmao"
+        )
+        headers_openrouter["X-Title"] = "liulianmao"
+        headers = headers_openrouter
+        headers_openrouter_safe = {
+            **headers_openrouter,
+            **{"Authorization": "__REMOVED__"},
+        }
+        logger.trace(
+            f"[headers(headers_openrouter)]: {headers_openrouter_safe}"
+        )
+
+    # pre-processing by model
     ## reasoning length
-    import re
-
-    flag_reasoning_model = False
-    patterns = [
-        r"gpt-5(?!\.[12])*",r"deepseek-(?!chat)",
-        r"(?<!no-)(?<!non-)(?<!none-)reasoning",
-        r"\b(o1|o3|o5|r1)\b",
-        r"think",
-        r"pony-alpha",
-        r"nemotron"
-    ]
-
-    for pattern in patterns:
-        if re.search(pattern, model, re.IGNORECASE):
-            flag_reasoning_model = True
-            logger.debug("detected thinking keywords by regex")
-            break
-
     if flag_reasoning_model:
         logger.trace(f"[payload(pop_before)]: {payload}")
         payload.pop("max_tokens")
@@ -517,8 +542,6 @@ def openai_chat_completion(
         # 其实这是新api的，未来其他新api上了也可以安排上
         payload["input"] = payload["messages"]
         payload.pop("messages")
-
-
 
         payload.pop("presence_penalty")
         payload.pop("frequency_penalty")
@@ -533,7 +556,9 @@ def openai_chat_completion(
     ## hacked endpoint
     if model in ["Exotic Shorthair", "Orange Cat"]:
         response = requests.post(
-            API_URL + "/v1/msg/019-***-***-dd/stream", headers=headers, json=payload
+            API_URL + "/v1/msg/019-***-***-dd/stream",
+            headers=headers,
+            json=payload,
         )
         # response = requests.post(
         #     API_URL + "/v1/chat", headers=headers, json=payload
