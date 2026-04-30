@@ -364,7 +364,7 @@ def openai_chat_completion(
     import re
 
     flag_reasoning_model = False
-    patterns = [
+    reasoning_model_patterns = [
         r"gpt-5(?!\.[12])*",
         r"deepseek-(?!chat)",
         r"(?<!no-)(?<!non-)(?<!none-)reasoning",
@@ -374,7 +374,7 @@ def openai_chat_completion(
         r"nemotron",
     ]
 
-    for pattern in patterns:
+    for pattern in reasoning_model_patterns:
         if re.search(pattern, model, re.IGNORECASE):
             flag_reasoning_model = True
             logger.debug("detected thinking keywords by regex")
@@ -460,9 +460,27 @@ def openai_chat_completion(
 
     # 模型参数定制化：deepseek
 
+    customed_keyword_deepseek = ["deepseek"]
+
     ## deepseek：强制绕过缓存或者优先缓存
+    # DOCS: https://api-docs.deepseek.com/guides/kv_cache
+    # 可能是什么都做不到的，完全自动，但就是绕开缓存似乎可以人工加噪声解决
     ## deepseek：指定是否使用思考模型（因为目前存在flash和pro两个可思考模型）
+    # DOCS: https://api-docs.deepseek.com/guides/thinking_mode
+    flag_customed_deepseek_force_no_thinking = False
+    if flag_customed_deepseek_force_no_thinking:
+        payload["thinking"] = {"type": "disabled"}
+    else:
+        payload["thinking"] = {"type": "enabled"}
     ## deepseek：指定思考深度
+    # DOCS: https://api-docs.deepseek.com/guides/thinking_mode
+    var_customed_deepseek_thinking_deepth = "max"
+    payload["reasoning_effort"] = (
+        var_customed_deepseek_thinking_deepth  # OpenAI Style
+    )
+    payload["output_config"] = {
+        "effort": var_customed_deepseek_thinking_deepth
+    }  # Anthropic Style
 
     # 如果启用插件，添加到payload中
     if use_plugin:
@@ -513,7 +531,7 @@ def openai_chat_completion(
         logger.info(
             "[openrouter] referer was send while the request for analytic usage."
         )
-        # https://openrouter.ai/docs/app-attribution#privacy-considerations
+        # DOCS: https://openrouter.ai/docs/app-attribution#privacy-considerations
         import copy
 
         headers_openrouter = copy.deepcopy(headers)
