@@ -142,16 +142,16 @@ def get_warning_string(langcode: str = "zh-Hans") -> str:
 # 获取API URL和API KEY
 logger.trace("★" * 5 + get_warning_string() + "★" * 5)
 logger.trace(
-    f'ENVIRONMENT_KEYWORD["openai"]["endpoint"]={ENVIRONMENT_KEYWORD["openai"]["endpoint"]}'
+    f'ENVIRONMENT_KEYWORD["openai"]["endpoint"][0]={ENVIRONMENT_KEYWORD["openai"]["endpoint"]}'
 )
 logger.trace(
-    f'ENVIRONMENT_KEYWORD["openai"]["api_key"]={ENVIRONMENT_KEYWORD["openai"]["api_key"]}'
+    f'ENVIRONMENT_KEYWORD["openai"]["api_key"][0]={ENVIRONMENT_KEYWORD["openai"]["api_key"]}'
 )
 API_URL = get_env(
-    ENVIRONMENT_KEYWORD["openai"]["endpoint"], "https://api.openai.com"
+    ENVIRONMENT_KEYWORD["openai"]["endpoint"][0], "https://api.openai.com"
 )
 API_KEY = get_env(
-    ENVIRONMENT_KEYWORD["openai"]["api_key"],
+    ENVIRONMENT_KEYWORD["openai"]["api_key"][0],
     "You may need to check your environment variables' configure.",
 )
 logger.trace("★" * 5 + get_warning_string() + "★" * 5)
