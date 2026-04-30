@@ -33,6 +33,32 @@ ENVIRONMENT_KEYWORD = {
         "api_key": ["GEMINI_API_KEY", "GOOGLE_API_KEY"],
         "endpoint": ["GOOGLE_GEMINI_BASE_URL", "GOOGLE_VERTEX_BASE_URL"],
     },
+    "zhipu": {
+        "provider": "zhipu",
+        "document": [
+            "https://docs.bigmodel.cn/cn/guide/develop/python/introduction",
+            "https://docs.z.ai/guides/develop/openai/python",
+            "https://github.com/zai-org/z-ai-sdk-python/blob/d8d898bbf19925c56251b526faf097018a78e549/README.md?plain=1#L122-L123",
+            "https://docs.bigmodel.cn/cn/guide/platform/model-migration",
+        ],
+        "api_key": ["ZAI_API_KEY", "ZHIPUAI_API_KEY"],
+        "endpoint": ["ZAI_BASE_URL", "ZHIPUAI_BASE_URL"],
+        "note": "This provider former use different keyword for environment in Mainland of China, and different package.",
+    },
+    # 只要吃的了苦，就有吃不完的苦
+    # MISTRAL_API_KEY
+    # AZURE_OPENAI_API_KEY
+    # AZURE_OPENAI_ENDPOINT
+    # COHERE_API_KEY
+    # HUGGINGFACE_API_KEY
+    # HF_TOKEN
+    # GROQ_API_KEY
+    # XAI_API_KEY
+    # PPLX_API_KEY
+    # MINIMAX_API_KEY
+    # MOONSHOT_API_KEY
+    # DEEPSEEK_API_KEY
+    # 以上的适配以后再说吧
 }
 
 
