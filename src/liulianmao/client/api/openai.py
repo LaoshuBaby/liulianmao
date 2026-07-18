@@ -509,7 +509,10 @@ def openai_chat_completion(
 
     if flag_reasoning_model:
         logger.trace(f"[payload(pop_before)]: {payload}")
-        payload.pop("max_tokens")
+        try:
+            payload.pop("max_tokens")
+        except Exception as e:
+            logger.error(e)
         logger.trace(f"[payload(pop_after)]: {payload}")
 
     ## openai new endpoint
