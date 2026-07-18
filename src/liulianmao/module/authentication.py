@@ -5,8 +5,64 @@ from typing import Optional
 from .log import logger
 from .storage import PROJECT_FOLDER, get_user_folder
 
+ENVIRONMENT_KEYWORD = {
+    "default": {
+        "provider": "liulianmao",
+        "document": ["https://github.com/laoshubaby/liulianmao"],
+        "api_key": ["LIULIANMAO_APIKEY"],
+        "endpoint": ["LIULIANMAO_ENDPOINT"],
+    },
+    "openai": {
+        "provider": "openai",
+        "document": ["https://developers.openai.com/api/reference/python"],
+        "api_key": ["OPENAI_API_KEY"],
+        "endpoint": ["OPENAI_BASE_URL"],
+    },
+    "anthropic": {
+        "provider": "anthropic",
+        "document": ["https://code.claude.com/docs/en/llm-gateway"],
+        "api_key": ["ANTHROPIC_AUTH_TOKEN", "ANTHROPIC_API_KEY"],
+        "endpoint": ["ANTHROPIC_BASE_URL"],
+    },
+    "gemini": {
+        "provider": "google",
+        "document": [
+            "https://ai.google.dev/gemini-api/docs/api-key?hl=en#set-api-env-var",
+            "https://github.com/googleapis/python-genai/blob/860c041810c6b37638ea23370d39c80364b5c99a/google/genai/_base_url.py#L34-L50",
+        ],
+        "api_key": ["GEMINI_API_KEY", "GOOGLE_API_KEY"],
+        "endpoint": ["GOOGLE_GEMINI_BASE_URL", "GOOGLE_VERTEX_BASE_URL"],
+    },
+    "zhipu": {
+        "provider": "zhipu",
+        "document": [
+            "https://docs.bigmodel.cn/cn/guide/develop/python/introduction",
+            "https://docs.z.ai/guides/develop/openai/python",
+            "https://github.com/zai-org/z-ai-sdk-python/blob/d8d898bbf19925c56251b526faf097018a78e549/README.md?plain=1#L122-L123",
+            "https://docs.bigmodel.cn/cn/guide/platform/model-migration",
+        ],
+        "api_key": ["ZAI_API_KEY", "ZHIPUAI_API_KEY"],
+        "endpoint": ["ZAI_BASE_URL", "ZHIPUAI_BASE_URL"],
+        "note": "This provider former use different keyword for environment in Mainland of China, and different package.",
+    },
+    # 只要吃的了苦，就有吃不完的苦
+    # MISTRAL_API_KEY
+    # AZURE_OPENAI_API_KEY
+    # AZURE_OPENAI_ENDPOINT
+    # COHERE_API_KEY
+    # HUGGINGFACE_API_KEY
+    # HF_TOKEN
+    # GROQ_API_KEY
+    # XAI_API_KEY
+    # PPLX_API_KEY
+    # MINIMAX_API_KEY
+    # MOONSHOT_API_KEY
+    # DEEPSEEK_API_KEY
+    # 以上的适配以后再说吧
+}
 
-def get_env(var_name: str, default: str) -> str:
+
+def get_env(var_name: str, default="") -> str:
     """
     尝试从环境变量获取值，如果失败，尝试从用户目录下和同目录下的文件读取，最后使用默认值。
     """
@@ -85,9 +141,17 @@ def get_warning_string(langcode: str = "zh-Hans") -> str:
 
 # 获取API URL和API KEY
 logger.trace("★" * 5 + get_warning_string() + "★" * 5)
-API_URL = get_env("OPENAI_BASE_URL", "https://api.openai.com")
+logger.trace(
+    f'ENVIRONMENT_KEYWORD["openai"]["endpoint"][0]={ENVIRONMENT_KEYWORD["openai"]["endpoint"]}'
+)
+logger.trace(
+    f'ENVIRONMENT_KEYWORD["openai"]["api_key"][0]={ENVIRONMENT_KEYWORD["openai"]["api_key"]}'
+)
+API_URL = get_env(
+    ENVIRONMENT_KEYWORD["openai"]["endpoint"][0], "https://api.openai.com"
+)
 API_KEY = get_env(
-    "OPENAI_API_KEY",
+    ENVIRONMENT_KEYWORD["openai"]["api_key"][0],
     "You may need to check your environment variables' configure.",
 )
 logger.trace("★" * 5 + get_warning_string() + "★" * 5)

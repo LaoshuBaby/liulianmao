@@ -226,7 +226,9 @@ def ask(
                     return base64_message
 
             image = image_to_base64(image_path)
-            logger.debug(f"[Fairy] 图像地址为本地图片，读取后Base64长度为 {len(image)}")
+            logger.debug(
+                f"[Fairy] 图像地址为本地图片，读取后Base64长度为 {len(image)}"
+            )
 
     if model_series == "openai":
         if feature_vision == True:
@@ -294,18 +296,49 @@ def ask(
         ):
             choices = response.get("choices", [])
 
+            # 计费结算
             # 使用.get()方法更安全地访问字典键值，以避免KeyError异常
-            response_usage_completion_tokens = response.get("usage", {}).get(
-                "completion_tokens", -1
-            )
+
+            # 基本标签
+            # 理论上应该 prompt_tokens + completion_tokens = total_tokens
+            # 理论上reasoning算completion_tokens
             response_usage_prompt_tokens = response.get("usage", {}).get(
                 "prompt_tokens", -1
+            )
+            response_usage_completion_tokens = response.get("usage", {}).get(
+                "completion_tokens", -1
             )
             response_usage_total_tokens = response.get("usage", {}).get(
                 "total_tokens", -1
             )
+            logger.trace(
+                f"[usage_report]response_usage_prompt_tokens = {response_usage_prompt_tokens}"
+            )
+            logger.trace(
+                f"[usage_report]response_usage_completion_tokens = {response_usage_completion_tokens}"
+            )
+            logger.trace(
+                f"[usage_report]response_usage_total_tokens = {response_usage_total_tokens}"
+            )
 
-            reasoning_tokens = 0
+            # cached 判断 （仅限支持缓存的模型）
+            # DS和openrouter：点我名算了
+            cached_tokens = -1
+            if response.get("usage", {}).get("prompt_tokens_details", None):
+                if (
+                    response.get("usage", {})
+                    .get("prompt_tokens_details", None)
+                    .get("cached_tokens", None)
+                ):
+                    cached_tokens = (
+                        response.get("usage", {})
+                        .get("prompt_tokens_details", None)
+                        .get("cached_tokens", None)
+                    )
+            logger.trace(f"[usage_report]cached_tokens = {cached_tokens}")
+
+            # reasoning 判断 （仅限支持推理的模型）
+            reasoning_tokens = -1
             if response.get("usage", {}).get(
                 "completion_tokens_details", None
             ):
@@ -319,24 +352,64 @@ def ask(
                         .get("completion_tokens_details", None)
                         .get("reasoning_tokens", None)
                     )
+            logger.trace(
+                f"[usage_report]reasoning_tokens = {reasoning_tokens}"
+            )
 
             # 使用展平路径的变量名进行日志记录，仅在包含token记录时
+            usage_report = {
+                "[input]  response_usage_prompt_tokens": (
+                    str(response_usage_prompt_tokens)
+                    if cached_tokens == -1
+                    else f"{response_usage_prompt_tokens} (reasoning: {cached_tokens})"
+                ),
+                "[output] response_usage_completion_tokens": (
+                    str(response_usage_completion_tokens)
+                    if reasoning_tokens == -1
+                    else f"{response_usage_completion_tokens} (reasoning: {reasoning_tokens})"
+                ),
+                "[stat]   response_usage_total_tokens": str(
+                    response_usage_total_tokens
+                ),
+                # 计算验证
+                # 保留计算验证是因为有的provider返回是当轮的有的是返回总计全文的
+                # "verify"在2025年价值不高了说实话
+                "verify": f"{response_usage_completion_tokens} + {response_usage_prompt_tokens} = {response_usage_completion_tokens + response_usage_prompt_tokens}",
+            }
+            logger.trace(f"[usage_report]usage_report = {usage_report}")
+
+            # 是否DS
+            # DOCS: https://api-docs.deepseek.com/guides/kv_cache
+            prompt_cache_hit_tokens = response.get("usage", {}).get(
+                "prompt_cache_hit_tokens", -1
+            )
+            prompt_cache_miss_tokens = response.get("usage", {}).get(
+                "prompt_cache_miss_tokens", -1
+            )
+            logger.trace(f"[usage_report]prompt_cache_hit_tokens = {prompt_cache_hit_tokens}")
+            logger.trace(f"[usage_report]prompt_cache_miss_tokens = {prompt_cache_miss_tokens}")
+            if (
+                prompt_cache_hit_tokens == -1
+                or prompt_cache_miss_tokens == -1
+            ):
+                pass
+            else:
+                usage_report.pop("verify")
+                usage_report["verify.total"] = (
+                    f"{response_usage_prompt_tokens} + {response_usage_completion_tokens} = {response_usage_completion_tokens + response_usage_prompt_tokens}"
+                )
+
+                usage_report["verify.cache"] = (
+                    f"{response_usage_prompt_tokens} = {prompt_cache_hit_tokens} + {prompt_cache_miss_tokens}"
+                )
+
+            logger.trace(f"[usage_report]usage_report = {usage_report}")
+
+            # 最终记录
             logger.debug(
                 "[Token Usage]\n"
                 + json.dumps(
-                    {
-                        "[input]  response_usage_prompt_tokens": response_usage_prompt_tokens,
-                        "[output] response_usage_completion_tokens": response_usage_completion_tokens,
-                        "[stat]   response_usage_total_tokens": (
-                            response_usage_total_tokens
-                            if reasoning_tokens == 0
-                            else f"{response_usage_total_tokens} (reasoning: {reasoning_tokens})"
-                        ),
-                        # 计算验证
-                        # 保留计算验证是因为有的provider返回是当轮的有的是返回总计全文的
-                        # "verify"在2025年价值不高了说实话
-                        "verify": f"{response_usage_completion_tokens} + {response_usage_prompt_tokens} = {response_usage_completion_tokens + response_usage_prompt_tokens}",
-                    },
+                    usage_report,
                     indent=2,
                     ensure_ascii=False,
                     sort_keys=False,
@@ -346,15 +419,16 @@ def ask(
         else:
             # 恭喜你，openai新api格式
             usage = response.get("usage", [])
+            usage_report = {
+                "[note]": "The response is following openai's latest response format",
+                "[input]  response_usage_prompt_tokens": f"{usage.get("input_tokens")} (cached: {usage.get("input_tokens_details").get("cached_tokens")})",
+                "[output] response_usage_completion_tokens": f"{usage.get("output_tokens")} (reasoning: {usage.get("output_tokens_details").get("reasoning_tokens")})",
+                "[stat]   response_usage_total_tokens": f"{usage.get("total_tokens")}",
+            }
             logger.debug(
                 "[Token Usage]\n"
                 + json.dumps(
-                    {
-                        "[note]": "The response is following openai's latest response format",
-                        "[input]  response_usage_prompt_tokens": f"{usage.get("input_tokens")} (cached: {usage.get("input_tokens_details").get("cached_tokens")})",
-                        "[output] response_usage_completion_tokens": f"{usage.get("output_tokens")} (reasoning: {usage.get("output_tokens_details").get("reasoning_tokens")})",
-                        "[stat]   response_usage_total_tokens": f"{usage.get("total_tokens")}",
-                    },
+                    usage_report,
                     indent=2,
                     ensure_ascii=False,
                     sort_keys=False,
@@ -664,7 +738,9 @@ def chat(
         )
     elif model_series == "openai":
         # 各个兼容的model都要体现出来的，因为兼容也都在用“openai”
-        available_models = openai_models(["gpt", "grok", "deepseek", "mistral"])
+        available_models = openai_models(
+            ["gpt", "grok", "deepseek", "mistral"]
+        )
     elif model_series == "zhipu":
         available_models = ["glm-4", "glm-3-turbo", "glm-4v"]
     elif model_series == "llama":
